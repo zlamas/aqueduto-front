@@ -19,7 +19,7 @@ const title = productData.name
 
 useHead({ title })
 
-currentColor.value = productData.colors.find((color) => color.is_default).id
+currentColor.value = productData.colors?.find((color) => color.is_default)?.id
 
 const targetSet = ref(false)
 const activeImage = ref(0)
@@ -29,12 +29,6 @@ const tabs = {
   documents: 'Инструкции',
   features: 'Особенности'
 }
-
-const images = [
-  '/images/product-1.png',
-  '/images/product-1.png',
-  '/images/product-1.png',
-]
 
 const currentTab = ref(Object.keys(tabs)[0])
 
@@ -69,12 +63,19 @@ function toggleComparison() {
       <div class="grid desktop:grid-cols-[auto_1fr] gap-[24px] mb-[32px] desktop:mb-[80px]">
         <div class="flex justify-center relative rounded-[24px] desktop:hidden">
           <div class="slider">
-            <img
-              v-for="image in productData.gallery"
-              class="slider-item size-full"
-              :src="image"
-              alt=""
-            >
+            <template v-for="media in productData.gallery">
+              <img
+                v-if="media.media_type === 'image'"
+                class="slider-item size-full"
+                :src="media.url"
+                alt=""
+              >
+              <video
+                v-else-if="media.media_type === 'video'"
+                class="slider-item size-full"
+                :src="media.url"
+              ></video>
+            </template>
           </div>
 
           <button
@@ -98,22 +99,26 @@ function toggleComparison() {
         </div>
 
         <div class="flex gap-[12px] desktop:h-[622px] max-desktop:hidden">
-          <div class="relative flex flex-col h-full">
+          <div class="relative flex flex-col h-full shrink-0">
             <button class="gallery-arrow gallery-arrow-up"></button>
             <div class="absolute top-[50px] bg-linear-to-t to-white h-[32px] w-full pointer-events-none"></div>
 
             <div class="flex flex-col flex-1 p-[8px_4px] gap-[8px] overflow-y-auto scrollbar-none">
-              <div
-                v-for="(image, index) in productData.gallery"
-                :key="index"
-                :class="{
-                  'gallery-preview': true,
-                  'selected': activeImage === index
-                }"
-                @click="activeImage = index"
-              >
-                <img :src="image" alt="">
-              </div>
+              <template v-for="(media, index) in productData.gallery">
+                <img
+                  v-if="media.media_type === 'image'"
+                  :key="index"
+                  :class="{
+                     'gallery-preview': true,
+                     'selected': activeImage === index
+                   }"
+                  @click="activeImage = index" :src="media.url" alt="">
+                <video
+                  v-else-if="media.media_type === 'video'"
+                  class="slider-item size-full"
+                  :src="media.url"
+                ></video>
+              </template>
             </div>
 
             <div class="absolute bottom-[50px] bg-linear-to-b to-white h-[32px] w-full pointer-events-none"></div>
@@ -121,7 +126,7 @@ function toggleComparison() {
           </div>
 
           <div class="relative">
-            <img class="size-full" :src="productData.gallery[activeImage]" alt="">
+            <img class="size-full" :src="productData.gallery[activeImage].url" alt="">
             <div class="absolute top-[16px] right-[16px] flex gap-[8px]">
               <button
                 class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014]"
@@ -154,7 +159,10 @@ function toggleComparison() {
             </div>
           </div>
 
-          <div class="product-block flex items-center justify-between">
+          <div
+            v-if="productData.colors?.length"
+            class="product-block flex items-center justify-between"
+          >
             <h5 class="m-0">Цветовая гамма</h5>
             <ColorSelect
               :colors="productData.colors"
@@ -405,7 +413,6 @@ function toggleComparison() {
   height: 90px;
   border-radius: 13px;
   background: #E6E6E6;
-  flex-shrink: 0;
 }
 
 .gallery-preview.selected {

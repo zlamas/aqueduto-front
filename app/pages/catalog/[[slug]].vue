@@ -18,25 +18,36 @@ if (slug) {
   parameters.value.category = slug
 }
 
-const selectedCategory = computed(() => parameters.value?.category)
+const priceRange = ref([])
+const minPrice = ref(null)
+const maxPrice = ref(null)
 
+const selectedCategory = computed(() => parameters.value?.category)
 const { data: catalogData } = await useAPI('/catalog')
 const { data: productData } = await useAPI('/products', { query: parameters })
 const { data: collectionData } = await useAPI('/collections')
-const { data: filtersData } = await useAPI('/catalog/filters', { query: { category: selectedCategory } })
+const { data: filtersData } = await useAPI('/catalog/filters', {
+  query: { category: selectedCategory },
+  onResponse({ response }) {
+    delete parameters.price_min
+    delete parameters.price_max
+
+    const range = response._data.data.find((filter) => filter.key === 'price').values
+    priceRange.value = range
+    minPrice.value = range[0]
+    maxPrice.value = range[1]
+  }
+})
 
 const { banners, categories } = catalogData.value
 const products = computed(() => productData.value.data)
 const collections = collectionData.value.data
-const filters = computed(() => filtersData.value?.data)
+const filters = computed(() => filtersData?.value?.data)
 
-const prices = computed(() => products.value.map((product) => parseFloat(product.price)))
-
-const totalMinPrice = prices.value.reduce((a, b) => a < b ? a : b, 0)
-const totalMaxPrice = prices.value.reduce((a, b) => a > b ? a : b, 0)
-
-const minPrice = ref(totalMinPrice)
-const maxPrice = ref(totalMaxPrice)
+const range = getFilterByName('price').values
+priceRange.value = range
+minPrice.value = range[0]
+maxPrice.value = range[1]
 
 const collectionQuery = ref('')
 const productQuery = ref('')
@@ -161,7 +172,7 @@ const activeFilters = computed(
   )
 )
 
-function filterAvailable(name) {
+function getFilterByName(name) {
   return !filters.value?.length || filters.value.find((filter) => filter.key === name)
 }
 
@@ -200,48 +211,6 @@ const priceGraphPoints = [
    16.9,
    16.9,
 ]
-
-// const banners = [
-//   {
-//     media_url: '/images/promotion-1.png',
-//     media_type: 'image',
-//     title: 'Специальная цена на сантехнику из коллекции Esteta!',
-//     subtitle: 'Ванная комната в скандинавском стиле — это пространство света, уюта и природной гармонии. Нежно-голубые акценты, тёплое дерево и живые растения создают атмосферу спокойствия и домашнего тепла.'
-//   },
-//   {
-//     media_url: '/images/promotion-1.png',
-//     media_type: 'image',
-//     title: 'Специальная цена на сантехнику из коллекции Esteta!',
-//     subtitle: 'Ванная комната в скандинавском стиле — это пространство света, уюта и природной гармонии. Нежно-голубые акценты, тёплое дерево и живые растения создают атмосферу спокойствия и домашнего тепла.'
-//   },
-//   {
-//     media_url: '/images/promotion-1.png',
-//     media_type: 'image',
-//     title: 'Специальная цена на сантехнику из коллекции Esteta!',
-//     subtitle: 'Ванная комната в скандинавском стиле — это пространство света, уюта и природной гармонии. Нежно-голубые акценты, тёплое дерево и живые растения создают атмосферу спокойствия и домашнего тепла.'
-//   },
-//   {
-//     media_url: '/images/promotion-1.png',
-//     media_type: 'image',
-//     title: 'Специальная цена на сантехнику из коллекции Esteta!',
-//     subtitle: 'Ванная комната в скандинавском стиле — это пространство света, уюта и природной гармонии. Нежно-голубые акценты, тёплое дерево и живые растения создают атмосферу спокойствия и домашнего тепла.'
-//   },
-//   {
-//     media_url: '/images/promotion-1.png',
-//     media_type: 'image',
-//     title: 'Специальная цена на сантехнику из коллекции Esteta!',
-//     subtitle: 'Ванная комната в скандинавском стиле — это пространство света, уюта и природной гармонии. Нежно-голубые акценты, тёплое дерево и живые растения создают атмосферу спокойствия и домашнего тепла.'
-//   }
-// ]
-
-// const categories = [
-//   { name: 'Унитазы', image: 'images/category-1.png', },
-//   { name: 'Писсуары', image: 'images/category-2.png', },
-//   { name: 'Биде', image: 'images/category-3.png', },
-//   { name: 'Панели смыва', image: 'images/category-4.png', },
-//   { name: 'Гигиенические души', image: 'images/category-5.png', },
-//   { name: 'Раковины', image: 'images/category-6.png', },
-// ]
 </script>
 
 <template>
@@ -264,7 +233,7 @@ const priceGraphPoints = [
           class="arrow arrow-left absolute left-[16px] max-desktop:hidden"
         ></button>
 
-        <div class="grid grid-flow-col auto-cols-[140px] desktop:auto-cols-[220px] h-[180px] gap-[8px] desktop:gap-[24px] text-center px-[16px] overflow-x-auto scrollbar-none py-[4px]">
+        <div class="grid grid-flow-col auto-cols-[140px] desktop:auto-cols-[220px] gap-[8px] desktop:gap-[24px] text-center px-[16px] overflow-x-auto scrollbar-none py-[4px]">
           <div
             v-for="(category, index) in categories"
             :key="index"
@@ -274,7 +243,7 @@ const priceGraphPoints = [
             }"
             @click="updateCategory(category.slug)"
           >
-            <img :src="category.image" alt="">
+            <img :src="category.icon" alt="">
             <span>{{ category.name }}</span>
           </div>
         </div>
@@ -313,7 +282,7 @@ const priceGraphPoints = [
 
           <div class="flex gap-[8px] desktop:gap-[12px]">
             <Dropdown
-              v-show="filterAvailable('price')"
+              v-show="getFilterByName('price')"
               label="Цена"
             >
               <div class="grid gap-[35px] w-[274px]">
@@ -347,15 +316,15 @@ const priceGraphPoints = [
                     <input
                       type="range"
                       v-model="minPrice"
-                      :min="totalMinPrice"
-                      :max="totalMaxPrice"
+                      :min="priceRange[0]"
+                      :max="priceRange[1]"
                       class="range-slider"
                     >
                     <input
                       type="range"
                       v-model="maxPrice"
-                      :min="totalMinPrice"
-                      :max="totalMaxPrice"
+                      :min="priceRange[0]"
+                      :max="priceRange[1]"
                       class="range-slider"
                     >
                   </div>
@@ -383,21 +352,18 @@ const priceGraphPoints = [
                 <div class="flex gap-[4px] items-center">
                   <button
                     class="button-rounded bg-[#E6E6E6] p-[10px]"
-                    @click="() => {
-                      minPrice = totalMinPrice
-                      maxPrice = totalMaxPrice
-                    }"
+                    @click="[minPrice, maxPrice] = priceRange"
                   >
                     <img src="~/assets/icons/filter-clear.svg" alt="">
                   </button>
                   <button
                     class="button-rounded bg-[#2563EB] text-white flex-1"
-                    @click="() => {
+                    @click="
                       Object.assign(
                         parameters,
                 { price_min: minPrice, price_max: maxPrice }
                       )
-                    }"
+                    "
                   >
                     Показать {{ priceProductCount }} товаров
                   </button>
@@ -406,7 +372,7 @@ const priceGraphPoints = [
             </Dropdown>
 
             <Dropdown
-              v-show="filterAvailable('collection')"
+              v-show="getFilterByName('collection')"
               label="Коллекция"
             >
               <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
@@ -438,7 +404,7 @@ const priceGraphPoints = [
             </Dropdown>
 
             <Dropdown
-              v-show="filterAvailable('color')"
+              v-show="getFilterByName('color')"
               label="Цвет"
             >
               <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
@@ -491,13 +457,13 @@ const priceGraphPoints = [
             </Dropdown>
 
             <Dropdown
-              v-show="filterAvailable('material')"
+              v-show="getFilterByName('material')"
               label="Материал"
             >
             </Dropdown>
 
             <Dropdown
-              v-show="filterAvailable('room')"
+              v-show="getFilterByName('room')"
               label="Комната"
             >
             </Dropdown>
@@ -567,17 +533,23 @@ const priceGraphPoints = [
   gap: 8px;
   border-radius: 20px;
   color: var(--color-tertiary);
-  padding: 8px 4px;
+  padding: 4px 4px 8px 4px;
   cursor: pointer;
 }
 
 .category img {
-  min-height: 112px;
+  width: 100%;
+  height: 112px;
   border-radius: 16px;
   object-fit: contain;
 
   @variant max-desktop {
     background: #F8F8FA;
+    padding: 18px 10px;
+  }
+
+  @variant desktop {
+    height: 140px;
   }
 }
 

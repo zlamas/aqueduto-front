@@ -75,7 +75,7 @@ onMounted(() => {
       <div
         ref="dropdown"
         :class="{
-          'absolute mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999': true,
+          'absolute top-0 mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999': true,
           'invisible': !open,
         }"
         :style="popupPosition"

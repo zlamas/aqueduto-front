@@ -59,7 +59,7 @@ const currentAdvantagesSlide = ref(1)
         >
           <div class="flex-1">
             <h2>{{ section.title }}</h2>
-            <p class="text-secondary">
+            <p class="text-secondary whitespace-pre-line">
               {{ section.content }}
             </p>
           </div>

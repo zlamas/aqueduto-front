@@ -72,7 +72,7 @@ watch(
 
         <div
           v-if="item.title || item.subtitle || item.cta"
-          class="grid desktop:justify-items-start gap-[16px] max-w-[904px] max-desktop:text-center max-desktop:bg-[#00000033] max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] max-desktop:p-[24px_12px]"
+          class="grid desktop:justify-items-start gap-[16px] max-w-[904px] z-9 max-desktop:text-center max-desktop:bg-[#00000033] max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] max-desktop:p-[24px_12px]"
         >
           <h1
             v-if="item.title"
@@ -87,7 +87,7 @@ watch(
             {{ item.subtitle }}
           </p>
           <NuxtLink
-            v-if="item.cta"
+            v-if="item.cta?.text"
             :to="item.cta.url"
             class="button-rounded"
           >

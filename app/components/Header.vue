@@ -6,6 +6,8 @@ defineProps({
   categories: Array,
   styles: Array,
 })
+
+const mobileMenuOpen = ref(false)
 </script>
 
 <template>
@@ -48,7 +50,18 @@ defineProps({
             <NuxtLink to="/" class="">
               <img src="~/assets/icons/logo.svg" alt="">
              </NuxtLink>
-            <ul class="flex gap-[40px] list-none max-desktop:hidden">
+            <ul
+              :class="{
+                'flex gap-[24px_40px] list-none max-desktop:fixed max-desktop:inset-0  max-desktop:flex-col max-desktop:bg-white max-desktop:z-999 max-desktop:p-[16px]': true,
+                'max-desktop:hidden': !mobileMenuOpen,
+              }"
+            >
+              <button
+                class="absolute top-0 right-0 p-[16px]"
+                @click="mobileMenuOpen = false"
+              >
+                <img src="~/assets/icons/delete.svg" alt="">
+              </button>
               <li>
                 <NuxtLink to="/about">
                   О нас
@@ -59,7 +72,7 @@ defineProps({
                   label="Галерея"
                   class="p-0! text-inherit! [--bg:none]!"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
+                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px] max-desktop:hidden">
                     <NuxtLink
                       v-for="style in styles"
                       :key="style.id"
@@ -81,7 +94,7 @@ defineProps({
                   label="Каталог"
                   class="p-0! text-inherit! [--bg:none]!"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
+                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px] max-desktop:hidden">
                     <NuxtLink
                       v-for="category in categories"
                       :key="category.id"
@@ -120,7 +133,10 @@ defineProps({
           </div>
 
           <div class="flex gap-[8px] desktop:gap-[32px]">
-            <button class="header-button desktop:hidden">
+            <button
+              class="header-button desktop:hidden"
+              @click="mobileMenuOpen = !mobileMenuOpen"
+            >
               <img src="~/assets/icons/menu.svg" alt="">
             </button>
 

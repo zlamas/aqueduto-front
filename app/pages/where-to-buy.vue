@@ -572,7 +572,11 @@ onMounted(() => ymaps.ready(initMap));
                 </div>
               </div>
 
-              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>
+              <NuxtLink
+                :to="distributor.website"
+                class="button-rounded w-full mt-[24px]">
+                Перейти на сайт
+              </NuxtLink>
             </div>
 <!--            <div class="distributor-item">-->
 <!--              <div class="flex gap-[12px]">-->

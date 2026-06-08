@@ -33,7 +33,7 @@ useHead({ title })
         >
           <div class="flex-1">
             <h2>{{ section.title }}</h2>
-            <p class="text-secondary">
+            <p class="text-secondary whitespace-pre-line">
               {{ section.content }}
             </p>
           </div>
@@ -86,7 +86,7 @@ useHead({ title })
               :key="index"
               class="grid gap-[48px] p-[32px] rounded-[12px] desktop:rounded-[20px] shadow-md text-tertiary"
             >
-              <div>
+              <div class="whitespace-pre-line">
                 {{ testimonial.review_text }}
               </div>
               <div class="flex items-center gap-[12px]">
