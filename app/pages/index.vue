@@ -2,6 +2,8 @@
 import HeroSlider from "@/components/HeroSlider.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
+import useSlider from "@/composables/useSlider.js";
+import useSimpleSlider from "@/composables/useSimpleSlider.js";
 
 const { data: homeData } = await useAPI('/home')
 
@@ -9,30 +11,12 @@ useHead({
   title: 'Главная'
 })
 
-// const sliderItems = [
-//   {
-//     media_type: 'video',
-//     media_url: '/media/Aqueduto_15sec.mp4'
-//   },
-//   {
-//     media_type: 'video',
-//     media_url: '/media/Aqueduto_15sec.mp4'
-//   },
-//   {
-//     media_type: 'video',
-//     media_url: '/media/Aqueduto_15sec.mp4'
-//   },
-//   {
-//     media_type: 'video',
-//     media_url: '/media/Aqueduto_15sec.mp4'
-//   },
-//   {
-//     media_type: 'video',
-//     media_url: '/media/Aqueduto_15sec.mp4'
-//   },
-// ]
+const advantagesSliderContainer = useTemplateRef('advantages-slider')
+const advantagesSliderItems = ref([])
+const advantagesSlider = useSlider(advantagesSliderContainer, advantagesSliderItems)
 
-const currentAdvantagesSlide = ref(1)
+const productsSliderContainer = useTemplateRef('products-slider')
+const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
@@ -96,10 +80,14 @@ const currentAdvantagesSlide = ref(1)
             <p class="text-quaternary subtitle">6 причин выбрать Aqueduto</p>
           </div>
 
-          <div class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]">
+          <div
+            ref="advantages-slider"
+            class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]"
+          >
             <div
-              v-for="item in homeData.advantages"
+              v-for="(item, index) in homeData.advantages"
               :key="item.id"
+              :ref="(el) => advantagesSliderItems[index] = el"
               class="slider-item advantage-item"
             >
               <img class="advantage-icon" :src="item.icon" alt="">
@@ -161,12 +149,13 @@ const currentAdvantagesSlide = ref(1)
 
           <div class="dot-pagination">
             <div
-              v-for="index in homeData.advantages.length"
+              v-for="index in advantagesSlider.scrollPointsCount.value"
               :key="index"
               :class="{
                 'dot-pagination-item': true,
-                'active': currentAdvantagesSlide === index
+                'active': advantagesSlider.activeItem.value === index
               }"
+              @click="advantagesSlider.goToSlide(index)"
             ></div>
           </div>
         </section>
@@ -214,30 +203,35 @@ const currentAdvantagesSlide = ref(1)
         </section>
 
         <section>
-          <div class="max-desktop:text-center">
-            <h2>Новинки</h2>
-            <p class="text-tertiary subtitle">
-              Свежие решения для вашей ванной
-            </p>
-          </div>
+          <div class="flex max-desktop:flex-col justify-between items-center gap-[24px] max-desktop:mb-[16px]">
+            <div class="max-desktop:text-center">
+              <h2>Новинки</h2>
+              <p class="text-tertiary subtitle">
+                Свежие решения для вашей ванной
+              </p>
+            </div>
 
-          <div class="relative grid gap-[16px] max-desktop:mt-[24px]">
-            <div class="arrows desktop:absolute bottom-[100%] justify-self-end">
+            <div class="arrows self-end">
               <button
                 class="arrow arrow-left"
+                @click="productsSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="productsSlider.scrollRight"
               ></button>
-            </div>
+           </div>
+          </div>
 
-            <div class="slider desktop:py-[32px]">
-              <ProductCard
-                v-for="product in homeData.new_products"
-                :key="product.id"
-                v-bind="product"
-              />
-            </div>
+          <div
+            ref="products-slider"
+            class="slider desktop:py-[32px]"
+          >
+            <ProductCard
+              v-for="product in homeData.new_products"
+              :key="product.id"
+              v-bind="product"
+            />
           </div>
         </section>
 

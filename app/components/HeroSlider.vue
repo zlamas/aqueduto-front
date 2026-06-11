@@ -1,4 +1,6 @@
 <script setup>
+import useSlider from "@/composables/useSlider.js";
+
 defineProps({
   items: {
     type: Array,
@@ -8,46 +10,9 @@ defineProps({
 })
 
 const container = useTemplateRef('container')
-const activeItem = ref(1)
 const itemRefs = ref([])
-const targetSet = ref(false)
 
-onMounted(() => {
-  let scrollPos = container.value.scrollLeft;
-  let isDragging = false;
-
-  container.value.addEventListener('scroll', () => {
-    if (!container.value) return;
-    const scrollAmount = container.value.scrollLeft - scrollPos;
-    scrollPos = container.value.scrollLeft;
-    if (isDragging || targetSet.value) return;
-
-    const index = scrollPos / container.value.offsetWidth + 1;
-    activeItem.value = scrollAmount > 0 ? Math.ceil(index) : Math.floor(index + 0.01);
-  });
-
-  container.value.addEventListener('touchstart', () => {
-    isDragging = true;
-    targetSet.value = false;
-  });
-
-  container.value.addEventListener('touchend', () => {
-    isDragging = false;
-  });
-})
-
-watch(
-  activeItem,
-  (item) => {
-    if (targetSet.value) {
-      const offset = itemRefs.value
-        .find((el => el.dataset.slide === item.toString()))
-        .offsetLeft;
-
-      container.value.scrollTo({ left: offset, behavior: 'smooth' });
-    }
-  }
-)
+const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRefs)
 </script>
 
 <template>
@@ -99,27 +64,27 @@ watch(
 
     <div class="hero-slider-controls">
       <div class="stripe-pagination">
-        <div
-          v-for="index in items.length"
+        <button
+          v-for="index in scrollPointsCount"
           :key="index"
           :class="{
             'stripe-pagination-item': true,
             'active': activeItem === index
           }"
-          @click="() => { targetSet = true; activeItem = index; }"
-        ></div>
+          @click="goToSlide(index)"
+        ></button>
       </div>
 
       <div class="hero-slider-nav arrows max-desktop:hidden">
         <button
           class="arrow arrow-left"
           :disabled="activeItem === 1"
-          @click="() => { targetSet = true; activeItem -= 1; }"
+          @click="goToSlide(activeItem - 1)"
         ></button>
         <button
           class="arrow arrow-right"
-          :disabled="activeItem === items.length"
-          @click="() => { targetSet = true; activeItem += 1; }"
+          :disabled="activeItem === scrollPointsCount"
+          @click="goToSlide(activeItem + 1)"
         ></button>
       </div>
     </div>

@@ -342,7 +342,6 @@ select {
     border-radius: 20px;
     gap: 16px;
     padding: 20px;
-    counter-increment: advantage;
     flex-basis: 320px;
 
     @variant desktop {
@@ -382,10 +381,17 @@ select {
   }
 
   .arrow::after {
-    content: url(~/assets/icons/arrow-right.svg);
+    content: '';
+    background: url(~/assets/icons/arrow-right.svg) center / cover no-repeat;
     display: block;
-    line-height: 0;
+    width: 18px;
+    height: 18px;
     opacity: 0.6;
+
+    @variant desktop {
+      width: 24px;
+      height: 24px;
+    }
   }
 
   .arrow-left::after {

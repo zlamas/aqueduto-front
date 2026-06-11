@@ -15,6 +15,10 @@ defineProps({
     type: String,
     default: 'var(--color-tertiary)'
   },
+  contentClass: {
+    type: String,
+    default: ''
+  },
 })
 
 const button = useTemplateRef('button')
@@ -76,7 +80,8 @@ onMounted(() => {
         ref="dropdown"
         :class="{
           'absolute top-0 mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999': true,
-          'invisible': !open,
+          [contentClass]: true,
+          'invisible': !open
         }"
         :style="popupPosition"
       >

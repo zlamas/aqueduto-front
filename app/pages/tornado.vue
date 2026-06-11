@@ -6,6 +6,40 @@ const { data: homeData } = await useAPI('/home')
 const title = 'Смыв торнадо'
 
 useHead({ title })
+
+const advantages = [
+  {
+    title: 'Мощное очищение',
+    description: 'Вихревой поток равномерно очищает всю поверхность чаши',
+  },
+  {
+    title: 'Экономия воды',
+    description: 'Эффективный смыв требует меньше воды без потери результата',
+  },
+  {
+    title: 'Тихая работа',
+    description: 'Направленный поток снижает уровень шума при смыве',
+  },
+  {
+    title: 'Чистая поверхность',
+    description: 'Поток воды уменьшает брызги и следы на чаше',
+  },
+  {
+    title: 'Один смыв',
+    description: 'Загрязнения удаляются с первого раза без повторов',
+  },
+  {
+    title: 'Продуманная форма',
+    description: 'Геометрия чаши усиливает эффект вихревого потока',
+  },
+]
+
+const advantagesSliderContainer = useTemplateRef('advantages-slider')
+const advantagesSliderItems = ref([])
+const advantagesSlider = useSlider(advantagesSliderContainer, advantagesSliderItems)
+
+const productsSliderContainer = useTemplateRef('products-slider')
+const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
@@ -45,64 +79,35 @@ useHead({ title })
             <p class="text-quaternary font-medium">6 причин выбрать смыв торнадо</p>
           </div>
 
-          <div class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]">
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
-              <div>
-                <h6>Мощное очищение</h6>
-                <p>Вихревой поток равномерно очищает всю поверхность чаши</p>
+          <div
+            ref="advantages-slider"
+            class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]"
+          >
+            <div
+              v-for="(item, index) in advantages"
+              :key="index"
+              :ref="(el) => advantagesSliderItems[index] = el"
+              class="slider-item advantage-item"
+            >
+              <div class="advantage-icon">
+                {{ index + 1 }}
               </div>
-            </div>
-
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
               <div>
-                <h6>Экономия воды</h6>
-                <p>Эффективный смыв требует меньше воды без потери результата</p>
-              </div>
-            </div>
-
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
-              <div>
-                <h6>Тихая работа</h6>
-                <p>Направленный поток снижает уровень шума при смыве</p>
-              </div>
-            </div>
-
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
-              <div>
-                <h6>Чистая поверхность</h6>
-                <p>Поток воды уменьшает брызги и следы на чаше</p>
-              </div>
-            </div>
-
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
-              <div>
-                <h6>Один смыв</h6>
-                <p>Загрязнения удаляются с первого раза без повторов</p>
-              </div>
-            </div>
-
-            <div class="slider-item advantage-item">
-              <div class="advantage-icon before:content-[counter(advantage)]"></div>
-              <div>
-                <h6>Продуманная форма</h6>
-                <p>Геометрия чаши усиливает эффект вихревого потока</p>
+                <h6>{{ item.title }}</h6>
+                <p>{{ item.description }}</p>
               </div>
             </div>
           </div>
 
           <div class="dot-pagination">
             <div
-              v-for="index in 6"
+              v-for="index in advantagesSlider.scrollPointsCount.value"
               :key="index"
               :class="{
                 'dot-pagination-item': true,
-                'active': 1 === index
+                'active': advantagesSlider.activeItem.value === index
               }"
+              @click="advantagesSlider.goToSlide(index)"
             ></div>
           </div>
         </section>
@@ -183,30 +188,35 @@ useHead({ title })
         </section>
 
         <section>
-          <div class="max-desktop:text-center">
-            <h2>Попробуйте в реальной жизни</h2>
-            <p class="text-tertiary subtitle">
-              Ознакомьтесь с моделями и выберите подходящее решение для вашей ванной комнаты
-            </p>
-          </div>
+          <div class="flex max-desktop:flex-col justify-between items-center gap-[24px] max-desktop:mb-[16px]">
+            <div class="max-desktop:text-center">
+              <h2>Попробуйте в реальной жизни</h2>
+              <p class="text-tertiary subtitle">
+                Ознакомьтесь с моделями и выберите подходящее решение для вашей ванной комнаты
+              </p>
+            </div>
 
-          <div class="relative grid gap-[16px] max-desktop:mt-[24px]">
-            <div class="arrows desktop:absolute bottom-[100%] justify-self-end">
+            <div class="arrows self-end">
               <button
                 class="arrow arrow-left"
+                @click="productsSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="productsSlider.scrollRight"
               ></button>
             </div>
+          </div>
 
-            <div class="slider desktop:py-[32px]">
-              <ProductCard
-                v-for="product in homeData.new_products"
-                :key="product.id"
-                v-bind="product"
-              />
-            </div>
+          <div
+            ref="products-slider"
+            class="slider desktop:py-[32px]"
+          >
+            <ProductCard
+              v-for="product in homeData.new_products"
+              :key="product.id"
+              v-bind="product"
+            />
           </div>
         </section>
       </div>

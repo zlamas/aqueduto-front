@@ -1,8 +1,9 @@
 <script setup>
 import Breadcrumb from "@/components/Breadcrumb.vue";
 import ProductCard from "@/components/ProductCard.vue";
-import {useAPI} from "@/composables/useAPI.js";
 import {formatCurrency} from "@/assets/js/funcs.js";
+import {useAPI} from "@/composables/useAPI.js";
+import useSimpleSlider from "@/composables/useSimpleSlider.js";
 
 const { slug } = useRoute().params
 
@@ -19,137 +20,8 @@ const selectedHotspot = ref(null)
 const activeHotspot = ref(null)
 let hoverTimeout = null
 
-const slides = [
-  { image: '/images/style-page-1.png', flexGrow: 3, flexBasis: '40%' },
-  { image: '/images/style-page-2.png', flexGrow: 1, flexBasis: '40%' },
-  { image: '/images/style-page-3.png', flexGrow: 2, flexBasis: '20%' },
-  { image: '/images/style-page-4.png', flexGrow: 1, flexBasis: '20%' },
-  { image: '/images/style-page-5.png', flexGrow: 2, flexBasis: '20%' },
-]
-
-const hotspots = [
-  [
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '65.5%', left: '2.9%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '57.5%', left: '7.8%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '66.9%', left: '13.6%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '46.7%', left: '35.0%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '63.3%', left: '36.6%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '71.8%', left: '63.1%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '61.9%', left: '70.1%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '73.0%', left: '76.0%' }
-    },
-  ],
-  [
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '60.2%', left: '27.7%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '77.5%', left: '41.4%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '58.3%', left: '51.2%' }
-    },
-  ],
-  [
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '68.1%', left: '54.0%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '32.4%', left: '60.3%' }
-    },
-  ],
-  [
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '61.4%', left: '22.1%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '51.9%', left: '39.7%' }
-    },
-  ],
-  [
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '68.3%', left: '33.8%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '26.4%', left: '48.6%' }
-    },
-    {
-      name: 'Унитаз напольный',
-      collection: 'OVO Tornado Light',
-      price: 28000,
-      style: { top: '38.1%', left: '79.4%' }
-    },
-  ],
-]
-
 function onHotspotHover(hotspot, index) {
-  if (activeHotspot.value === null) {
+  if (!activeHotspot.value) {
     hoverTimeout = setTimeout(
       () => {
         selectedHotspot.value = hotspot
@@ -161,19 +33,30 @@ function onHotspotHover(hotspot, index) {
 }
 
 function onHotspotLeave() {
-  if (activeHotspot.value === null) {
+  if (!activeHotspot.value) {
     selectedHotspot.value = null
-    slideIndex.value = null
   }
 
   clearTimeout(hoverTimeout)
 }
 
 function onHotspotClick(hotspot, i, j) {
-  selectedHotspot.value = hotspot
-  slideIndex.value = i
-  activeHotspot.value = `${i}.${j}`
+  if (activeHotspot.value !== `${i}.${j}`) {
+    selectedHotspot.value = hotspot
+    slideIndex.value = i
+    activeHotspot.value = `${i}.${j}`
+  } else {
+    selectedHotspot.value = null
+    activeHotspot.value = null
+  }
 }
+
+const imagesSliderContainer = useTemplateRef('images-slider')
+const imagesSliderItems = ref([])
+const imagesSlider = useSlider(imagesSliderContainer, imagesSliderItems)
+
+const relatedSliderContainer = useTemplateRef('related-slider')
+const relatedSlider = useSimpleSlider(relatedSliderContainer)
 </script>
 
 <template>
@@ -210,29 +93,36 @@ function onHotspotClick(hotspot, i, j) {
             <div class="justify-self-end flex gap-[8px] desktop:hidden">
               <button
                 class="arrow arrow-left"
+                :disabled="imagesSlider.activeItem.value === 1"
+                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
               ></button>
               <button
                 class="arrow arrow-right"
+                :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
+                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
               ></button>
             </div>
 
-            <div class="slider desktop:flex-wrap">
+            <div
+              ref="images-slider"
+              class="slider desktop:flex-wrap"
+            >
               <div
-                v-for="(slide, i) in slides"
+                v-for="(slide, i) in styleData.images"
+                :key="slide.id"
+                :ref="(el) => imagesSliderItems[i] = el"
                 class="slider-item style-page-item"
                 :style="{
-                  '--bg': `url(${slide.image})`,
-                  '--flex-grow': slide.flexGrow,
-                  '--flex-basis': slide.flexBasis,
+                  '--bg': `url(${slide.url})`,
                 }"
               >
                 <button
-                  v-for="(hotspot, j) in hotspots[i]"
+                  v-for="(hotspot, j) in slide.hotspots"
                   :class="{
                     'hotspot': true,
                     'active': activeHotspot === `${i}.${j}`,
                   }"
-                  :style="hotspot.style"
+                  :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
                   @pointerover="onHotspotHover(hotspot, i)"
                   @pointerleave="onHotspotLeave()"
                   @click="onHotspotClick(hotspot, i, j)"
@@ -241,17 +131,17 @@ function onHotspotClick(hotspot, i, j) {
                 <div
                   v-if="i === slideIndex"
                   v-show="selectedHotspot"
-                  class="absolute grid justify-items-start min-w-[176px] bg-white rounded-[16px] p-[8px_12px] -translate-x-[8px] -translate-y-[calc(100%+16px)]"
-                  :style="selectedHotspot?.style"
+                  class="absolute grid justify-items-start w-[176px] bg-white rounded-[16px] p-[8px_12px] -translate-x-[8px] -translate-y-[calc(100%+16px)]"
+                  :style="{ left: `${selectedHotspot?.x}%`, top: `${selectedHotspot?.y}%` }"
                 >
                   <div class="font-semibold mb-[8px]">
-                    {{ selectedHotspot?.name }}
+                    {{ selectedHotspot?.product.name }}
                   </div>
                   <div class="bg-[#F1F5F9] rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
-                    {{ selectedHotspot?.collection }}
+                    {{ selectedHotspot?.product.collection.name }}
                   </div>
                   <h6 class="m-0">
-                    {{ formatCurrency(selectedHotspot?.price) }}
+                    {{ formatCurrency(selectedHotspot?.product.price) }}
                   </h6>
                 </div>
               </div>
@@ -260,11 +150,12 @@ function onHotspotClick(hotspot, i, j) {
 
             <div class="dot-pagination">
               <div
-                v-for="index in 5"
+                v-for="index in imagesSlider.scrollPointsCount.value"
                 :class="{
                   'dot-pagination-item': true,
-                  'active': 1 === index
+                  'active': imagesSlider.activeItem.value === index
                 }"
+                @click="imagesSlider.goToSlide(index)"
               ></div>
             </div>
           </div>
@@ -299,13 +190,18 @@ function onHotspotClick(hotspot, i, j) {
             <div class="arrows max-desktop:hidden">
               <button
                 class="arrow arrow-left"
+                @click="relatedSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="relatedSlider.scrollRight"
               ></button>
             </div>
           </div>
-          <div class="slider max-desktop:flex-wrap mt-[24px] desktop:mt-[40px]">
+          <div
+            ref="related-slider"
+            class="slider max-desktop:flex-wrap mt-[24px] desktop:mt-[40px]"
+          >
             <NuxtLink
               v-for="style in styleData.related_styles"
               :key="style.id"
@@ -338,18 +234,15 @@ function onHotspotClick(hotspot, i, j) {
   .style-page-item {
     position: relative;
     height: 380px;
+    width: 100%;
     background: var(--bg) center / cover;
     border-radius: 36px;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
-    @variant max-desktop {
-      min-width: 100%;
-    }
-
     @variant desktop {
       height: 480px;
-      flex: var(--flex-grow) var(--flex-basis);
+      width: calc(50% - 12px);
     }
   }
 

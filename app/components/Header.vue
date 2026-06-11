@@ -71,8 +71,9 @@ const mobileMenuOpen = ref(false)
                 <Dropdown
                   label="Галерея"
                   class="p-0! text-inherit! [--bg:none]!"
+                  content-class="max-desktop:hidden"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px] max-desktop:hidden">
+                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink
                       v-for="style in styles"
                       :key="style.id"
@@ -93,8 +94,9 @@ const mobileMenuOpen = ref(false)
                 <Dropdown
                   label="Каталог"
                   class="p-0! text-inherit! [--bg:none]!"
+                  content-class="max-desktop:hidden"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px] max-desktop:hidden">
+                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink
                       v-for="category in categories"
                       :key="category.id"

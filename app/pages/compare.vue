@@ -54,6 +54,12 @@ function deleteFromComparison(id) {
       refreshListToggle.value = !refreshListToggle.value
     })
 }
+
+const compareSliderContainer = useTemplateRef('compare-slider')
+const compareSlider = useSimpleSlider(compareSliderContainer)
+
+const productsSliderContainer = useTemplateRef('products-slider')
+const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
@@ -72,14 +78,19 @@ function deleteFromComparison(id) {
             <div class="arrows max-desktop:hidden">
               <button
                 class="arrow arrow-left"
+                @click="compareSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="compareSlider.scrollRight"
               ></button>
             </div>
           </div>
 
-          <div class="slider desktop:py-[32px]">
+          <div
+            ref="compare-slider"
+            class="slider desktop:py-[32px]"
+          >
             <div class="slider-item desktop:content-start max-desktop:order-1">
               <div class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-[#CBD5E1] text-center text-quaternary font-semibold cursor-pointer">
                 <div>Добавить товар <br> к сравнению</div>
@@ -159,19 +170,25 @@ function deleteFromComparison(id) {
         </section>
 
         <section v-if="similarData?.length">
-          <div class="flex max-desktop:flex-col items-center justify-center desktop:justify-between gap-[24px] max-desktop:mb-[16px]">
+          <div class="flex max-desktop:flex-col items-center justify-between gap-[24px] max-desktop:mb-[16px]">
             <h3 class="m-0">Похожие товары</h3>
+
             <div class="arrows self-end">
               <button
                 class="arrow arrow-left"
+                @click="productsSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="productsSlider.scrollRight"
               ></button>
             </div>
           </div>
 
-          <div class="slider desktop:py-[32px]">
+          <div
+            ref="products-slider"
+            class="slider desktop:py-[32px]"
+          >
             <ProductCard
               v-for="product in similarData"
               :key="product.id"

@@ -106,7 +106,7 @@ function onLocationClick(location, index) {
               'map-location': true,
               'active': activeLocation === index,
             }"
-            :style="{ top: '58.0%', left: '12.3%' }"
+            :style="{ left: `${location.map_x}%`, top: `${location.map_y}%` }"
             @pointerover="onLocationHover(location)"
             @pointerleave="onLocationLeave()"
             @click="onLocationClick(location, index)"
@@ -115,7 +115,7 @@ function onLocationClick(location, index) {
           <div
             v-show="selectedLocation"
             class="absolute grid gap-[8px] justify-items-center bg-white border border-[#E2E8F0] rounded-[8px] p-[12px_24px] text-[14px] shadow-lg -translate-x-1/2 -translate-y-[calc(100%+36px)]"
-            :style="{ top: '58.0%', left: '12.3%' }"
+            :style="{ left: `${selectedLocation?.map_x}%`, top: `${selectedLocation?.map_y}%` }"
           >
             <img width="20" :src="selectedLocation?.icon" alt="">
             <div class="font-semibold">

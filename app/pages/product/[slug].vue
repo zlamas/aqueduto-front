@@ -50,6 +50,9 @@ function toggleComparison() {
       isComparison.value = !isComparison.value
     })
 }
+
+const productsSliderContainer = useTemplateRef('products-slider')
+const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
@@ -210,7 +213,7 @@ function toggleComparison() {
         </div>
       </div>
 
-      <section class="grid gap-[24px] desktop:mb-[64px]">
+      <section class="grid gap-[24px] mb-[64px]">
         <div class="flex gap-[8px] desktop:gap-[32px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto">
           <button
             v-for="(name, id) in tabs"
@@ -371,20 +374,26 @@ function toggleComparison() {
         </div>
       </section>
 
-      <section class="max-desktop:hidden">
-        <div class="flex items-center justify-center desktop:justify-between">
-          <h3 class="desktop:m-0">Похожие товары</h3>
-          <div class="arrows max-desktop:hidden">
+      <section>
+        <div class="flex max-desktop:flex-col items-center justify-between gap-[24px] max-desktop:mb-[16px]">
+          <h3 class="m-0">Похожие товары</h3>
+
+          <div class="arrows self-end">
             <button
               class="arrow arrow-left"
+              @click="productsSlider.scrollLeft"
             ></button>
             <button
               class="arrow arrow-right"
+              @click="productsSlider.scrollRight"
             ></button>
           </div>
         </div>
 
-        <div class="slider desktop:py-[32px]">
+        <div
+          ref="products-slider"
+          class="slider desktop:py-[32px]"
+        >
           <ProductCard
             v-for="product in similarData"
             :key="product.id"

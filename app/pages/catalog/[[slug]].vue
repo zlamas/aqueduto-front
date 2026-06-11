@@ -271,8 +271,8 @@ const priceGraphPoints = [
               >
                 <input
                   type="radio"
-                  name="sorting"
-                  v-model="parameters.sorting"
+                  name="sort"
+                  v-model="parameters.sort"
                   :value="value"
                 >
                 <span>{{ label }}</span>

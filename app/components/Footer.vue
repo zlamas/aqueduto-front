@@ -13,13 +13,13 @@ defineProps({
         <img src="~/assets/icons/logo-black.svg" alt="">
         <div class="text-quaternary">
           {{ settings.footer_text }}
-          <!--          <span class="font-semibold">Aqueduto</span> — это сочетание португальского вдохновения, изысканного дизайна и передовых технологий.-->
         </div>
         <div class="flex items-center gap-[14px]">
           <NuxtLink
             v-for="(link, id) in settings.social"
             :key="id"
             :to="link"
+            class="shrink-0"
           >
             <img :src="`/images/social-${id}.svg`" alt="">
            </NuxtLink>

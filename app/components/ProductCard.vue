@@ -22,6 +22,10 @@ const props = defineProps({
   },
 })
 
+const productCard = useTemplateRef('product-card')
+
+defineExpose({productCard})
+
 const isFavorite = ref(false)
 const isComparison = ref(false)
 
@@ -43,7 +47,9 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
 </script>
 
 <template>
-  <div class="slider-item group grid-rows-[auto_1fr] text-primary rounded-[28px] hover:shadow-[0_6px_24px_#0000001F]">
+  <div
+    ref="product-card"
+    class="slider-item group grid-rows-[auto_1fr] text-primary rounded-[28px] hover:shadow-[0_6px_24px_#0000001F]">
     <div
       :class="{
         'relative desktop:h-[334px] rounded-[16px] desktop:rounded-[28px] max-desktop:bg-[#F8F8FA] overflow-hidden': true,
@@ -106,7 +112,7 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
 
         <button
           v-if="compareButton"
-          class="bg-[#E9F4F6] rounded-[8px] p-[10px] ml-auto desktop:hidden"
+          class="bg-[#E9F4F6] rounded-[8px] p-[10px] ml-auto shrink-0 desktop:hidden"
           @click="toggleComparison"
         >
           <img src="~/assets/icons/compare.svg" alt="">
