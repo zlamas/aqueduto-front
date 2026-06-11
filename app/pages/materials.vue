@@ -2,52 +2,30 @@
 import DownloadItem from "@/components/DownloadItem.vue";
 import {useAPI} from "@/composables/useAPI.js";
 
-const { data: materialsData } = await useAPI('/materials');
+const selectedCategory = ref(null)
+
+const { data: materialsData } = await useAPI('/materials', { query: { category: selectedCategory } })
+
+const categories = materialsData.value.categories
+const data = computed(() => materialsData.value.data)
+
+const materials = computed(() =>
+  Object.fromEntries(
+    data.value
+      .map((item) => [item.type, item.items])
+      .filter(([type, items]) => items.length)
+  )
+)
+
+const types = {
+  manual: 'Инструкции',
+  catalog: 'Каталоги',
+  model3d: '3D модели',
+}
 
 const title = 'Инструкции'
 
 useHead({ title })
-
-const categories = [
-  'Унитазы',
-  'Писсуары',
-  'Биде',
-  'Панели смыва',
-  'Гигиенические души',
-  'Души',
-  'Раковины',
-  'Смесители для ванной',
-  'Смесители для кухни',
-  'Инсталляции',
-  'Аксессуары',
-  'Комплектующие',
-]
-
-const types = {
-  'manual': 'Инструкции',
-  'catalog': 'Каталоги',
-  '3d': '3D модели',
-}
-
-const selectedCategory = ref(0)
-
-const materials = Object.fromEntries(materialsData.value.data.map((item) => [item.type, item.items]))
-
-// const manuals = ref([
-//   {
-//     name: 'Инструкции',
-//     items: [
-//       { name: 'Инструкция по монтажу подвесных унитазов', url: '/' },
-//       { name: 'Инструкция по монтажу подвесных унитазов', url: '/' },
-//     ]
-//   },
-//   {
-//     name: '3D модели',
-//     items: [
-//       { name: '3D модели унитазов', url: '/' },
-//     ]
-//   },
-// ])
 </script>
 
 <template>
@@ -77,15 +55,16 @@ const materials = Object.fromEntries(materialsData.value.data.map((item) => [ite
       <div class="flex max-desktop:flex-col gap-[16px_24px]">
         <div class="flex desktop:flex-col gap-[4px_12px] desktop:w-[342px] whitespace-nowrap overflow-x-auto scrollbar-none max-desktop:-mx-[16px] max-desktop:px-[16px]">
           <button
-            v-for="(category, index) in categories"
+            v-for="category in categories"
+            :key="category.id"
             :class="{
               'rounded-full desktop:rounded-[12px] p-[10px_20px] desktop:p-[12px] desktop:text-[24px]/[32px] text-left font-medium': true,
-              'bg-[#F1F5F9] text-tertiary desktop:bg-white desktop:text-secondary desktop:font-semibold': index !== selectedCategory,
-              'bg-[#7195B5] text-white desktop:bg-[#F3F9FA] desktop:text-[#7195B5] desktop:font-bold': index === selectedCategory,
+              'bg-[#F1F5F9] text-tertiary desktop:bg-white desktop:text-secondary desktop:font-semibold': category.slug !== selectedCategory,
+              'bg-[#7195B5] text-white desktop:bg-[#F3F9FA] desktop:text-[#7195B5] desktop:font-bold': category.slug === selectedCategory,
             }"
-            @click="selectedCategory = index"
+            @click="selectedCategory = category.slug"
           >
-            {{ category }}
+            {{ category.name }}
           </button>
         </div>
 

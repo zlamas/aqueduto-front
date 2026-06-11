@@ -8,10 +8,7 @@ defineProps({
     type: String,
     required: true
   },
-  type: {
-    type: String,
-    required: true
-  }
+  type: String,
 })
 </script>
 

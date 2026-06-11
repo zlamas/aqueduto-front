@@ -92,7 +92,7 @@ defineProps({
                </NuxtLink>
             </li>
             <li>
-              <NuxtLink to="/tornado">
+              <NuxtLink to="/smuv-tornado">
                 Смыв “Торнадо”
                </NuxtLink>
             </li>

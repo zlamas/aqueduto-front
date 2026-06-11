@@ -7,6 +7,25 @@ import useSimpleSlider from "@/composables/useSimpleSlider.js";
 
 const { data: homeData } = await useAPI('/home')
 
+const styleParams = ref({
+  page: 1,
+  per_page: 6,
+})
+const styleMeta = ref(null)
+const styles = ref([])
+
+const { data: styleData } = await useAPI('/gallery', {
+  query: styleParams.value,
+
+  onResponse({ response }) {
+    styles.value.push(...response._data.styles)
+    styleMeta.value = response._data.meta
+  }
+})
+
+styles.value = styleData.value.styles
+styleMeta.value = styleData.value.meta
+
 useHead({
   title: 'Главная'
 })
@@ -184,20 +203,19 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
           </p>
           <div class="flex flex-wrap gap-[12px] desktop:gap-[24px] mt-[24px] desktop:mt-[40px]">
             <NuxtLink
-              v-for="style in homeData.styles"
+              v-for="style in styles"
               :key="style.id"
               class="image-gradient style-item"
               :style="{ '--bg': `url(${style.thumbnail})` }"
               :to="`/gallery/${style.slug}`"
               :data-name="style.title"
-            > </NuxtLink>
-<!--            <NuxtLink to="/gallery/style" class="image-gradient style-item [&#45;&#45;bg:url(/images/style-8.jpg)]" data-name="Стиль"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="image-gradient style-item [&#45;&#45;bg:url(/images/style-12.png)]" data-name="Минимализм"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="image-gradient style-item [&#45;&#45;bg:url(/images/style-3.jpg)]" data-name="Стиль"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="image-gradient style-item [&#45;&#45;bg:url(/images/style-11.jpg)] max-desktop:hidden" data-name="Традиции"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="image-gradient style-item [&#45;&#45;bg:url(/images/style-1.jpg)] max-desktop:hidden" data-name="Современная классика"> </NuxtLink>-->
+            />
           </div>
-          <button class="button-rounded mt-[16px] desktop:mt-[32px] mx-auto max-desktop:w-full">
+          <button
+            v-show="styleMeta.current_page < styleMeta.last_page"
+            class="button-rounded mt-[16px] desktop:mt-[32px] mx-auto max-desktop:w-full"
+            @click="styleParams.page += 1"
+          >
             Посмотреть все
           </button>
         </section>
@@ -237,7 +255,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
         <section>
           <h2 class="text-center">Полезные материалы</h2>
-          <div class="flex max-desktop:flex-col gap-[12px_24px] mt-[24px] desktop:mt-[32px]">
+          <div class="grid desktop:grid-cols-2 gap-[12px_24px] mt-[24px] desktop:mt-[32px]">
             <NuxtLink
               v-for="item in homeData.materials"
               :key="item.id"
@@ -283,7 +301,6 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
     border-radius: 20px;
     color: #FCFCFD;
     padding: 12px 16px;
-    flex: 1;
 
     @variant desktop {
       height: 436px;

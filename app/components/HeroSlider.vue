@@ -24,7 +24,7 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
         :ref="(el) => itemRefs[index] = el"
         :data-slide="index + 1"
         :class="{
-          'hero-slider-item image-gradient flex items-center px-[32px] desktop:px-[160px]': true,
+          'hero-slider-item image-gradient flex items-center max-desktop:justify-center px-[32px] desktop:px-[160px]': true,
           'hero-slider-video': item.media_type === 'video'
         }"
         :style="item.media_type === 'image' && { '--bg': `url(${item.media_url})` }"
