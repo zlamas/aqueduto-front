@@ -566,7 +566,7 @@ onMounted(() => ymaps.ready(initMap));
                 <div
                   v-for="badge in distributor.badges"
                   class="distributor-badge"
-                  :style="{ color: badge.color }"
+                  :style="{ '--badge-color': badge.color }"
                 >
                   {{ badge.text }}
                 </div>
@@ -1209,6 +1209,8 @@ onMounted(() => ymaps.ready(initMap));
   align-items: center;
   gap: 6px;
   border-radius: 9999px;
+  background: color-mix(var(--badge-color) 10%);
+  color: var(--badge-color);
   font-size: 14px;
   padding: 6px 12px;
 }

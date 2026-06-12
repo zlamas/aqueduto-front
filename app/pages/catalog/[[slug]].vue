@@ -592,20 +592,41 @@ const priceGraphPoints = [
 .range-slider {
   position: absolute;
   inset: 0;
+  height: 2px;
+  appearance: none;
 }
 
-.range-slider::-webkit-slider-thumb,
+.range-slider::-webkit-slider-thumb {
+  width: 28px;
+  height: 28px;
+  background: white;
+  border: 2px solid #2E2E2E;
+  border-radius: 50%;
+  cursor: pointer;
+  margin-top: -13px;
+  appearance: none;
+}
+
 .range-slider::-moz-range-thumb {
   width: 24px;
   height: 24px;
   background: white;
   border: 2px solid #2E2E2E;
   border-radius: 50%;
+  cursor: pointer;
 }
 
-.range-slider:first-child::-webkit-slider-runnable-track,
+.range-slider::-webkit-slider-runnable-track {
+  height: 100%;
+}
+
+.range-slider:first-child::-webkit-slider-runnable-track {
+  background: #3C3C3C;
+  border-radius: 9999px;
+}
+
 .range-slider:first-child::-moz-range-track {
-  height: 2px;
+  height: 100%;
   background: #3C3C3C;
   border-radius: 9999px;
 }
