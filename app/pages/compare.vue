@@ -118,7 +118,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                 >
                   <img src="~/assets/icons/compare-remove.svg" alt="">
                 </button>
-                <button class="p-[8px]">
+                <button class="p-[8px] cursor-grab active:cursor-grabbing">
                   <img src="~/assets/icons/drag.svg" alt="">
                 </button>
               </div>
@@ -216,10 +216,6 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 .compare-controls {
   display: flex;
   justify-content: space-between;
-
-  @variant desktop {
-    display: none;
-  }
 }
 
 .compare-group {

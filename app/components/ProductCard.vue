@@ -16,6 +16,8 @@ const props = defineProps({
   image: String,
   image_hover: String,
   colors: Array,
+  is_favorite: Boolean,
+  is_in_comparison: Boolean,
   compareButton: {
     type: Boolean,
     default: true
@@ -26,8 +28,8 @@ const productCard = useTemplateRef('product-card')
 
 defineExpose({productCard})
 
-const isFavorite = ref(false)
-const isComparison = ref(false)
+const isFavorite = ref(props.is_favorite)
+const isInComparison = ref(props.is_in_comparison)
 
 function toggleFavorite() {
   useAPI(`/favorites/${props.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
@@ -37,9 +39,9 @@ function toggleFavorite() {
 }
 
 function toggleComparison() {
-  useAPI(`/comparison/${props.id}`, { method: isComparison.value ? 'DELETE' : 'POST' })
+  useAPI(`/comparison/${props.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
     .then(({data}) => {
-      isComparison.value = !isComparison.value
+      isInComparison.value = !isInComparison.value
     })
 }
 
@@ -73,14 +75,23 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
         class="absolute max-desktop:bottom-[8px] max-desktop:right-[8px] desktop:top-[16px] desktop:right-[16px] desktop:invisible group-hover:visible bg-[#F8FAFC] rounded-full p-[8px] z-99"
         @click="toggleFavorite"
       >
-        <img src="~/assets/icons/favorite.svg" alt="">
+        <img
+          v-if="isFavorite"
+          src="~/assets/icons/favorite-full.svg"
+          alt=""
+        >
+        <img
+          v-else
+          src="~/assets/icons/favorite.svg"
+          alt=""
+        >
       </button>
       <button
         v-if="compareButton"
         class="button-rounded absolute bottom-[16px] right-[16px] invisible group-hover:visible bg-[#1E293B] text-[#FCFCFD] p-[8px_16px] before:content-[url(~/assets/icons/compare-white.svg)] before:leading-0 z-99"
         @click="toggleComparison"
       >
-        Cравнить
+        {{ isInComparison ? 'В сравнении' : 'Сравнить' }}
       </button>
     </div>
 
@@ -115,7 +126,16 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
           class="bg-[#E9F4F6] rounded-[8px] p-[10px] ml-auto shrink-0 desktop:hidden"
           @click="toggleComparison"
         >
-          <img src="~/assets/icons/compare.svg" alt="">
+          <img
+            v-if="isInComparison"
+            src="~/assets/icons/trash.svg"
+            alt=""
+          >
+          <img
+            v-else
+            src="~/assets/icons/compare.svg"
+            alt=""
+          >
         </button>
       </div>
     </div>

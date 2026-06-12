@@ -1,8 +1,7 @@
 <script setup>
 defineProps({
   settings: Object,
-  categories: Array,
-  styles: Array,
+  navigation: Object,
 })
 </script>
 
@@ -39,7 +38,7 @@ defineProps({
         <div class="grid gap-[24px]">
           <h5>Галерея</h5>
           <ul class="grid gap-[12px] text-tertiary">
-            <li v-for="style in styles.slice(0, 8)">
+            <li v-for="style in navigation.gallery.slice(0, 8)">
               <NuxtLink :to="`/gallery/${style.slug}`">
                 {{ style.title }}
                </NuxtLink>
@@ -55,7 +54,7 @@ defineProps({
         <div class="grid gap-[24px]">
           <h5>Каталог</h5>
           <ul class="grid gap-[12px] text-tertiary">
-            <li v-for="category in categories.slice(0, 8)">
+            <li v-for="category in navigation.catalog.slice(0, 8)">
               <NuxtLink :to="`/catalog/${category.slug}`">
                 {{ category.name }}
                </NuxtLink>

@@ -3,8 +3,7 @@ import Dropdown from "@/components/Dropdown.vue";
 
 defineProps({
   settings: Object,
-  categories: Array,
-  styles: Array,
+  navigation: Object,
 })
 
 const mobileMenuOpen = ref(false)
@@ -75,7 +74,7 @@ const mobileMenuOpen = ref(false)
                 >
                   <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink
-                      v-for="style in styles"
+                      v-for="style in navigation.gallery"
                       :key="style.id"
                       :to="`/gallery/${style.slug}`"
                       class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
@@ -98,7 +97,7 @@ const mobileMenuOpen = ref(false)
                 >
                   <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink
-                      v-for="category in categories"
+                      v-for="category in navigation.catalog"
                       :key="category.id"
                       :to="`/catalog/${category.slug}`"
                       class="flex items-center gap-[12px] rounded-[12px] p-[4px]"

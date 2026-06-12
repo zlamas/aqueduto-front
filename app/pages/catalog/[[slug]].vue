@@ -354,7 +354,7 @@ const priceGraphPoints = [
                     class="button-rounded bg-[#E6E6E6] p-[10px]"
                     @click="[minPrice, maxPrice] = priceRange"
                   >
-                    <img src="~/assets/icons/filter-clear.svg" alt="">
+                    <img src="~/assets/icons/trash.svg" alt="">
                   </button>
                   <button
                     class="button-rounded bg-[#2563EB] text-white flex-1"

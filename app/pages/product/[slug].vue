@@ -34,8 +34,8 @@ const currentTab = ref(Object.keys(tabs)[0])
 
 const attributes = Object.fromEntries(productData.attributes.map((item) => [item.group, item.items]))
 
-const isFavorite = ref(false)
-const isComparison = ref(false)
+const isFavorite = ref(product.value.data.is_favorite)
+const isInComparison = ref(product.value.data.is_in_comparison)
 
 function toggleFavorite() {
   useAPI(`/favorites/${productData.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
@@ -45,9 +45,9 @@ function toggleFavorite() {
 }
 
 function toggleComparison() {
-  useAPI(`/comparison/${productData.id}`, { method: isComparison.value ? 'DELETE' : 'POST' })
+  useAPI(`/comparison/${productData.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
     .then(({data}) => {
-      isComparison.value = !isComparison.value
+      isInComparison.value = !isInComparison.value
     })
 }
 
@@ -85,7 +85,16 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             class="absolute top-[16px] right-[16px] bg-[#F8FAFC] rounded-full p-[8px]"
             @click="toggleFavorite"
           >
-            <img src="~/assets/icons/favorite.svg" alt="">
+            <img
+              v-if="isFavorite"
+              src="~/assets/icons/favorite-full.svg"
+              alt=""
+            >
+            <img
+              v-else
+              src="~/assets/icons/favorite.svg"
+              alt=""
+            >
           </button>
 
           <div class="stripe-pagination absolute bottom-[16px]">
@@ -132,16 +141,38 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             <img class="size-full" :src="productData.gallery[activeImage].url" alt="">
             <div class="absolute top-[16px] right-[16px] flex gap-[8px]">
               <button
-                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014]"
+                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014] shrink-0"
                 @click="toggleComparison"
               >
-                <img class="size-[24px]" src="~/assets/icons/compare-white.svg" alt="">
+                <img
+                  v-if="isInComparison"
+                  class="size-[24px]"
+                  src="~/assets/icons/trash-white.svg"
+                  alt=""
+                >
+                <img
+                  v-else
+                  class="size-[24px]"
+                  src="~/assets/icons/compare-white.svg"
+                  alt=""
+                >
               </button>
               <button
-                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014]"
+                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014] shrink-0"
                 @click="toggleFavorite"
               >
-                <img class="size-[24px]" src="~/assets/icons/favorite-white.svg" alt="">
+                <img
+                  v-if="isFavorite"
+                  class="size-[24px]"
+                  src="~/assets/icons/favorite-full-white.svg"
+                  alt=""
+                >
+                <img
+                  v-else
+                  class="size-[24px]"
+                  src="~/assets/icons/favorite-white.svg"
+                  alt=""
+                >
               </button>
             </div>
           </div>

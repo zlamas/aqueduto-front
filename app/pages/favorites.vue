@@ -10,14 +10,6 @@ const title = 'Избранное'
 
 useHead({ title })
 
-// const categories = [
-//   { name: 'Все', count: 19 },
-//   { name: 'Унитазы', count: 9 },
-//   { name: 'Смесители для ванной', count: 5 },
-//   { name: 'Инсталляции', count: 2 },
-//   { name: 'Раковины', count: 3 },
-// ]
-
 const selectedCategory = ref(0)
 </script>
 
