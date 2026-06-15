@@ -71,6 +71,8 @@ const mobileMenuOpen = ref(false)
                   label="Галерея"
                   class="p-0! text-inherit! [--bg:none]!"
                   content-class="max-desktop:hidden"
+                  :hover="true"
+                  to="/gallery"
                 >
                   <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink
@@ -94,6 +96,8 @@ const mobileMenuOpen = ref(false)
                   label="Каталог"
                   class="p-0! text-inherit! [--bg:none]!"
                   content-class="max-desktop:hidden"
+                  :hover="true"
+                  to="/catalog"
                 >
                   <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
                     <NuxtLink

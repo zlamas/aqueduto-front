@@ -1,5 +1,5 @@
 <script setup>
-defineProps({
+const props = defineProps({
   type: String,
   label: String,
   iconLeft: String,
@@ -19,6 +19,11 @@ defineProps({
     type: String,
     default: ''
   },
+  hover: {
+    type: Boolean,
+    default: false
+  },
+  to: String,
 })
 
 const button = useTemplateRef('button')
@@ -26,6 +31,9 @@ const dropdown = useTemplateRef('dropdown')
 
 const open = ref(false)
 const popupPosition = ref(null)
+
+let hoverTimeout = null
+const hoverTimeoutDuration = 200
 
 watch(
   open,
@@ -57,6 +65,22 @@ onMounted(() => {
     }
   })
 })
+
+function onPointerEnter() {
+  if (!props.hover) return
+
+  clearTimeout(hoverTimeout)
+  open.value = true
+}
+
+function onPointerLeave() {
+  if (!props.hover) return
+
+  hoverTimeout = setTimeout(
+    () => open.value = false,
+    hoverTimeoutDuration
+  )
+}
 </script>
 
 <template>
@@ -69,9 +93,21 @@ onMounted(() => {
       '--icon-left': iconLeft && `url(/images/${iconLeft}.svg)`,
       '--icon-right': iconRight && `url(/images/${iconRight}.svg)`,
      }"
-    @click="open = !open"
+    @click="!hover && (open = !open)"
+    @pointerenter="onPointerEnter"
+    @pointerleave="onPointerLeave"
   >
-    <span :class="{ 'max-desktop:hidden': iconLeft }">
+    <NuxtLink
+      v-if="to"
+      :to="to"
+      :class="{ 'max-desktop:hidden': iconLeft }"
+    >
+      {{ label }}
+    </NuxtLink>
+    <span
+      v-else
+      :class="{ 'max-desktop:hidden': iconLeft }"
+    >
       {{ label }}
     </span>
 
@@ -79,11 +115,12 @@ onMounted(() => {
       <div
         ref="dropdown"
         :class="{
-          'absolute top-0 mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999': true,
-          [contentClass]: true,
-          'invisible': !open
+          [`absolute top-0 mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999 ${contentClass}`]: true,
+          'invisible': !open,
         }"
         :style="popupPosition"
+        @pointerenter="onPointerEnter"
+        @pointerleave="onPointerLeave"
       >
         <slot />
       </div>
