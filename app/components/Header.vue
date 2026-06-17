@@ -37,7 +37,7 @@ const mobileMenuOpen = ref(false)
             <span>
               {{ settings.email }}
             </span>
-           </NuxtLink>
+          </NuxtLink>
         </div>
       </div>
     </div>
@@ -48,7 +48,7 @@ const mobileMenuOpen = ref(false)
           <div class="flex items-center gap-[60px]">
             <NuxtLink to="/" class="">
               <img src="~/assets/icons/logo.svg" alt="">
-             </NuxtLink>
+            </NuxtLink>
             <ul
               :class="{
                 'flex gap-[24px_40px] list-none max-desktop:fixed max-desktop:inset-0  max-desktop:flex-col max-desktop:bg-white max-desktop:z-999 max-desktop:p-[16px]': true,
@@ -87,7 +87,7 @@ const mobileMenuOpen = ref(false)
                         alt=""
                       >
                       <div class="font-semibold">{{ style.title }}</div>
-                     </NuxtLink>
+                    </NuxtLink>
                   </div>
                 </Dropdown>
               </li>
@@ -107,7 +107,7 @@ const mobileMenuOpen = ref(false)
                       class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
                     >
                       <img
-                        :src="category.image"
+                        :src="category.icon"
                         class="size-[56px] rounded-[8px] bg-[#E6E6E6]"
                         alt=""
                       >
@@ -115,24 +115,24 @@ const mobileMenuOpen = ref(false)
                         <div class="font-semibold">{{ category.name }}</div>
                         <div class="text-quaternary">{{ category.product_count }} товаров</div>
                       </div>
-                     </NuxtLink>
+                    </NuxtLink>
                   </div>
                 </Dropdown>
               </li>
               <li>
                 <NuxtLink to="/promotions">
                   Акции
-                 </NuxtLink>
+                </NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/where-to-buy">
                   Где купить
-                 </NuxtLink>
+                </NuxtLink>
               </li>
               <li>
                 <NuxtLink to="/contact">
                   Контакты
-                 </NuxtLink>
+                </NuxtLink>
               </li>
             </ul>
           </div>
@@ -154,10 +154,10 @@ const mobileMenuOpen = ref(false)
             <div class="flex gap-[4px] desktop:gap-[12px]">
               <NuxtLink class="header-button"  to="/favorites">
                 <img src="~/assets/icons/favorite.svg" alt="">
-               </NuxtLink>
+              </NuxtLink>
               <NuxtLink class="header-button"  to="/compare">
                 <img src="~/assets/icons/compare.svg" alt="">
-               </NuxtLink>
+              </NuxtLink>
             </div>
           </div>
         </div>
@@ -192,17 +192,6 @@ const mobileMenuOpen = ref(false)
       width: 24px;
       height: 24px;
     }
-  }
-
-  .dropdown {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-  }
-
-  .dropdown::after {
-    content: url(/images/arrow-down.svg);
-    line-height: 0;
   }
 }
 </style>

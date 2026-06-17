@@ -22,7 +22,7 @@ const priceRange = ref([])
 const minPrice = ref(null)
 const maxPrice = ref(null)
 
-const selectedCategory = computed(() => parameters.value?.category)
+const selectedCategory = computed(() => parameters.value.category)
 const { data: catalogData } = await useAPI('/catalog')
 const { data: productData } = await useAPI('/products', { query: parameters })
 const { data: collectionData } = await useAPI('/collections')
@@ -211,6 +211,9 @@ const priceGraphPoints = [
    16.9,
    16.9,
 ]
+
+const categorySliderContainer = useTemplateRef('category-slider')
+const categorySlider = useSimpleSlider(categorySliderContainer)
 </script>
 
 <template>
@@ -231,14 +234,18 @@ const priceGraphPoints = [
         <div class="absolute left-0 bg-linear-to-l to-white w-[15%] h-full pointer-events-none"></div>
         <button
           class="arrow arrow-left absolute left-[16px] max-desktop:hidden"
+          @click="categorySlider.scrollLeft"
         ></button>
 
-        <div class="grid grid-flow-col auto-cols-[140px] desktop:auto-cols-[220px] gap-[8px] desktop:gap-[24px] text-center px-[16px] overflow-x-auto scrollbar-none py-[4px]">
+        <div
+          ref="category-slider"
+          class="slider gap-[8px] desktop:gap-[24px] text-center py-[4px] m-0"
+        >
           <div
             v-for="(category, index) in categories"
             :key="index"
             :class="{
-              'category': true,
+              'category slider-item': true,
               'selected': parameters.category === category.slug,
             }"
             @click="updateCategory(category.slug)"
@@ -251,6 +258,7 @@ const priceGraphPoints = [
         <div class="absolute right-0 bg-linear-to-r to-white w-[15%] h-full pointer-events-none"></div>
         <button
           class="arrow arrow-right absolute right-[16px] max-desktop:hidden"
+          @click="categorySlider.scrollRight"
         ></button>
       </div>
 
@@ -312,20 +320,20 @@ const priceGraphPoints = [
                     </div>
                   </div>
 
-                  <div class="relative mt-[12px]">
+                  <div class="range-slider">
                     <input
                       type="range"
-                      v-model="minPrice"
+                      v-model.number="minPrice"
                       :min="priceRange[0]"
                       :max="priceRange[1]"
-                      class="range-slider"
+                      class="range-input"
                     >
                     <input
                       type="range"
-                      v-model="maxPrice"
+                      v-model.number="maxPrice"
                       :min="priceRange[0]"
                       :max="priceRange[1]"
-                      class="range-slider"
+                      class="range-input"
                     >
                   </div>
                 </div>
@@ -335,16 +343,16 @@ const priceGraphPoints = [
                     <span>Мин. цена</span>
                     <input
                       class="price-input"
-                      type="text"
-                      v-model="minPrice"
+                      type="number"
+                      v-model.number="minPrice"
                     >
                   </label>
                   <label class="grid gap-[2px]">
                     <span>Макс. цена</span>
                     <input
                       class="price-input"
-                      type="text"
-                      v-model="maxPrice"
+                      type="number"
+                      v-model.number="maxPrice"
                     >
                   </label>
                 </div>
@@ -531,10 +539,15 @@ const priceGraphPoints = [
 .category {
   display: grid;
   gap: 8px;
+  width: 140px;
   border-radius: 20px;
   color: var(--color-tertiary);
   padding: 4px 4px 8px 4px;
   cursor: pointer;
+
+  @variant desktop {
+    width: 220px;
+  }
 }
 
 .category img {
@@ -590,44 +603,38 @@ const priceGraphPoints = [
 }
 
 .range-slider {
-  position: absolute;
-  inset: 0;
+  position: relative;
   height: 2px;
-  appearance: none;
+  background: #3C3C3C;
+  margin-top: 12px;
 }
 
-.range-slider::-webkit-slider-thumb {
+.range-input {
+  position: absolute;
+  inset: 0;
+  appearance: none;
+  pointer-events: none;
+}
+
+.range-input::-webkit-slider-thumb {
   width: 28px;
   height: 28px;
   background: white;
   border: 2px solid #2E2E2E;
   border-radius: 50%;
   cursor: pointer;
-  margin-top: -13px;
+  pointer-events: auto;
   appearance: none;
 }
 
-.range-slider::-moz-range-thumb {
-  width: 24px;
-  height: 24px;
+.range-input::-moz-range-thumb {
+  width: 28px;
+  height: 28px;
   background: white;
   border: 2px solid #2E2E2E;
   border-radius: 50%;
   cursor: pointer;
-}
-
-.range-slider::-webkit-slider-runnable-track {
-  height: 100%;
-}
-
-.range-slider:first-child::-webkit-slider-runnable-track {
-  background: #3C3C3C;
-  border-radius: 9999px;
-}
-
-.range-slider:first-child::-moz-range-track {
-  height: 100%;
-  background: #3C3C3C;
-  border-radius: 9999px;
+  pointer-events: auto;
+  box-sizing: border-box;
 }
 </style>

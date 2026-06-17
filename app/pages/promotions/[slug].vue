@@ -5,20 +5,40 @@ import {useAPI} from "@/composables/useAPI.js";
 
 const { slug } = useRoute().params
 
-const { data: promotionData } = await useAPI(`/promotions/${slug}`)
+const productsParams = ref({
+  page: 1,
+  per_page: 6,
+})
+const productsMeta = ref(null)
+const products = ref([])
 
-const promotion = promotionData.value.data
+const { data: promotionData } = await useAPI(`/promotions/${slug}`, {
+  query: productsParams.value,
 
-const title = promotion.title
+  onResponse({ response }) {
+    products.value.push(...response._data.data.products)
+    productsMeta.value = response._data.data.products_meta
+  }
+})
+
+const promotion = computed(() => promotionData.value.data)
+
+products.value = promotion.value.products
+productsMeta.value = promotion.value.products_meta
+
+const title = promotion.value.title
 
 useHead({ title })
+
+const relatedSliderContainer = useTemplateRef('related-slider')
+const relatedSlider = useSimpleSlider(relatedSliderContainer)
 </script>
 
 <template>
   <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
     <section
       class="hero-banner image-gradient grid desktop:content-between desktop:h-[500px] desktop:rounded-[32px] desktop:p-[32px_160px_96px] [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]"
-      :style="{ '--bg': `url(${promotion.image})` }"
+      :style="{ '--bg': `url(${promotion.banner_image})` }"
     >
       <Breadcrumb
         :items="[ { name: 'Акции', path: '/promotions' }, { name: title } ]"
@@ -40,13 +60,17 @@ useHead({ title })
         <section>
           <div class="product-grid">
             <ProductCard
-              v-for="product in promotion.products"
+              v-for="product in products"
               :key="product.id"
               v-bind="product"
             />
           </div>
 
-          <button class="button-rounded flex mt-[32px] mx-auto max-desktop:w-full">
+          <button
+            v-show="productsMeta.current_page < productsMeta.last_page"
+            class="button-rounded flex mt-[32px] mx-auto max-desktop:w-full"
+            @click="productsParams.page += 1"
+          >
             Показать еще
           </button>
         </section>
@@ -57,48 +81,37 @@ useHead({ title })
             <div class="arrows max-desktop:hidden">
               <button
                 class="arrow arrow-left"
+                @click="relatedSlider.scrollLeft"
               ></button>
               <button
                 class="arrow arrow-right"
+                @click="relatedSlider.scrollRight"
               ></button>
             </div>
           </div>
 
-          <div class="flex flex-col desktop:grid grid-flow-col auto-cols-[calc(50%-12px)] gap-[12px] desktop:gap-[24px]  mt-[24px] desktop:mt-[32px] scrollbar-none overflow-x-auto scroll-smooth snap-x snap-mandatory">
+          <div
+            ref="related-slider"
+            class="slider max-desktop:flex-col mt-[24px] desktop:mt-[32px]"
+          >
             <NuxtLink
               v-for="promotion in promotion.related"
               :key="promotion.id"
               :to="`/promotions/${promotion.slug}`"
-              class="promotion-item image-gradient"
+              class="slider-item promotion-item image-gradient"
               :style="{ '--bg': `url(${promotion.image})` }"
             >
               <h4>{{ promotion.title }}</h4>
               <p>{{ promotion.short_description }}</p>
-             </NuxtLink>
-<!--            <NuxtLink to="/promotions/promotion" class="promotion-item image-gradient [&#45;&#45;bg:url(/images/style-13.jpg)]">-->
-<!--              <h4>Название</h4>-->
-<!--              <p>Крутое описание, которое четко доносит выгоду покупателю</p>-->
-<!--             </NuxtLink>-->
-<!--            <NuxtLink to="/promotions/promotion" class="promotion-item image-gradient [&#45;&#45;bg:url(/images/style-3.jpg)]">-->
-<!--              <h4>Название</h4>-->
-<!--              <p>Крутое описание, которое четко доносит выгоду покупателю</p>-->
-<!--             </NuxtLink>-->
-<!--            <NuxtLink to="/promotions/promotion" class="promotion-item image-gradient [&#45;&#45;bg:url(/images/style-9.jpg)] max-desktop:hidden">-->
-<!--              <h4>Название</h4>-->
-<!--              <p>Крутое описание, которое четко доносит выгоду покупателю</p>-->
-<!--             </NuxtLink>-->
-<!--            <NuxtLink to="/promotions/promotion" class="promotion-item image-gradient [&#45;&#45;bg:url(/images/style-10.jpg)] max-desktop:hidden">-->
-<!--              <h4>Название</h4>-->
-<!--              <p>Крутое описание, которое четко доносит выгоду покупателю</p>-->
-<!--             </NuxtLink>-->
-<!--            <NuxtLink to="/promotions/promotion" class="promotion-item image-gradient [&#45;&#45;bg:url(/images/style-4.jpg)] max-desktop:hidden">-->
-<!--              <h4>Название</h4>-->
-<!--              <p>Крутое описание, которое четко доносит выгоду покупателю</p>-->
-<!--             </NuxtLink>-->
+            </NuxtLink>
           </div>
-          <button class="button-rounded mt-[16px] w-full desktop:hidden">
+
+          <NuxtLink
+            to="/promotions"
+            class="button-rounded mt-[16px] w-full desktop:hidden"
+          >
             Посмотреть все
-          </button>
+          </NuxtLink>
         </section>
       </div>
     </div>

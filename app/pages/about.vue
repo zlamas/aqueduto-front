@@ -13,15 +13,15 @@ useHead({ title })
 
 <template>
   <main class="layout pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
-    <section class="hero-banner image-gradient grid desktop:h-[800px] desktop:rounded-[32px] desktop:p-[32px_160px] desktop:shadow-[0_4px_4px_#00000040]">
+    <section
+      class="hero-banner image-gradient grid desktop:h-[800px] desktop:rounded-[32px] desktop:p-[32px_160px] desktop:shadow-[0_4px_4px_#00000040]"
+      :style="{ '--bg': `url(${hero.image})` }"
+    >
       <Breadcrumb
         :items="[ { name: title } ]"
         class="place-self-start"
       />
-      <div
-        class="absolute place-self-center bg-[#00000033] backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]"
-        :style="{ '--bg': hero.image }"
-      >
+      <div class="absolute place-self-center bg-[#00000033] backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
         <h1 class="text-[#FCFCFD]">
           {{ hero.title }}
         </h1>

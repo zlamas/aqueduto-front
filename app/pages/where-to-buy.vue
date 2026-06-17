@@ -18,27 +18,28 @@ useHead({
 })
 
 function initMap() {
+  console.log(dealers)
+
   let my_map = new ymaps.Map('map', {
-    center: [55.755819, 37.617644],
+    center: [dealers[0].latitude, dealers[0].longitude],
     zoom: 16,
-    controls: []
-  });
+  })
 
   let LayoutClass = ymaps.templateLayoutFactory.createClass(`
-    <div class="store-balloon open">
+    <div class="store-balloon {% if properties.is_open %} open {% else %} closed {% endif %}">
       <div class="store-balloon-content">
         <div class="store-balloon-image">
-          <img src="/images/store-1.png" alt="">
+          <img src="{{ properties.image }}" alt="">
           <div class="store-status store-balloon-status"></div>
-          <div class="store-balloon-distance">6,8 км</div>
+          <div class="store-balloon-distance">{{ properties.distance_km }} км</div>
         </div>
 
         <div class="store-info">
-          <div class="store-name">Название</div>
+          <div class="store-name">{{ properties.name }}</div>
           <div class="text-[#6E6E6E]">
-            <span class="store-city">Город</span>
+            <span class="store-city">{{ properties.city }}</span>
             <span> · </span>
-            <span class="store-address">Адрес (улица, номер)</span>
+            <span class="store-address">{{ properties.address }}</span>
           </div>
         </div>
 
@@ -49,28 +50,48 @@ function initMap() {
       </div>
 
       <div class="flex gap-[4px]">
-        <NuxtLink to="tel:+7 916 123 45 67" class="button-rounded gap-[8px] rounded-[8px] border border-#E9F4F6 bg-[#8CB0C8] text-white shadow-sm p-[4px] pr-[16px]">
+        <a
+         href="tel:{{ properties.phone }}"
+         class="button-rounded gap-[8px] rounded-[8px] border border-#E9F4F6 bg-[#8CB0C8] text-white shadow-sm p-[4px] pr-[16px] flex-1"
+        >
           <img class="size-[32px] bg-[#F5FAFF] rounded-[5px] p-[5px]" src="/images/phone.svg" alt="">
-          <span>+7 916 123 45 67</span>
-         </NuxtLink>
-        <NuxtLink to="/" class="button-rounded bg-[#E9F4F6] rounded-[10px] p-[10px]">
+          <span class="m-auto">{{ properties.phone }}</span>
+        </a>
+        <a
+          href="{{ properties.website }}"
+          class="button-rounded bg-[#E9F4F6] rounded-[10px] p-[10px]"
+        >
           <img src="/images/site.svg" alt="">
-         </NuxtLink>
+        </a>
       </div>
     </div>
   `)
 
-  let my_placemark = new ymaps.Placemark(my_map.getCenter(), {}, {
-    iconLayout: 'default#image',
-    iconImageHref: '/images/map-marker.svg',
-    iconImageSize: [48, 48],
-    balloonLayout: LayoutClass,
-  });
+  dealers.forEach((dealer) => {
+    let my_placemark = new ymaps.Placemark(
+      [dealer.latitude, dealer.longitude],
+      dealer,
+      {
+        iconLayout: 'default#image',
+        iconImageHref: '/images/map-marker.svg',
+        iconImageSize: [48, 48],
+        balloonLayout: LayoutClass,
+      }
+    )
 
-  my_map.geoObjects.add(my_placemark);
+    my_map.geoObjects.add(my_placemark)
+  })
 }
 
-onMounted(() => ymaps.ready(initMap));
+onMounted(() => ymaps.ready(initMap))
+
+const tabs = {
+ offline: { icon: 'tab-list', title: 'Оффлайн-партнеры' },
+ map: { icon: 'tab-globe' },
+ online: { icon: 'tab-location' },
+}
+
+const currentTab = ref('offline')
 </script>
 
 <template>
@@ -81,7 +102,7 @@ onMounted(() => ymaps.ready(initMap));
         class="mb-[64px]"
       />
 
-      <div class="layout">
+      <div class="layout max-desktop:gap-[16px]">
         <section>
           <h1 class="desktop:mb-[40px]">{{ title }}</h1>
 
@@ -92,8 +113,34 @@ onMounted(() => ymaps.ready(initMap));
             </span>
           </div>
 
-          <div class="flex gap-[24px] h-[764px] mt-[24px]">
-            <div class="grid gap-[16px] content-start w-[446px] bg-[#F1F5F9] rounded-[28px] p-[12px]">
+          <div class="flex gap-[8px] whitespace-nowrap overflow-x-auto scrollbar-none -mx-[16px] px-[16px] mt-[24px] desktop:hidden">
+            <button
+              v-for="(tab, id) in tabs"
+              :key="id"
+              :class="{
+                'flex gap-[4px] items-center rounded-full p-[8px_16px] text-[14px] font-medium shrink-0': true,
+                'bg-[#F1F5F9] text-tertiary': id !== currentTab,
+                'bg-[#7195B5] text-white': id === currentTab,
+              }"
+              @click="currentTab = id"
+            >
+              <img :src="`/images/${tab.icon}.svg`" alt="">
+              <span v-if="tab.title">
+                {{ tab.title }}
+              </span>
+            </button>
+          </div>
+
+          <div
+            v-show="currentTab !== 'online'"
+            class="flex gap-[24px] h-[764px] mt-[16px] desktop:mt-[24px]"
+          >
+            <div
+              :class="{
+                'grid gap-[16px] content-start w-[446px] bg-[#F1F5F9] rounded-[28px] p-[12px]': true,
+                'max-desktop:hidden': currentTab !== 'offline'
+              }"
+            >
               <label class="search-field w-full bg-white px-[12px]">
                 <input class="search-input" type="text" placeholder="Введите название, город или адрес">
               </label>
@@ -109,7 +156,7 @@ onMounted(() => ymaps.ready(initMap));
                   }"
                 >
                   <div class="store-info">
-                    <div class="flex justify-between">
+                    <div class="flex justify-between items-start">
                       <span class="store-name">{{ dealer.name }}</span>
                       <span class="store-distance">{{ dealer.distance_km }} км</span>
                     </div>
@@ -519,13 +566,19 @@ onMounted(() => ymaps.ready(initMap));
               </div>
             </div>
 
-            <div class="flex-1 rounded-[40px] overflow-hidden max-desktop:hidden" id="map"></div>
+            <div
+              :class="{
+                'flex-1 rounded-[40px] overflow-hidden': true,
+                'max-desktop:hidden': currentTab !== 'map'
+              }"
+              id="map"
+            ></div>
           </div>
         </section>
 
-        <section class="max-desktop:hidden">
-          <h2 class="mb-[40px]">Онлайн-дистрибьюторы</h2>
-          <div class="flex flex-wrap max-desktop:flex-col items-center justify-center gap-[24px]">
+        <section :class="{ 'max-desktop:hidden': currentTab !== 'online' }">
+          <h2 class="mb-[40px] max-desktop:hidden">Онлайн-дистрибьюторы</h2>
+          <div class="flex flex-wrap max-desktop:flex-col desktop:items-center justify-center gap-[24px]">
             <div
               v-for="distributor in online_distributors"
               :key="distributor.id"
@@ -1127,6 +1180,7 @@ onMounted(() => ymaps.ready(initMap));
   display: grid;
   gap: 24px;
   width: max-content;
+  max-width: 250px;
   background: white;
   border-radius: 16px;
   box-shadow: var(--shadow-md);
@@ -1200,6 +1254,7 @@ onMounted(() => ymaps.ready(initMap));
 
 .distributor-badges {
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
   margin-top: 16px;
 }

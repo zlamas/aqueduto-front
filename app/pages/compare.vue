@@ -92,10 +92,13 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             class="slider desktop:py-[32px]"
           >
             <div class="slider-item desktop:content-start max-desktop:order-1">
-              <div class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-[#CBD5E1] text-center text-quaternary font-semibold cursor-pointer">
+              <NuxtLink
+                to="/catalog"
+                class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-[#CBD5E1] text-center text-quaternary font-semibold cursor-pointer"
+              >
                 <div>Добавить товар <br> к сравнению</div>
                 <img src="~/assets/icons/compare-add.svg" alt="">
-              </div>
+              </NuxtLink>
 
               <label class="flex items-center justify-between text-tertiary max-desktop:hidden">
                 <span>Показать только различия</span>
