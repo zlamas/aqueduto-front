@@ -10,28 +10,92 @@ const title = 'Каталог'
 
 useHead({ title })
 
-const parameters = ref({})
+const productsParams = ref({
+  page: 1,
+  per_page: 24,
+})
 
 const slug = useRoute().params.slug
 
 if (slug) {
-  parameters.value.category = slug
+  productsParams.value.category = slug
 }
 
 const priceRange = ref([])
 const minPrice = ref(null)
 const maxPrice = ref(null)
 
-const selectedCategory = computed(() => parameters.value.category)
+const selectedCategory = computed(() => productsParams.value.category)
+
+const isLoading = ref(false)
+
+const productsMeta = ref(null)
+const products = ref([])
+
+const productWrapper = useTemplateRef('product-wrapper')
+
+function nextPage() {
+  if (productsMeta.value.current_page >= productsMeta.value.last_page || isLoading.value) return
+
+  const wrapperBottom = productWrapper.value.getBoundingClientRect().bottom
+
+  if (wrapperBottom < window.innerHeight) {
+    productsParams.value.page += 1
+    isLoading.value = true
+  }
+}
+
+onMounted(() => {
+  window.addEventListener('scroll', nextPage);
+})
+
+onUnmounted(() => {
+  window.removeEventListener('scroll', nextPage);
+})
+
+const { data: productsData } = await useAPI('/products', {
+  query: productsParams,
+
+  onResponse({ response }) {
+    if (response._data.meta.current_page === 1) {
+      products.value.length = 0
+    }
+
+    products.value.push(...response._data.data)
+    productsMeta.value = response._data.meta
+    isLoading.value = false
+  }
+})
+
+products.value = productsData.value.data
+productsMeta.value = productsData.value.meta
+
+function resetProducts() {
+  productsParams.value.page = productsMeta.value.current_page = 1
+}
+
+function updateCategory(newCategory) {
+  delete productsParams.value.price_min
+  delete productsParams.value.price_max
+  productsParams.value.category = newCategory
+  resetProducts()
+  window.history.pushState({}, null, `/catalog/${newCategory}`)
+}
+
+function applyPriceRange() {
+  Object.assign(
+    productsParams.value,
+    { price_min: minPrice.value, price_max: maxPrice.value }
+  )
+  resetProducts()
+}
+
 const { data: catalogData } = await useAPI('/catalog')
-const { data: productData } = await useAPI('/products', { query: parameters })
 const { data: collectionData } = await useAPI('/collections')
 const { data: filtersData } = await useAPI('/catalog/filters', {
   query: { category: selectedCategory },
-  onResponse({ response }) {
-    delete parameters.price_min
-    delete parameters.price_max
 
+  onResponse({ response }) {
     const range = response._data.data.find((filter) => filter.key === 'price').values
     priceRange.value = range
     minPrice.value = range[0]
@@ -40,7 +104,6 @@ const { data: filtersData } = await useAPI('/catalog/filters', {
 })
 
 const { banners, categories } = catalogData.value
-const products = computed(() => productData.value.data)
 const collections = collectionData.value.data
 const filters = computed(() => filtersData?.value?.data)
 
@@ -52,11 +115,6 @@ maxPrice.value = range[1]
 const collectionQuery = ref('')
 const productQuery = ref('')
 const colorQuery = ref('')
-
-function updateCategory(newCategory) {
-  parameters.value.category = newCategory
-  window.history.pushState({}, null, `/catalog/${newCategory}`)
-}
 
 const filteredCollections = computed(
   () => filterQuery(collections, 'name', collectionQuery.value)
@@ -86,7 +144,7 @@ watch(
 
 const updateProductsDebounce = debounce(
   () => Object.assign(
-    parameters.value,
+    productsParams.value,
     { search: productQuery.value }
   )
 )
@@ -99,7 +157,7 @@ watch(
 const priceProductCount = ref(products.value.length)
 
 const fetchProductsPriceDebounce = debounce(() => {
-  const params = Object.assign({ price_min: minPrice.value, price_max: maxPrice.value }, parameters.value)
+  const params = Object.assign({ price_min: minPrice.value, price_max: maxPrice.value }, productsParams.value)
   useAPI('/products', { query: params }).then(({ data }) => {
     priceProductCount.value = data.value.data.length
   })
@@ -166,7 +224,7 @@ const activeFilters = computed(
     activeFilterBadges
       .map((filter) => [
         filter.name,
-        filter.array.find((item) => item[filter.valueKey] === parameters.value[filter.name])]
+        filter.array.find((item) => item[filter.valueKey] === productsParams.value[filter.name])]
       )
       .filter(([name, item]) => item)
   )
@@ -246,7 +304,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             :key="index"
             :class="{
               'category slider-item': true,
-              'selected': parameters.category === category.slug,
+              'selected': productsParams.category === category.slug,
             }"
             @click="updateCategory(category.slug)"
           >
@@ -280,8 +338,9 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                 <input
                   type="radio"
                   name="sort"
-                  v-model="parameters.sort"
+                  v-model="productsParams.sort"
                   :value="value"
+                  @change="resetProducts"
                 >
                 <span>{{ label }}</span>
               </label>
@@ -366,12 +425,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                   </button>
                   <button
                     class="button-rounded bg-[#2563EB] text-white flex-1"
-                    @click="
-                      Object.assign(
-                        parameters,
-                { price_min: minPrice, price_max: maxPrice }
-                      )
-                    "
+                    @click="applyPriceRange"
                   >
                     Показать {{ priceProductCount }} товаров
                   </button>
@@ -402,7 +456,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                     <input
                       type="radio"
                       name="collections"
-                      v-model="parameters.collection"
+                      v-model="productsParams.collection"
                       :value="collection.slug"
                     >
                     <span>{{ collection.name }}</span>
@@ -434,7 +488,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                     <input
                       type="radio"
                       name="collections"
-                      v-model="parameters.color"
+                      v-model="productsParams.color"
                       :value="color.value"
                       class="hidden"
                     >
@@ -452,7 +506,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                       <img
                         :class="{
                           'size-[16px] m-auto': true,
-                          'hidden': color.value !== parameters.color
+                          'hidden': color.value !== productsParams.color
                         }"
                         src="~/assets/icons/checkmark.svg"
                         alt=""
@@ -512,7 +566,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
           <div>{{ item.name }}</div>
           <button
             class="cursor-pointer"
-            @click="delete parameters[filter]"
+            @click="delete productsParams[filter]"
           >
             <img src="~/assets/icons/delete.svg" alt="">
           </button>
@@ -521,7 +575,10 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
       <div>
         <h2 class="mb-[24px] desktop:hidden">Товары</h2>
-        <div class="product-grid">
+        <div
+          ref="product-wrapper"
+          class="product-grid"
+        >
           <ProductCard
             v-for="product in products"
             :key="product.id"

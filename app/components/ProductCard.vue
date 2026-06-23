@@ -60,12 +60,12 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
     >
       <img
         :src="image"
-        class="relative z-9"
+        class="relative size-full object-contain z-9"
         alt=""
       >
       <img
         :src="image_hover"
-        class="absolute inset-0 group-hover:z-19"
+        class="absolute inset-0 size-full object-contain group-hover:z-19"
         alt=""
       >
       <div v-if="badge" class="absolute top-[8px] left-[8px] desktop:top-[16px] desktop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[12px]/[16px] desktop:text-[14px]/[20px] text-[#FCFCFD] font-semibold p-[4px_10px] desktop:p-[6px_12px] before:content-(--icon) before:leading-0 z-99">
