@@ -64,6 +64,7 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
         alt=""
       >
       <img
+        v-if="image_hover"
         :src="image_hover"
         class="absolute inset-0 size-full object-contain group-hover:z-19"
         alt=""
