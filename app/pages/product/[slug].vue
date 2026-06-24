@@ -34,8 +34,8 @@ const currentTab = ref(Object.keys(tabs)[0])
 
 const attributes = Object.fromEntries(productData.attributes.map((item) => [item.group, item.items]))
 
-const isFavorite = ref(product.value.data.is_favorite)
-const isInComparison = ref(product.value.data.is_in_comparison)
+const isFavorite = ref(productData.is_favorite)
+const isInComparison = ref(productData.is_in_comparison)
 
 function toggleFavorite() {
   useAPI(`/favorites/${productData.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })

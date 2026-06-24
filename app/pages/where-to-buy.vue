@@ -18,8 +18,6 @@ useHead({
 })
 
 function initMap() {
-  console.log(dealers)
-
   let my_map = new ymaps.Map('map', {
     center: [dealers[0].latitude, dealers[0].longitude],
     zoom: 16,
