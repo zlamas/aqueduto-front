@@ -157,7 +157,11 @@ watch(
 const priceProductCount = ref(products.value.length)
 
 const fetchProductsPriceDebounce = debounce(() => {
-  const params = Object.assign({ price_min: minPrice.value, price_max: maxPrice.value }, productsParams.value)
+  const params = Object.assign(
+    {},
+    productsParams.value,
+    { price_min: minPrice.value, price_max: maxPrice.value }
+  )
   useAPI('/products', { query: params }).then(({ data }) => {
     priceProductCount.value = data.value.data.length
   })
