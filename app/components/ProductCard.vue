@@ -46,6 +46,8 @@ function toggleComparison() {
 }
 
 const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
+
+const currentColorData = computed(() => props.colors?.find((color) => currentColor.value === color.id))
 </script>
 
 <template>
@@ -107,13 +109,13 @@ const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
         </div>
 
         <div class="text-quaternary">
-          Арт. {{ article }}
+          Арт. {{ currentColorData?.article || article }}
         </div>
       </div>
 
       <div class="flex items-center justify-center max-desktop:px-[8px]">
         <h6 class="m-0">
-          {{ formatCurrency(price) }}
+          {{ formatCurrency(currentColorData?.price || price) }}
         </h6>
 
         <ColorSelect

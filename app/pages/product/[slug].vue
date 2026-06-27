@@ -9,7 +9,7 @@ const { slug } = useRoute().params
 
 const currentColor = ref(null)
 
-const { data: product } = await useAPI(`/products/${slug}`, { query: { variant_id: currentColor } })
+const { data: product } = await useAPI(`/products/${slug}`)
 const { data: similar } = await useAPI(`/products/${slug}/similar`)
 
 const productData = product.value.data
@@ -20,6 +20,8 @@ const title = productData.name
 useHead({ title })
 
 currentColor.value = productData.colors?.find((color) => color.is_default)?.id
+
+const currentColorData = computed(() => productData.colors?.find((color) => currentColor.value === color.id))
 
 const targetSet = ref(false)
 const activeImage = ref(0)
@@ -188,7 +190,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                 {{ productData.collection.name }}
               </div>
               <div class="text-quaternary">
-                Артикул {{ productData.article }}
+                Артикул {{ currentColorData?.article || productData.article }}
               </div>
             </div>
           </div>
@@ -228,7 +230,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
           <div class="product-block flex items-center justify-between max-desktop:hidden">
             <div>
               <h4>
-                {{ formatCurrency(productData.price) }}
+                {{ formatCurrency(currentColorData?.price || productData.price) }}
               </h4>
               <div class="text-[14px]/[20px] text-quaternary">
                 Рекоменд. розничная цена
