@@ -63,7 +63,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         class="mb-[48px]"
       />
 
-      <div class="grid desktop:grid-cols-[auto_1fr] gap-[24px] mb-[32px] desktop:mb-[80px]">
+      <div class="flex flex-col desktop:grid desktop:grid-cols-[auto_1fr] gap-[24px] mb-[32px] desktop:mb-[80px]">
         <div class="flex justify-center relative rounded-[24px] desktop:hidden">
           <div class="slider">
             <template v-for="media in productData.gallery">

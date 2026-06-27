@@ -12,7 +12,8 @@ useHead({
   script: [
     {
       src: 'https://api-maps.yandex.ru/2.1/?apikey=86cb0147-d5b1-4892-ac30-f7ce196228c8&load=package.standard&lang=ru_RU',
-      defer: true
+      defer: true,
+      onload: () => ymaps.ready(initMap)
     }
   ]
 })
@@ -80,8 +81,6 @@ function initMap() {
     my_map.geoObjects.add(my_placemark)
   })
 }
-
-onMounted(() => ymaps.ready(initMap))
 
 const tabs = {
  offline: { icon: 'tab-list', title: 'Оффлайн-партнеры' },
