@@ -1,4 +1,5 @@
 <script setup>
+import Breadcrumb from "@/components/Breadcrumb.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
 
@@ -19,32 +20,51 @@ const title = 'Сравнение'
 
 useHead({ title })
 
-const itemsGrouped = computed(() =>
-  items.value.map((item) =>
-    Object.groupBy(
-      item.attributes,
-      ({ group }) => group
-    )
-  )
-)
-
 const attributes = computed(() =>
-  itemsGrouped.value?.length ?
-    Object.fromEntries(
-      Object.keys(itemsGrouped.value[0])
-        .map((group) => [
-          group,
-          itemsGrouped.value.flatMap((item) => item[group].map(({ items }) => items))]
-        )
-    ) : {}
+  items.value.map((item) => item.attributes.flatMap((group) => group.items))
 )
 
 const attributeMeta = computed(() =>
   Object.fromEntries(
-    Object.entries(attributes.value)
-      .map(([group, items]) => [group, items[0]])
+    attributes.value.flat().map((attribute) => [attribute.key, attribute.name])
   )
 )
+
+const attributeValues = computed(() =>
+  Object.keys(attributeMeta.value)
+    .map(
+      (key) => attributes.value.map(
+        (item) => item.find((attribute) => attribute.key === key)?.value
+      )
+    )
+)
+
+// const itemsGrouped = computed(() =>
+//   items.value.map((item) =>
+//     Object.groupBy(
+//       item.attributes,
+//       ({ group }) => group
+//     )
+//   )
+// )
+//
+// const attributes = computed(() =>
+//   itemsGrouped.value?.length ?
+//     Object.fromEntries(
+//       Object.keys(itemsGrouped.value[0])
+//         .map((group) => [
+//           group,
+//           itemsGrouped.value.flatMap((item) => item[group].map(({ items }) => items))]
+//         )
+//     ) : {}
+// )
+//
+// const attributeMeta = computed(() =>
+//   Object.fromEntries(
+//     Object.entries(attributes.value)
+//       .map(([group, items]) => [group, items[0]])
+//   )
+// )
 
 function deleteFromComparison(id) {
   useAPI(`/comparison/${id}`, { method: 'DELETE' })
@@ -142,30 +162,32 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             </span>
           </label>
 
-          <details
-            v-if="'main' in attributes"
-            class="compare-group"
-            open
-          >
+          <details class="compare-group" open>
             <summary class="compare-group-title">
               <h5>Основные характеристики</h5>
             </summary>
             <div class="slider compare-slider">
               <div class="compare-col slider-item">
-                <div v-for="meta in attributeMeta.main">{{ meta.name }}</div>
+                <div v-for="name in attributeMeta">
+                  {{ name }}
+                </div>
               </div>
 
               <div
-                v-for="(product, index) in items"
+                v-for="(product, productIndex) in items"
                 :key="product.id"
                 class="compare-col slider-item"
               >
                 <div
-                  v-for="attribute in attributes.main[index]"
-                  class="grid gap-[8px]"
+                  v-for="(name, key, attrIndex) in attributeMeta"
+                  class="flex flex-col gap-[8px]"
                 >
-                  <div class="desktop:hidden text-quaternary font-normal">{{ attribute.name }}</div>
-                  <div>{{ attribute.value }}</div>
+                  <div class="desktop:hidden text-quaternary font-normal">
+                    {{ name }}
+                  </div>
+                  <div>
+                    {{ attributeValues[attrIndex][productIndex] }}
+                  </div>
                 </div>
               </div>
             </div>
@@ -241,13 +263,26 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 }
 
 .compare-slider {
-  margin-top: 16px;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: calc(50% - 6px);
+  margin-top: 20px;
+  overflow-wrap: anywhere;
+
+  @variant desktop {
+    grid-auto-columns: calc(25% - 16px);
+    margin-top: 32px;
+  }
 }
 
 .compare-col {
   display: grid;
-  gap: 0;
+  gap: 28px;
   font-weight: 600;
+  width: auto;
+  grid-template-rows: subgrid;
+  grid-template-columns: 100%;
+  grid-row: span v-bind(Object.keys(attributeMeta).length);
 }
 
 .compare-col:first-child {
@@ -257,9 +292,5 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
   @variant max-desktop {
     display: none;
   }
-}
-
-.compare-col > div {
-  padding-block: 14px;
 }
 </style>
