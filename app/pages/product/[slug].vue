@@ -9,25 +9,29 @@ const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
 
-const currentColor = ref(null)
+const currentColor = ref(parseInt(variant_id))
 
-const { data: product } = await useAPI(`/products/${slug}`)
+const { data: product } = await useAPI(`/products/${slug}`, { query: { variant_id: currentColor } })
 const { data: similar } = await useAPI(`/products/${slug}/similar`)
 
-const productData = product.value.data
+const productData = computed(() => product.value.data)
 const similarData = similar.value.data
 
-const title = productData.name
+const title = productData.value.name
 
 useHead({ title })
 
-currentColor.value = parseInt(variant_id) || productData.colors?.find((color) => color.is_default)?.variant_id
+if (!currentColor.value) {
+  currentColor.value = productData.value.colors?.find((color) => color.is_default)?.variant_id
+}
 
-const currentColorData = computed(() => productData.colors?.find((color) => currentColor.value === color.variant_id))
+const currentColorData = computed(() => productData.value.colors?.find((color) => currentColor.value === color.variant_id))
 
 watch(
   currentColor,
-  (id) => window.history.pushState({}, '', `${window.location.pathname}?variant_id=${id}`)
+  (id) => {
+    window.history.pushState({}, '', `${window.location.pathname}?variant_id=${id}`)
+  }
 )
 
 const targetSet = ref(false)
@@ -41,20 +45,20 @@ const tabs = {
 
 const currentTab = ref(Object.keys(tabs)[0])
 
-const attributes = Object.fromEntries(productData.attributes.map((item) => [item.group, item.items]))
+const attributes = Object.fromEntries(productData.value.attributes.map((item) => [item.group, item.items]))
 
-const isFavorite = ref(productData.is_favorite)
-const isInComparison = ref(productData.is_in_comparison)
+const isFavorite = ref(productData.value.is_favorite)
+const isInComparison = ref(productData.value.is_in_comparison)
 
 function toggleFavorite() {
-  useAPI(`/favorites/${productData.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
+  useAPI(`/favorites/${productData.value.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
     .then(({data}) => {
       isFavorite.value = !isFavorite.value
     })
 }
 
 function toggleComparison() {
-  useAPI(`/comparison/${productData.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
+  useAPI(`/comparison/${productData.value.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
     .then(({data}) => {
       isInComparison.value = !isInComparison.value
     })

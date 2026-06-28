@@ -61,7 +61,7 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       }"
     >
       <img
-        :src="image"
+        :src="currentColorData?.image || image"
         class="relative size-full object-contain z-9"
         alt=""
       >
