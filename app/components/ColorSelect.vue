@@ -24,7 +24,7 @@ const currentColor = defineModel()
       :key="color.id"
       :class="{
         'swatch': true,
-        'selected': currentColor === color.id,
+        'selected': currentColor === color.variant_id,
         'border': color.hex === '#FFFFFF',
       }"
       :style="{
@@ -32,10 +32,10 @@ const currentColor = defineModel()
         '--bg': color.hex,
       }"
       :title="color.name"
-      @click="currentColor = color.id"
+      @click="currentColor = color.variant_id"
     >
       <svg
-        v-show="currentColor === color.id"
+        v-show="currentColor === color.variant_id"
         class="swatch-checkmark"
         width="22"
         height="22"

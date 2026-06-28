@@ -5,7 +5,9 @@ import DownloadItem from "@/components/DownloadItem.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import {formatCurrency} from "@/assets/js/funcs";
 
-const { slug } = useRoute().params
+const route = useRoute()
+const { slug } = route.params
+const { variant_id } = route.query
 
 const currentColor = ref(null)
 
@@ -19,9 +21,14 @@ const title = productData.name
 
 useHead({ title })
 
-currentColor.value = productData.colors?.find((color) => color.is_default)?.id
+currentColor.value = parseInt(variant_id) || productData.colors?.find((color) => color.is_default)?.variant_id
 
-const currentColorData = computed(() => productData.colors?.find((color) => currentColor.value === color.id))
+const currentColorData = computed(() => productData.colors?.find((color) => currentColor.value === color.variant_id))
+
+watch(
+  currentColor,
+  (id) => window.history.pushState({}, '', `${window.location.pathname}?variant_id=${id}`)
+)
 
 const targetSet = ref(false)
 const activeImage = ref(0)

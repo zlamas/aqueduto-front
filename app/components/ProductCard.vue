@@ -45,9 +45,9 @@ function toggleComparison() {
     })
 }
 
-const currentColor = ref(props.colors?.find((color) => color.is_default)?.id)
+const currentColor = ref(props.colors?.find((color) => color.is_default)?.variant_id)
 
-const currentColorData = computed(() => props.colors?.find((color) => currentColor.value === color.id))
+const currentColorData = computed(() => props.colors?.find((color) => currentColor.value === color.variant_id))
 </script>
 
 <template>

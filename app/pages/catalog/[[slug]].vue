@@ -15,7 +15,7 @@ const productsParams = ref({
   per_page: 24,
 })
 
-const slug = useRoute().params.slug
+const { slug } = useRoute().params
 
 if (slug) {
   productsParams.value.category = slug
@@ -79,7 +79,7 @@ function updateCategory(newCategory) {
   delete productsParams.value.price_max
   productsParams.value.category = newCategory
   resetProducts()
-  window.history.pushState({}, null, `/catalog/${newCategory}`)
+  window.history.pushState({}, '', `/catalog/${newCategory}`)
 }
 
 function applyPriceRange() {
