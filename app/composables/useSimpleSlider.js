@@ -1,10 +1,14 @@
-export default function useSimpleSlider(container) {
+export default function useSimpleSlider(refs){
+  const containers = computed(() =>
+    Array.isArray(refs.value) ? refs.value : [refs.value]
+  )
+
   function scrollLeft() {
-    container.value.scrollBy({ left: -1 })
+    containers.value.forEach((container) => container.scrollBy({ left: -1 }))
   }
 
   function scrollRight() {
-    container.value.scrollBy({ left: 1 })
+    containers.value.forEach((container) => container.scrollBy({ left: 1 }))
   }
 
   return { scrollLeft, scrollRight }

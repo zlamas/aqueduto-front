@@ -75,8 +75,8 @@ function deleteFromComparison(id) {
     })
 }
 
-const compareSliderContainer = useTemplateRef('compare-slider')
-const compareSlider = useSimpleSlider(compareSliderContainer)
+const compareSliderContainers = ref([])
+const compareSlider = useSimpleSlider(compareSliderContainers)
 
 const productsSliderContainer = useTemplateRef('products-slider')
 const productsSlider = useSimpleSlider(productsSliderContainer)
@@ -108,8 +108,8 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
           </div>
 
           <div
-            ref="compare-slider"
             class="slider desktop:py-[32px]"
+            :ref="(el) => compareSliderContainers.push(el)"
           >
             <div class="slider-item desktop:content-start max-desktop:order-1">
               <NuxtLink
@@ -166,7 +166,10 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             <summary class="compare-group-title">
               <h5>Основные характеристики</h5>
             </summary>
-            <div class="slider compare-slider">
+            <div
+              class="slider compare-slider"
+              :ref="(el) => compareSliderContainers.push(el)"
+            >
               <div class="compare-col slider-item">
                 <div v-for="name in attributeMeta">
                   {{ name }}
@@ -270,7 +273,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
   overflow-wrap: anywhere;
 
   @variant desktop {
-    grid-auto-columns: calc(25% - 16px);
+    grid-auto-columns: calc(25% - 18px);
     margin-top: 32px;
   }
 }
