@@ -51,7 +51,8 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
 </script>
 
 <template>
-  <div
+  <NuxtLink
+    :to="`/product/${slug}`"
     ref="product-card"
     class="slider-item group/card grid-rows-[auto_1fr] text-primary rounded-[28px] hover:shadow-[0_6px_24px_#0000001F]">
     <div
@@ -76,7 +77,7 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       </div>
       <button
         class="absolute max-desktop:bottom-[8px] max-desktop:right-[8px] desktop:top-[16px] desktop:right-[16px] desktop:invisible group-hover/card:visible bg-[#F8FAFC] rounded-full p-[8px] z-99"
-        @click="toggleFavorite"
+        @click.prevent="toggleFavorite"
       >
         <img
           v-if="isFavorite"
@@ -92,16 +93,16 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       <button
         v-if="compareButton"
         class="button-rounded absolute bottom-[16px] right-[16px] invisible group-hover/card:visible bg-[#1E293B] text-[#FCFCFD] p-[8px_16px] before:content-[url(~/assets/icons/compare-white.svg)] before:leading-0 z-99"
-        @click="toggleComparison"
+        @click.prevent="toggleComparison"
       >
         {{ isInComparison ? 'В сравнении' : 'Сравнить' }}
       </button>
     </div>
 
     <div class="grid gap-[12px] grid-rows-[1fr] desktop:p-[16px] max-desktop:text-center">
-      <NuxtLink :to="`/product/${slug}`" class="self-center font-semibold hover:text-[#2563EB] active:text-[#1D4ED8]">
+      <div class="self-center font-semibold group-hover/card:text-[#2563EB] group-active/card:text-[#1D4ED8]">
         {{ name }}
-       </NuxtLink>
+      </div>
 
       <div class="flex items-center justify-between max-desktop:flex-col gap-[12px] text-[14px]">
         <div class="bg-[#F1F5F9] rounded-full p-[4px_12px] font-medium">
@@ -122,12 +123,13 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
           :colors="colors"
           v-model="currentColor"
           class="ml-auto max-desktop:hidden"
+          @click.prevent
         />
 
         <button
           v-if="compareButton"
           class="bg-[#E9F4F6] rounded-[8px] p-[10px] ml-auto shrink-0 desktop:hidden"
-          @click="toggleComparison"
+          @click.prevent="toggleComparison"
         >
           <img
             v-if="isInComparison"
@@ -142,7 +144,7 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
         </button>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <style scoped>
