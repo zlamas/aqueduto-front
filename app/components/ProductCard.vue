@@ -53,10 +53,10 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
 <template>
   <div
     ref="product-card"
-    class="slider-item group grid-rows-[auto_1fr] text-primary rounded-[28px] hover:shadow-[0_6px_24px_#0000001F]">
+    class="slider-item group/card grid-rows-[auto_1fr] text-primary rounded-[28px] hover:shadow-[0_6px_24px_#0000001F]">
     <div
       :class="{
-        'relative desktop:h-[334px] rounded-[16px] desktop:rounded-[28px] max-desktop:bg-[#F8F8FA] overflow-hidden': true,
+        'group/image relative desktop:h-[334px] rounded-[16px] desktop:rounded-[28px] max-desktop:bg-[#F8F8FA] overflow-hidden': true,
         [`product-${badge}`]: badge,
       }"
     >
@@ -68,14 +68,14 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       <img
         v-if="image_hover"
         :src="image_hover"
-        class="absolute inset-0 size-full object-contain group-hover:z-19"
+        class="absolute inset-0 size-full object-contain group-hover/image:z-19"
         alt=""
       >
       <div v-if="badge" class="absolute top-[8px] left-[8px] desktop:top-[16px] desktop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[12px]/[16px] desktop:text-[14px]/[20px] text-[#FCFCFD] font-semibold p-[4px_10px] desktop:p-[6px_12px] before:content-(--icon) before:leading-0 z-99">
         {{ badge_label }}
       </div>
       <button
-        class="absolute max-desktop:bottom-[8px] max-desktop:right-[8px] desktop:top-[16px] desktop:right-[16px] desktop:invisible group-hover:visible bg-[#F8FAFC] rounded-full p-[8px] z-99"
+        class="absolute max-desktop:bottom-[8px] max-desktop:right-[8px] desktop:top-[16px] desktop:right-[16px] desktop:invisible group-hover/card:visible bg-[#F8FAFC] rounded-full p-[8px] z-99"
         @click="toggleFavorite"
       >
         <img
@@ -91,7 +91,7 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       </button>
       <button
         v-if="compareButton"
-        class="button-rounded absolute bottom-[16px] right-[16px] invisible group-hover:visible bg-[#1E293B] text-[#FCFCFD] p-[8px_16px] before:content-[url(~/assets/icons/compare-white.svg)] before:leading-0 z-99"
+        class="button-rounded absolute bottom-[16px] right-[16px] invisible group-hover/card:visible bg-[#1E293B] text-[#FCFCFD] p-[8px_16px] before:content-[url(~/assets/icons/compare-white.svg)] before:leading-0 z-99"
         @click="toggleComparison"
       >
         {{ isInComparison ? 'В сравнении' : 'Сравнить' }}
