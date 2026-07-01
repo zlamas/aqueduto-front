@@ -33,6 +33,9 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
           v-if="item.media_type === 'video'"
           :src="item.media_url"
           class="absolute size-full inset-0 object-cover"
+          autoplay
+          playsinline
+          muted
         ></video>
 
         <div

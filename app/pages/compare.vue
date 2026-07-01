@@ -75,7 +75,7 @@ function deleteFromComparison(id) {
     })
 }
 
-const compareSliderContainers = ref([])
+const compareSliderContainers = ref(new Set())
 const compareSlider = useSimpleSlider(compareSliderContainers)
 
 const productsSliderContainer = useTemplateRef('products-slider')
@@ -109,7 +109,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div
             class="slider desktop:py-[32px]"
-            :ref="(el) => compareSliderContainers.push(el)"
+            :ref="(el) => compareSliderContainers.add(el)"
           >
             <div class="slider-item desktop:content-start max-desktop:order-1">
               <NuxtLink
@@ -168,7 +168,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             </summary>
             <div
               class="slider compare-slider"
-              :ref="(el) => compareSliderContainers.push(el)"
+              :ref="(el) => compareSliderContainers.add(el)"
             >
               <div class="compare-col slider-item">
                 <div v-for="name in attributeMeta">

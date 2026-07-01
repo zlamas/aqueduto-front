@@ -15,7 +15,7 @@ const title = `Результаты поиска “${query}”`
 useHead({ title })
 
 const categories = {
-  all: { name: 'Все', count: 19 },
+  all: { name: 'Все', count: products.length },
   products: { name: 'Товары', count: products.length },
   manuals: { name: 'Материалы', count: 3 },
   collections: { name: 'Коллекции', count: 2 },
@@ -75,12 +75,15 @@ const manuals = ref([
           </button>
         </div>
 
-        <Dropdown label="Тип товара" />
+        <Dropdown
+          v-show="(selectedCategory === 'all' || selectedCategory === 'products') && products.length"
+          label="Тип товара"
+        />
       </div>
 
       <div class="layout">
         <section
-          v-show="selectedCategory === 'all' || selectedCategory === 'products'"
+          v-show="(selectedCategory === 'all' || selectedCategory === 'products') && products.length"
           class="search-section"
         >
           <h5>Товары</h5>

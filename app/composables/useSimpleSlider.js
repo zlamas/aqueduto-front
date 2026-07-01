@@ -1,6 +1,6 @@
 export default function useSimpleSlider(refs){
   const containers = computed(() =>
-    Array.isArray(refs.value) ? refs.value : [refs.value]
+    refs.value.forEach ? refs.value : [refs.value]
   )
 
   function scrollLeft() {
