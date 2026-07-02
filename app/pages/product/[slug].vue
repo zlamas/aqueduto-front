@@ -9,12 +9,20 @@ const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
 
-const currentColor = ref(parseInt(variant_id))
+const currentColor = ref(variant_id)
 
-const { data: product } = await useAPI(`/products/${slug}`, { query: { variant_id: currentColor } })
+const productData = ref(null)
+
+const { data: product } = await useAPI(`/products/${slug}`, {
+  query: { variant_id: currentColor },
+
+  onResponse({ response }) {
+    productData.value = response._data.data
+  }
+})
 const { data: similar } = await useAPI(`/products/${slug}/similar`)
 
-const productData = computed(() => product.value.data)
+productData.value = product.value.data
 const similarData = similar.value.data
 
 const title = productData.value.name
@@ -25,7 +33,9 @@ if (!currentColor.value) {
   currentColor.value = productData.value.colors?.find((color) => color.is_default)?.variant_id
 }
 
-const currentColorData = computed(() => productData.value.colors?.find((color) => currentColor.value === color.variant_id))
+const currentColorData = computed(
+  () => productData.value.colors?.find((color) => currentColor.value === color.variant_id)
+)
 
 watch(
   currentColor,
