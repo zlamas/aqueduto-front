@@ -18,8 +18,10 @@ useHead({
   ]
 })
 
+let map
+
 function initMap() {
-  let my_map = new ymaps.Map('map', {
+  map = new ymaps.Map('map', {
     center: [dealers[0].latitude, dealers[0].longitude],
     zoom: 16,
   })
@@ -27,11 +29,9 @@ function initMap() {
   let LayoutClass = ymaps.templateLayoutFactory.createClass(`
     <div class="store-balloon {% if properties.is_open %} open {% else %} closed {% endif %}">
       <div class="store-balloon-content">
-        <div class="store-balloon-image">
-          <img src="{{ properties.image }}" alt="">
-          <div class="store-status store-balloon-status"></div>
-          <div class="store-balloon-distance">{{ properties.distance_km }} км</div>
-        </div>
+        {% if properties.image %}
+        <img class="store-balloon-image" src="{{ properties.image }}" alt="">
+        {% endif %}
 
         <div class="store-info">
           <div class="store-name">{{ properties.name }}</div>
@@ -46,6 +46,8 @@ function initMap() {
           <div>пн-пт 10:00-22:00</div>
           <div>сб-вс 10:00-19:00</div>
         </div>
+
+        <div class="store-status"></div>
       </div>
 
       <div class="flex gap-[4px]">
@@ -66,21 +68,43 @@ function initMap() {
     </div>
   `)
 
-  dealers.forEach((dealer) => {
+  dealers.forEach((dealer, index) => {
     let my_placemark = new ymaps.Placemark(
       [dealer.latitude, dealer.longitude],
       dealer,
       {
-        iconLayout: 'default#image',
+        iconLayout: 'default#imageWithContent',
         iconImageHref: '/images/map-marker.svg',
         iconImageSize: [48, 48],
+        iconImageOffset: [-24, 8],
+        hideIconOnBalloonOpen: false,
         balloonLayout: LayoutClass,
       }
     )
 
-    my_map.geoObjects.add(my_placemark)
+    my_placemark.events.add('balloonopen', () => currentLocation.value = index)
+
+    map.geoObjects.add(my_placemark)
   })
 }
+
+const currentLocation = ref(null)
+
+const dealersWrapper = useTemplateRef('dealers-wrapper')
+
+watch(
+  currentLocation,
+  (index) => {
+    const placemark = map.geoObjects.get(index)
+    placemark.balloon.open()
+    map.setCenter([dealers[index].latitude, dealers[index].longitude])
+    dealersWrapper.value.children[index].scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+      container: 'nearest'
+    })
+  }
+)
 
 const tabs = {
  offline: { icon: 'tab-list', title: 'Оффлайн-партнеры' },
@@ -142,21 +166,26 @@ const currentTab = ref('offline')
                 <input class="search-input" type="text" placeholder="Введите название, город или адрес">
               </label>
 
-              <div class="grid gap-[8px] content-start h-full overflow-y-auto scrollbar-none">
+              <div
+                ref="dealers-wrapper"
+                class="grid gap-[8px] content-start h-full overflow-y-auto scrollbar-none"
+              >
                 <div
-                  v-for="dealer in dealers"
+                  v-for="(dealer, index) in dealers"
                   :key="dealer.id"
                   :class="{
                     'store-item': true,
                     'open': dealer.is_open,
                     'closed': !dealer.is_open,
+                    'selected': currentLocation === index
+                  }"
+                  @click="() => {
+                    currentLocation = index
+                    currentTab = 'map'
                   }"
                 >
                   <div class="store-info">
-                    <div class="flex justify-between items-start">
-                      <span class="store-name">{{ dealer.name }}</span>
-                      <span class="store-distance">{{ dealer.distance_km }} км</span>
-                    </div>
+                    <div class="store-name">{{ dealer.name }}</div>
                     <div
                       v-if="dealer.metro"
                       class="store-metro"
@@ -174,7 +203,7 @@ const currentTab = ref('offline')
                     <span class="store-status"></span>
                     <span> · </span>
                     <details class="store-schedule-details">
-                      <summary class="store-schedule-open">Откроется в 8:00</summary>
+                      <summary class="store-schedule-open" @click.stop>Откроется в 8:00</summary>
                       <table class="store-schedule-table">
                         <colgroup>
                           <col class="w-full">
@@ -214,352 +243,6 @@ const currentTab = ref('offline')
                     </details>
                   </div>
                 </div>
-<!--                <div class="store-item closed">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div class="store-metro">Название станции</div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Откроется в 8:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="store-item open">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Закроется в 22:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="store-item open">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div class="store-metro">Название станции</div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Закроется в 22:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="store-item closed">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Откроется в 8:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="store-item open">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div class="store-metro">Название станции</div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Закроется в 22:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--                <div class="store-item open">-->
-<!--                  <div class="store-info">-->
-<!--                    <div class="flex justify-between">-->
-<!--                      <span class="store-name">Название магазина</span>-->
-<!--                      <span class="store-distance">Расстояние</span>-->
-<!--                    </div>-->
-<!--                    <div class="store-metro">Название станции</div>-->
-<!--                    <div>-->
-<!--                      <span class="store-city">Город</span>-->
-<!--                      <span> · </span>-->
-<!--                      <span class="store-address">Адрес (улица, номер дома)</span>-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="store-schedule">-->
-<!--                    <span class="store-status"></span>-->
-<!--                    <span> · </span>-->
-<!--                    <details class="store-schedule-details">-->
-<!--                      <summary class="store-schedule-open">Закроется в 22:00</summary>-->
-<!--                      <table class="store-schedule-table">-->
-<!--                        <colgroup>-->
-<!--                          <col class="w-full">-->
-<!--                          <col>-->
-<!--                        </colgroup>-->
-<!--                        <tbody>-->
-<!--                          <tr>-->
-<!--                            <td>Понедельник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Вторник</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr class="today">-->
-<!--                            <td>Среда</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Четверг</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Пятница</td>-->
-<!--                            <td>08:00 - 22:00</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Суббота</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                          <tr>-->
-<!--                            <td>Воскресенье</td>-->
-<!--                            <td>Закрыто</td>-->
-<!--                          </tr>-->
-<!--                        </tbody>-->
-<!--                      </table>-->
-<!--                    </details>-->
-<!--                  </div>-->
-<!--                </div>-->
               </div>
             </div>
 
@@ -628,430 +311,6 @@ const currentTab = ref('offline')
                 Перейти на сайт
               </NuxtLink>
             </div>
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
-<!--            <div class="distributor-item">-->
-<!--              <div class="flex gap-[12px]">-->
-<!--                <img src="/images/distributor-1.png" alt="" class="distributor-logo">-->
-
-<!--                <div class="grid gap-[4px] flex-1">-->
-<!--                  <div class="flex justify-between">-->
-<!--                    <div class="font-semibold">-->
-<!--                      Сантехника-онлайн-->
-<!--                    </div>-->
-<!--                    <div class="font-medium text-tertiary text-[14px]">-->
-<!--                      пн-вск: 8:00 - 23:00-->
-<!--                    </div>-->
-<!--                  </div>-->
-
-<!--                  <div class="flex items-baseline gap-[4px] text-[14px]">-->
-<!--                    <span>4.0</span>-->
-<!--                    <span class="flex gap-[2px]">-->
-<!--                    <img-->
-<!--                      v-for="i in 5"-->
-<!--                      :key="i"-->
-<!--                      src="~/assets/icons/star.svg"-->
-<!--                      alt=""-->
-<!--                      :class="{-->
-<!--                        'grayscale': i > 4,-->
-<!--                      }"-->
-<!--                    >-->
-<!--                  </span>-->
-<!--                    <span class="text-quaternary">(2896)</span>-->
-<!--                  </div>-->
-<!--                </div>-->
-<!--              </div>-->
-
-<!--              <div class="distributor-tags">-->
-<!--                <div class="distributor-badge shipping-badge-1">Доставка от 650₽</div>-->
-<!--                <div class="distributor-badge shipping-badge-2">Бесплатная доставка в ПВЗ</div>-->
-<!--              </div>-->
-
-<!--              <NuxtLink to="/" class="button-rounded w-full mt-[24px]">Перейти на сайт </NuxtLink>-->
-<!--            </div>-->
           </div>
         </section>
       </div>
@@ -1068,6 +327,17 @@ const currentTab = ref('offline')
   padding: 12px 16px;
   color: var(--color-tertiary);
   font-size: 14px;
+  cursor: pointer;
+}
+
+.store-item:hover {
+  background: #F8FAFC;
+}
+
+.store-item.selected {
+  background: #F8FAFC;
+  outline: 1px solid #3B82F6;
+  outline-offset: -1px;
 }
 
 .open {
@@ -1089,18 +359,6 @@ const currentTab = ref('offline')
   color: var(--color-primary);
   font-size: 16px;
   font-weight: 600;
-}
-
-.store-distance {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  color: var(--color-quaternary);
-}
-
-.store-distance::before {
-  content: url(~/assets/icons/distance.svg);
-  line-height: 0;
 }
 
 .store-metro {
@@ -1145,6 +403,7 @@ const currentTab = ref('offline')
 }
 
 .store-schedule-open {
+  display: inline-flex;
   gap: 2px;
 }
 
@@ -1184,6 +443,7 @@ const currentTab = ref('offline')
   padding: 8px;
   font-family: 'Lato', sans-serif;
   font-size: 14px;
+  translate: -50% -100%;
 }
 
 .store-balloon-content {
@@ -1192,36 +452,10 @@ const currentTab = ref('offline')
 }
 
 .store-balloon-image {
-  position: relative;
-}
-
-.store-balloon-image img {
   width: 100%;
   height: 120px;
   border-radius: 8px;
   object-fit: cover;
-}
-
-.store-balloon-status {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: white;
-  border-radius: 9999px;
-  color: var(--color-primary);
-  font-weight: 500;
-  padding: 2px 12px;
-}
-
-.store-balloon-distance {
-  position: absolute;
-  bottom: 8px;
-  right: 8px;
-  background: white;
-  border-radius: 4px;
-  color: var(--color-primary);
-  font-weight: 600;
-  padding: 4px 8px;
 }
 
 .store-balloon-schedule {
@@ -1269,23 +503,5 @@ const currentTab = ref('offline')
 
 .distributor-badge::before {
   line-height: 0;
-}
-
-.shipping-badge-1 {
-  background: #FFEDD5;
-  color: #C2410C;
-}
-
-.shipping-badge-1::before {
-  content: url(~/assets/icons/shipping-1.svg);
-}
-
-.shipping-badge-2 {
-  background: #D6F1DA;
-  color: #008439;
-}
-
-.shipping-badge-2::before {
-  content: url(~/assets/icons/shipping-2.svg);
 }
 </style>
