@@ -1,12 +1,15 @@
 <script setup>
-defineProps({
+import Dropdown from "@/components/Dropdown.vue";
+import ColorSwatch from "@/components/ColorSwatch.vue";
+
+const props = defineProps({
   colors: {
     type: Array,
     required: true,
   },
   size: {
     type: [Number, String],
-    default: 32,
+    default: 28,
   },
   gap: {
     type: [Number, String],
@@ -18,51 +21,44 @@ const currentColor = defineModel()
 </script>
 
 <template>
-  <div class="flex" :style="{ gap: `${gap}px` }">
-    <button
-      v-for="color in colors"
+  <div class="flex items-center" :style="{ gap: `${gap}px` }">
+    <ColorSwatch
+      v-for="color in colors.slice(0, 4)"
       :key="color.id"
-      :class="{
-        'swatch': true,
-        'selected': currentColor === color.variant_id,
-        'border': color.hex === '#FFFFFF',
-      }"
-      :style="{
-        '--size': `${size}px`,
-        '--bg': color.hex,
-      }"
-      :title="color.name"
+      :color="color"
+      :size="size"
+      :selected="currentColor === color.variant_id"
       @click="currentColor = color.variant_id"
+    />
+
+    <Dropdown
+      v-if="colors.length > 4"
+      content-class="flex flex-wrap gap-[4px] p-[8px] rounded-[16px] border border-neutral-100"
     >
-      <svg
-        v-show="currentColor === color.variant_id"
-        class="swatch-checkmark"
-        width="22"
-        height="22"
-        viewBox="0 0 22 22"
-        fill="none"
-        xmlns="http://www.w3.org/2000/svg"
-      >
-        <path d="M6.1499 11.309L9.60879 14.7679L16.5388 7.8501" stroke-width="2.25" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-    </button>
+      <template #button>
+        <button
+          class="swatch text-neutral-950 text-[12px] font-bold"
+          :style="{
+            '--size': `${size}px`,
+            background: '#BFBFBF',
+          }"
+        >
+          +{{ colors.length - 4 }}
+        </button>
+      </template>
+
+      <ColorSwatch
+        v-for="color in colors.slice(4)"
+        :key="color.id"
+        :color="color"
+        :size="size"
+        :selected="currentColor === color.variant_id"
+        @click="currentColor = color.variant_id"
+      />
+    </Dropdown>
   </div>
 </template>
 
 <style scoped>
-.swatch {
-  width: var(--size);
-  height: var(--size);
-  background: var(--bg);
-  border-color: #CBD5E1;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
 
-.swatch-checkmark {
-  width: 80%;
-  height: 80%;
-  margin: auto;
-  stroke: contrast-color(var(--bg));
-}
 </style>

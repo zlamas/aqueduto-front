@@ -22,7 +22,7 @@ if (pageData.value) {
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main>
     <div class="container" v-html="content"></div>
   </main>
 </template>

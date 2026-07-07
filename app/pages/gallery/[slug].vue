@@ -15,17 +15,59 @@ const title = styleData.title
 
 useHead({ title })
 
+const page = ref(1)
+const perPage = 8
+
+const hotspotCard = useTemplateRef('hotspot-card')
+
 const slideIndex = ref(null)
 const selectedHotspot = ref(null)
 const activeHotspot = ref(null)
 let hoverTimeout = null
 
-function onHotspotHover(hotspot, index) {
+const cardHotspotOffset = 8
+const cardEdgeOffset = 16
+
+function positionCard(button, slideIndex) {
+  nextTick().then(() => {
+    const slideRect = imagesSliderItems.value[slideIndex].getBoundingClientRect()
+    const buttonRect = button.getBoundingClientRect()
+    const cardRect = hotspotCard.value.$el.getBoundingClientRect()
+    let style = {
+      bottom: null,
+      left: null,
+      top: null,
+      right: null,
+    }
+
+    if (buttonRect.left + cardRect.width > slideRect.right - cardEdgeOffset) {
+      style.right = `${cardEdgeOffset}px`
+    } else {
+      style.left = `${buttonRect.left - slideRect.left}px`
+    }
+
+    if (buttonRect.top - cardHotspotOffset - cardRect.height < slideRect.top + cardEdgeOffset) {
+      style.top = `${buttonRect.bottom - slideRect.top + cardHotspotOffset}px`
+    } else {
+      style.bottom = `${slideRect.bottom - buttonRect.top + cardHotspotOffset}px`
+    }
+
+    Object.assign(hotspotCard.value.$el.style, style)
+  })
+}
+
+function closeHotspot() {
+  selectedHotspot.value = null
+  activeHotspot.value = null
+}
+
+function onHotspotHover(button, hotspot, index) {
   if (!activeHotspot.value) {
     hoverTimeout = setTimeout(
       () => {
         selectedHotspot.value = hotspot
         slideIndex.value = index
+        positionCard(button, index)
       },
       1000
     )
@@ -34,20 +76,20 @@ function onHotspotHover(hotspot, index) {
 
 function onHotspotLeave() {
   if (!activeHotspot.value) {
-    selectedHotspot.value = null
+    closeHotspot()
   }
 
   clearTimeout(hoverTimeout)
 }
 
-function onHotspotClick(hotspot, i, j) {
+function onHotspotClick(button, hotspot, i, j) {
   if (activeHotspot.value !== `${i}.${j}`) {
     selectedHotspot.value = hotspot
     slideIndex.value = i
     activeHotspot.value = `${i}.${j}`
+    positionCard(button, i)
   } else {
-    selectedHotspot.value = null
-    activeHotspot.value = null
+    closeHotspot()
   }
 }
 
@@ -60,37 +102,37 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 </script>
 
 <template>
-  <main class="layout pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="layout">
     <section
-      class="hero-banner image-gradient grid desktop:h-[800px] desktop:rounded-[32px] desktop:p-[32px_160px] desktop:shadow-[0_4px_4px_#00000040]"
+      class="hero-banner desktop:hero-banner-large image-gradient"
       :style="{ '--bg': `url(${styleData.hero_image})` }"
     >
-      <Breadcrumb
-        :items="[ { name: 'Галерея', path: '/gallery' }, { name: title } ]"
-        class="place-self-start"
-      />
-      <div class="absolute place-self-center bg-[#00000033] backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
-        <h1 class="text-[#FCFCFD]">
-          {{ styleData.title }}
-        </h1>
-        <p class="text-[#FCFCFD] max-desktop:text-[14px]/[20px]">
-          {{ styleData.description }}
-        </p>
+      <div class="container grid">
+        <Breadcrumb :items="[ { name: 'Галерея', path: '/gallery' }, { name: title } ]" />
+
+        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
+          <h1 class="text-text-inverse">
+            {{ styleData.title }}
+          </h1>
+          <p class="text-text-inverse max-desktop:text-[14px]/[20px]">
+            {{ styleData.description }}
+          </p>
+        </div>
       </div>
     </section>
 
     <div class="container">
       <div class="layout">
         <section>
-          <div class="grid desktop:grid-cols-2">
-            <h2 class="max-w-[500px]">Используемые коллекции</h2>
+          <div class="grid desktop:grid-cols-[auto_830px] gap-[8px]">
+            <h2 class="m-0">Используемые коллекции</h2>
             <p>
               {{ styleData.intro_text }}
             </p>
           </div>
 
-          <div class="grid gap-[16px] mt-[32px] desktop:mt-[40px]">
-            <div class="justify-self-end flex gap-[8px] desktop:hidden">
+          <div class="grid mt-[32px]">
+            <div class="justify-self-end flex gap-[8px] mb-[16px] desktop:hidden">
               <button
                 class="arrow arrow-left"
                 :disabled="imagesSlider.activeItem.value === 1"
@@ -103,52 +145,85 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
               ></button>
             </div>
 
-            <div
-              ref="images-slider"
-              class="slider desktop:flex-wrap"
-            >
+            <div class="relative flex items-center">
               <div
-                v-for="(slide, i) in styleData.images"
-                :key="slide.id"
-                :ref="(el) => imagesSliderItems[i] = el"
-                class="slider-item style-page-item"
-                :style="{
-                  '--bg': `url(${slide.url})`,
-                }"
+                ref="images-slider"
+                class="slider flex-1"
               >
-                <button
-                  v-for="(hotspot, j) in slide.hotspots"
-                  :class="{
-                    'hotspot': true,
-                    'active': activeHotspot === `${i}.${j}`,
-                  }"
-                  :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
-                  @pointerover="onHotspotHover(hotspot, i)"
-                  @pointerleave="onHotspotLeave()"
-                  @click="onHotspotClick(hotspot, i, j)"
-                ></button>
-
                 <div
-                  v-if="i === slideIndex"
-                  v-show="selectedHotspot"
-                  class="absolute grid justify-items-start w-[176px] bg-white rounded-[16px] p-[8px_12px] -translate-x-[8px] -translate-y-[calc(100%+16px)]"
-                  :style="{ left: `${selectedHotspot?.x}%`, top: `${selectedHotspot?.y}%` }"
+                  v-for="(slide, i) in styleData.images"
+                  :key="slide.id"
+                  :ref="(el) => imagesSliderItems[i] = el"
+                  class="slider-item style-page-item"
+                  :style="{ '--bg': `url(${slide.url})` }"
+                  @click="closeHotspot"
                 >
-                  <div class="font-semibold mb-[8px]">
-                    {{ selectedHotspot?.product.name }}
-                  </div>
-                  <div class="bg-[#F1F5F9] rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
-                    {{ selectedHotspot?.product.collection.name }}
-                  </div>
-                  <h6 class="m-0">
-                    {{ formatCurrency(selectedHotspot?.product.price) }}
-                  </h6>
+                  <button
+                    v-for="(hotspot, j) in slide.hotspots"
+                    :class="{
+                      'hotspot': true,
+                      'active': activeHotspot === `${i}.${j}`,
+                    }"
+                    :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
+                    @pointerover="onHotspotHover($event.target, hotspot, i)"
+                    @pointerleave="onHotspotLeave()"
+                    @click.stop="onHotspotClick($event.target, hotspot, i, j)"
+                  ></button>
                 </div>
+
+                <Teleport
+                  :to="imagesSliderItems[slideIndex]"
+                  :disabled="!imagesSliderItems[slideIndex]"
+                >
+                  <NuxtLink
+                    ref="hotspot-card"
+                    :to="`/catalog/${selectedHotspot?.product.slug}`"
+                    :class="{
+                      'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
+                      'invisible': !selectedHotspot,
+                    }"
+                    :style="{
+                      maxWidth: `calc(100% - ${cardEdgeOffset * 2}px)`
+                    }"
+                  >
+                    <img
+                      class="size-[96px] desktop:size-[116px] bg-backdrop rounded-[8px]"
+                      :src="selectedHotspot?.product.image"
+                      alt=""
+                    >
+
+                    <div>
+                      <div class="font-semibold mb-[8px]">
+                        {{ selectedHotspot?.product.name }}
+                      </div>
+                      <div class="w-max bg-neutral-100 rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
+                        {{ selectedHotspot?.product.collection.name }}
+                      </div>
+                      <h6 class="m-0">
+                        {{ formatCurrency(selectedHotspot?.product.price) }}
+                      </h6>
+                    </div>
+
+                    <button class="button button-secondary p-[8px] rounded-[8px] ml-[12px]">
+                      <img src="~/assets/icons/arrow-right.svg" alt="">
+                    </button>
+                  </NuxtLink>
+                </Teleport>
               </div>
 
+              <button
+                class="arrow arrow-left absolute left-0 -translate-x-1/2 max-desktop:hidden"
+                :disabled="imagesSlider.activeItem.value === 1"
+                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
+              ></button>
+              <button
+                class="arrow arrow-right absolute right-0 translate-x-1/2 max-desktop:hidden"
+                :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
+                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
+              ></button>
             </div>
 
-            <div class="dot-pagination">
+            <div class="dot-pagination mt-[12px]">
               <div
                 v-for="index in imagesSlider.scrollPointsCount.value"
                 :class="{
@@ -161,26 +236,36 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
           </div>
         </section>
 
-        <section class="grid gap-[24px] desktop:gap-[40px]">
+        <section class="grid gap-[24px] desktop:gap-[32px]">
           <h2 class="m-0">Используемые товары</h2>
 
-          <div class="grid grid-cols-2 grid-rows-[auto_auto] grid-flow-col gap-[4px] bg-[#F1F5F9] p-[12px_16px] desktop:p-[16px_32px] rounded-[16px]">
-            <div class="text-quaternary">Позиций</div>
+          <div class="grid grid-cols-2 grid-rows-[auto_auto] grid-flow-col gap-[4px] bg-neutral-100 p-[12px_16px] desktop:p-[16px_32px] rounded-[16px]">
+            <div class="text-neutral-500">Позиций</div>
             <div class="text-[20px]/[32px] desktop:text-[24px] font-bold">
               {{ styleData.products_summary.count }}
             </div>
-            <div class="text-quaternary">Общая стоимость</div>
+            <div class="text-neutral-500">Общая стоимость</div>
             <div class="text-[20px]/[32px] desktop:text-[24px] font-bold">
               {{ formatCurrency(styleData.products_summary.total_price) }}
             </div>
           </div>
 
-          <div class="product-grid">
-            <ProductCard
-              v-for="product in styleData.products"
-              :key="product.id"
-              v-bind="product"
-            />
+          <div class="grid gap-[16px]">
+            <div class="product-grid">
+              <ProductCard
+                v-for="product in styleData.products.slice(0, page * perPage)"
+                :key="product.id"
+                v-bind="product"
+              />
+            </div>
+
+            <button
+              v-show="page * perPage < styleData.products_summary.count"
+              class="button button-tertiary desktop:mx-auto"
+              @click="page += 1"
+            >
+              Показать еще
+            </button>
           </div>
         </section>
 
@@ -198,25 +283,26 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
               ></button>
             </div>
           </div>
+
           <div
             ref="related-slider"
-            class="slider max-desktop:flex-wrap mt-[24px] desktop:mt-[40px]"
+            class="slider mt-[24px] desktop:mt-[32px]"
           >
             <NuxtLink
               v-for="style in styleData.related_styles"
               :key="style.id"
-              class="slider-item image-gradient style-item"
+              class="slider-item image-gradient style-item image-link"
               :style="{ '--bg': `url(${style.thumbnail})` }"
               :to="`/gallery/${style.slug}`"
               :data-name="style.title"
-            > </NuxtLink>
-<!--            <NuxtLink to="/gallery/style" class="slider-item style-item image-gradient [&#45;&#45;bg:url(/images/style-4.jpg)] max-desktop:basis-full" data-name="Минимализм с характером"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="slider-item style-item image-gradient [&#45;&#45;bg:url(/images/style-11.jpg)]" data-name="Традиции"> </NuxtLink>-->
-<!--            <NuxtLink to="/gallery/style" class="slider-item style-item image-gradient [&#45;&#45;bg:url(/images/style-3.jpg)]" data-name="Неомодерн"> </NuxtLink>-->
+            />
           </div>
-          <button class="button-rounded mt-[16px] w-full desktop:hidden">
+          <NuxtLink
+            to="/gallery"
+            class="button button-tertiary mt-[16px] w-full desktop:hidden"
+          >
             Посмотреть все
-          </button>
+          </NuxtLink>
         </section>
       </div>
     </div>
@@ -227,8 +313,10 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 @reference "~/assets/css/main.css";
 
 @layer components {
-  .style-item {
-    flex-basis: calc(50% - 12px);
+  @variant desktop {
+    .style-item {
+      width: calc(50% - 12px);
+    }
   }
 
   .style-page-item {
@@ -236,33 +324,51 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
     height: 380px;
     width: 100%;
     background: var(--bg) center / cover;
-    border-radius: 36px;
+    border-radius: 32px;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
     @variant desktop {
-      height: 480px;
+      height: 472px;
       width: calc(50% - 12px);
     }
   }
 
   .hotspot {
-    --color: 140, 176, 200;
-    --opacity-inner: 0.6;
-    --opacity-outer: 0.3;
+    --opacity-inner: 0.1;
+    --opacity-outer: 0.7;
+    --border: 1px;
+    --size: 12px;
     position: absolute;
-    width: 24px;
-    height: 24px;
-    background: rgba(var(--color), var(--opacity-inner)) url(~/assets/icons/hotspot.svg) center / 16px no-repeat;
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, var(--opacity-inner));
+    border: var(--border) solid rgba(255, 255, 255, var(--opacity-outer));
     border-radius: 50%;
-    box-shadow: 0 0 0 8px rgba(var(--color), var(--opacity-outer));
     cursor: pointer;
+    transition: 0.2s;
+  }
+
+  .hotspot::after {
+    content: "";
+    display: block;
+    width: var(--size);
+    height: var(--size);
+    background: white;
+    border-radius: 50%;
+    margin: auto;
+    transition: 0.2s;
+  }
+
+  .hotspot:hover,
+  .hotspot.active {
+    --opacity-inner: 0.3;
+    --opacity-outer: 1;
+    --size: 16px;
   }
 
   .hotspot.active {
-    --opacity-inner: 0.8;
-    --opacity-outer: 0.5;
-    rotate: 45deg;
+    --border: 2px;
   }
 }
 </style>

@@ -29,38 +29,36 @@ useHead({ title })
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
-    <div class="max-desktop:px-[16px]">
-      <section class="hero-banner image-gradient grid content-end desktop:content-between h-[220px] desktop:h-[460px] rounded-[20px] desktop:rounded-[32px] p-[16px] desktop:p-[32px_160px_96px] [--bg:url(/images/catalog.jpg)] [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[128px]">
-        <Breadcrumb
-          :items="[ { name: title } ]"
-          class="place-self-start z-9"
-        />
+  <main>
+    <section class="hero-banner image-gradient [--bg:url(/images/catalog.jpg)] [--direction:bottom] desktop:[--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]">
+      <div class="container grid desktop:content-between max-desktop:p-[16px] max-desktop:backdrop-blur-[2px] max-desktop:bg-black/20">
+        <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="max-w-[904px] text-[#FCFCFD]">
-          <h1 class="max-desktop:mb-[36px]">
+        <div class="relative grid content-center desktop:p-[0_160px_64px]">
+          <h1 class="text-text-inverse max-desktop:m-0 max-desktop:text-center">
             Каталог Aqueduto 2026
           </h1>
-          <p class="text-[20px]/[32px] mb-[24px] max-desktop:hidden">
+          <p class="text-white text-[20px]/[32px] mb-[24px] max-desktop:hidden">
             Загрузите наш полный каталог и откройте для себя мир <br> элегантной и надежной сантехники Aqueduto!
           </p>
-          <NuxtLink to="/" class="button-rounded bg-[#7195B5] text-white max-desktop:w-full">
-            Скачать каталог
-           </NuxtLink>
+          <NuxtLink to="/" class="button button-primary p-[14px_28px] justify-self-start max-desktop:absolute bottom-0 max-desktop:w-full">
+            <img src="~/assets/icons/download.svg" alt="">
+            <span>Скачать каталог</span>
+          </NuxtLink>
         </div>
-      </section>
-    </div>
+      </div>
+    </section>
 
     <div class="container">
-      <div class="flex max-desktop:flex-col gap-[16px_24px]">
+      <div class="flex max-desktop:flex-col gap-[24px]">
         <div class="flex desktop:flex-col gap-[4px_12px] desktop:w-[342px] whitespace-nowrap overflow-x-auto scrollbar-none max-desktop:-mx-[16px] max-desktop:px-[16px]">
           <button
             v-for="category in categories"
             :key="category.id"
             :class="{
-              'rounded-full desktop:rounded-[12px] p-[10px_20px] desktop:p-[12px] desktop:text-[24px]/[32px] text-left font-medium': true,
-              'bg-[#F1F5F9] text-tertiary desktop:bg-white desktop:text-secondary desktop:font-semibold': category.slug !== selectedCategory,
-              'bg-[#7195B5] text-white desktop:bg-[#F3F9FA] desktop:text-[#7195B5] desktop:font-bold': category.slug === selectedCategory,
+              'rounded-full desktop:rounded-[16px] p-[10px_16px] desktop:p-[12px_16px] desktop:text-[24px]/[32px] text-left font-medium desktop:font-semibold': true,
+              'text-neutral-600 max-desktop:bg-neutral-100 hover:bg-neutral-100': category.slug !== selectedCategory,
+              'bg-brand-950 text-white desktop:bg-neutral-950': category.slug === selectedCategory,
             }"
             @click="selectedCategory = category.slug"
           >
@@ -80,6 +78,7 @@ useHead({ title })
               :key="item.id"
               :title="item.title"
               :url="item.file_url"
+              :type="type"
             />
           </div>
         </div>

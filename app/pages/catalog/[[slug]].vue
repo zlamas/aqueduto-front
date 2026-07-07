@@ -279,21 +279,23 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
-    <section class="hero-banner grid desktop:h-[600px] desktop:rounded-[32px] desktop:p-[32px_160px] [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]">
-      <Breadcrumb
-        :items="[ { name: title } ]"
-        class="place-self-start z-9"
-      />
-      <HeroSlider
-        :items="banners"
-        :pagination-offset="81"
-      />
-    </section>
+  <main class="pt-[24px]">
+    <div class="max-desktop:px-[16px]">
+      <section
+        v-if="banners?.length"
+        class="hero-banner max-desktop:rounded-[20px] max-desktop:h-[256px] [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]"
+      >
+        <div class="container relative z-9">
+          <Breadcrumb :items="[ { name: title } ]" />
+        </div>
+
+          <HeroSlider :items="banners" />
+      </section>
+    </div>
 
     <div class="container">
       <div class="relative flex items-center -mx-[16px] mb-[24px] desktop:mb-[48px]">
-        <div class="absolute left-0 bg-linear-to-l to-white w-[15%] h-full pointer-events-none"></div>
+        <div class="absolute left-0 bg-linear-to-l to-white w-[6%] h-full pointer-events-none"></div>
         <button
           class="arrow arrow-left absolute left-[16px] max-desktop:hidden"
           @click="categorySlider.scrollLeft"
@@ -301,7 +303,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
         <div
           ref="category-slider"
-          class="slider gap-[8px] desktop:gap-[24px] text-center py-[4px] m-0"
+          class="slider gap-[8px] desktop:gap-[12px] pb-[20px] -mb-[20px] m-0 text-neutral-700 text-[18px] text-center font-medium"
         >
           <div
             v-for="(category, index) in categories"
@@ -312,26 +314,30 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             }"
             @click="updateCategory(category.slug)"
           >
-            <img :src="category.icon" alt="">
-            <span>{{ category.name }}</span>
+            <img
+              class="w-full bg-backdrop rounded-[20px] desktop:h-[192px] object-contain"
+              :src="category.icon"
+              alt=""
+            >
+            <span class="grid items-center h-[64px] desktop:h-[72px]">
+              {{ category.name }}
+            </span>
           </div>
         </div>
 
-        <div class="absolute right-0 bg-linear-to-r to-white w-[15%] h-full pointer-events-none"></div>
+        <div class="absolute right-0 bg-linear-to-r to-white w-[6%] h-full pointer-events-none"></div>
         <button
           class="arrow arrow-right absolute right-[16px] max-desktop:hidden"
           @click="categorySlider.scrollRight"
         ></button>
       </div>
 
-      <div class="flex max-desktop:flex-col justify-between gap-[24px] mb-[24px] desktop:mb-[32px]">
+      <div class="flex max-desktop:flex-col justify-between gap-[24px]">
         <div class="flex gap-[16px] desktop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto overflow-y-hidden">
           <Dropdown
-            bg-color="var(--color-quaternary)"
-            text-color="#FCFCFD"
             label="Сортировка"
             icon-left="sort"
-            icon-right="arrow-down-white"
+            content-class="rounded-[20px] p-[16px]"
           >
             <div class="grid gap-[12px]">
               <label
@@ -355,6 +361,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             <Dropdown
               v-show="getFilterByName('price')"
               label="Цена"
+              content-class="rounded-[20px] p-[16px]"
             >
               <div class="grid gap-[35px] w-[274px]">
                 <div>
@@ -366,15 +373,15 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                     >
                       <div
                         v-if="percent === 100"
-                        class="absolute bottom-full flex justify-center bg-[#3C3C3C] rounded-[5px] text-[12px]/[16px] text-white p-[4px_7px] mb-[7px] after:absolute after:bottom-0 after:transform-[translateY(20%)_scaleX(1.5)_rotate(45deg)] after:size-[16px] after:rounded-[3px] after:bg-inherit"
+                        class="absolute bottom-full flex justify-center bg-neutral-950 rounded-[5px] text-[12px]/[16px] text-white p-[4px_7px] mb-[7px] after:absolute after:bottom-0 after:transform-[translateY(20%)_scaleX(1.5)_rotate(45deg)] after:size-[16px] after:rounded-[3px] after:bg-inherit"
                       >
                         <span class="z-9">{{ formatCurrency(3900) }}</span>
                       </div>
                       <div
                         :class="{
                           'w-[6px] rounded-full': true,
-                          'bg-[#3C3C3C]': percent === 100,
-                          'bg-[#999999]': percent < 100
+                          'bg-brand-600': percent === 100,
+                          'bg-neutral-300': percent < 100
                         }"
                         :style="{
                           height: `${percent}%`
@@ -401,7 +408,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                   </div>
                 </div>
 
-                <div class="flex justify-between text-[#999999]">
+                <div class="flex justify-between text-neutral-500">
                   <label class="grid gap-[2px]">
                     <span>Мин. цена</span>
                     <input
@@ -422,13 +429,13 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
                 <div class="flex gap-[4px] items-center">
                   <button
-                    class="button-rounded bg-[#E6E6E6] p-[10px]"
+                    class="button button-secondary p-[12px]"
                     @click="[minPrice, maxPrice] = priceRange"
                   >
                     <img src="~/assets/icons/trash.svg" alt="">
                   </button>
                   <button
-                    class="button-rounded bg-[#2563EB] text-white flex-1"
+                    class="button button-primary py-[14px] flex-1"
                     @click="applyPriceRange"
                   >
                     Показать {{ priceProductCount }} товаров
@@ -440,6 +447,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             <Dropdown
               v-show="getFilterByName('collection')"
               label="Коллекция"
+              content-class="rounded-[20px] p-[16px]"
             >
               <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
                 <label class="search-field p-[8px_12px]">
@@ -472,6 +480,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             <Dropdown
               v-show="getFilterByName('color')"
               label="Цвет"
+              content-class="rounded-[20px] p-[16px]"
             >
               <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
                 <label class="search-field p-[8px_12px]">
@@ -499,7 +508,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                     <span
                       :class="{
                         'flex size-[24px] rounded-full': true,
-                        'border border-[#CBD5E1]': color.hex === '#FFFFFF'
+                        'border border-neutral-300': color.hex === '#FFFFFF'
                       }"
                       :style="{
                         background: Array.isArray(color.hex) ?
@@ -525,12 +534,14 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             <Dropdown
               v-show="getFilterByName('material')"
               label="Материал"
+              content-class="rounded-[20px] p-[16px]"
             >
             </Dropdown>
 
             <Dropdown
               v-show="getFilterByName('room')"
               label="Комната"
+              content-class="rounded-[20px] p-[16px]"
             >
             </Dropdown>
           </div>
@@ -548,18 +559,19 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
       <div
         v-show="Object.keys(activeFilters).length"
-        class="flex gap-[12px] mb-[24px] desktop:mb-[32px] -mx-[16px] px-[16px] whitespace-nowrap scrollbar-none overflow-x-auto"
+        class="flex gap-[12px] mt-[16px] -mx-[16px] px-[16px] whitespace-nowrap scrollbar-none overflow-x-auto"
       >
         <div
           v-for="(item, filter) in activeFilters"
           :key="filter"
-          class="filter"
+          class="filter-badge"
+          @click="delete productsParams[filter]"
         >
           <div
-            v-show="filter === 'color'"
+            v-if="filter === 'color'"
             :class="{
               'flex size-[20px] rounded-full': true,
-              'border border-[#CBD5E1]': item.hex === '#FFFFFF'
+              'border border-neutral-300': item.hex === '#FFFFFF'
             }"
             :style="{
               background: Array.isArray(item.hex) ?
@@ -568,27 +580,21 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             }"
           ></div>
           <div>{{ item.name }}</div>
-          <button
-            class="cursor-pointer"
-            @click="delete productsParams[filter]"
-          >
-            <img src="~/assets/icons/delete.svg" alt="">
+          <button class="size-[24px]">
+            <img class="m-auto" src="~/assets/icons/filter-delete.svg" alt="">
           </button>
         </div>
       </div>
 
-      <div>
-        <h2 class="mb-[24px] desktop:hidden">Товары</h2>
-        <div
-          ref="product-wrapper"
-          class="product-grid"
-        >
-          <ProductCard
-            v-for="product in products"
-            :key="product.id"
-            v-bind="product"
-          />
-        </div>
+      <div
+        ref="product-wrapper"
+        class="product-grid mt-[32px]"
+      >
+        <ProductCard
+          v-for="product in products"
+          :key="product.id"
+          v-bind="product"
+        />
       </div>
     </div>
   </main>
@@ -598,67 +604,49 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 @reference "~/assets/css/main.css";
 
 .category {
-  display: grid;
-  gap: 8px;
+  gap: 0;
   width: 140px;
   border-radius: 20px;
-  color: var(--color-tertiary);
-  padding: 4px 4px 8px 4px;
+  color: var(--color-neutral-600);
   cursor: pointer;
 
   @variant desktop {
     width: 220px;
-  }
-}
-
-.category img {
-  width: 100%;
-  height: 112px;
-  border-radius: 16px;
-  object-fit: contain;
-
-  @variant max-desktop {
-    background: #F8F8FA;
-    padding: 18px 10px;
-  }
-
-  @variant desktop {
-    height: 140px;
+    scroll-margin-inline: 60px;
   }
 }
 
 .category:hover {
-  background: #F2F4F7;
-  color: var(--color-secondary);
+  color: var(--color-neutral-950);
+  box-shadow: var(--shadow-md);
 }
 
-.category:active {
-  color: #1D4ED8;
-}
-
+.category:active,
 .category.selected {
-  outline: 1px solid;
+  outline: 1px solid var(--color-info-500);
   outline-offset: -1px;
-  color: #8CB0C8;
-  box-shadow: var(--shadow-sm);
+  color: var(--color-brand-950);
+  box-shadow: var(--shadow-lg);
 }
 
-.filter {
+.filter-badge {
   display: flex;
   align-items: center;
-  gap: 4px;
-  border: 1px solid #CBD5E1;
+  gap: 6px;
+  background: var(--color-info-50);
   border-radius: 9999px;
-  color: var(--color-secondary);
-  padding: 10px 16px;
+  color: var(--color-info-600);
+  padding: 8px 12px;
+  font-weight: 500;
   flex-shrink: 0;
+  cursor: pointer;
 }
 
 .price-input {
   width: 88px;
-  background: #E6E6E6;
+  background: var(--color-neutral-100);
   border-radius: 10px;
-  color: #2E2E2E;
+  color: var(--color-neutral-950);
   font-weight: 700;
   padding: 10px;
 }
@@ -666,8 +654,8 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 .range-slider {
   position: relative;
   height: 2px;
-  background: #3C3C3C;
-  margin-top: 12px;
+  background: var(--color-neutral-950);
+  margin-top: 10px;
 }
 
 .range-input {
@@ -678,10 +666,10 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 }
 
 .range-input::-webkit-slider-thumb {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   background: white;
-  border: 2px solid #2E2E2E;
+  border: 2px solid var(--color-neutral-950);
   border-radius: 50%;
   cursor: pointer;
   pointer-events: auto;
@@ -689,10 +677,10 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 }
 
 .range-input::-moz-range-thumb {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   background: white;
-  border: 2px solid #2E2E2E;
+  border: 2px solid var(--color-neutral-950);
   border-radius: 50%;
   cursor: pointer;
   pointer-events: auto;

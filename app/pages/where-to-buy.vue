@@ -1,5 +1,6 @@
 <script setup>
 import {useAPI} from "@/composables/useAPI.js";
+import {getDayOfWeek} from "@/assets/js/funcs.js";
 
 const { data: whereToBuyData } = await useAPI('/where-to-buy')
 
@@ -18,6 +19,8 @@ useHead({
   ]
 })
 
+const today = getDayOfWeek()
+
 let map
 
 function initMap() {
@@ -28,42 +31,47 @@ function initMap() {
 
   let LayoutClass = ymaps.templateLayoutFactory.createClass(`
     <div class="store-balloon {% if properties.is_open %} open {% else %} closed {% endif %}">
-      <div class="store-balloon-content">
-        {% if properties.image %}
-        <img class="store-balloon-image" src="{{ properties.image }}" alt="">
-        {% endif %}
+      {% if properties.image %}
+      <img class="store-balloon-image" src="{{ properties.image }}" alt="">
+      {% endif %}
 
+      <div class="store-balloon-content">
         <div class="store-info">
           <div class="store-name">{{ properties.name }}</div>
-          <div class="text-[#6E6E6E]">
+
+          {% if properties.metro %}
+          <div class="store-metro text-neutral-600">{{ properties.metro }}</div>
+          {% endif %}
+
+          <div class="text-neutral-600">
             <span class="store-city">{{ properties.city }}</span>
             <span> · </span>
             <span class="store-address">{{ properties.address }}</span>
           </div>
         </div>
 
-        <div class="store-balloon-schedule">
-          <div>пн-пт 10:00-22:00</div>
-          <div>сб-вс 10:00-19:00</div>
+        <div class="store-schedule py-[8px]">
+          <span class="store-status"></span>
+          <span> · </span>
+          <span>{{ properties.status_text }}</span>
         </div>
 
-        <div class="store-status"></div>
-      </div>
-
-      <div class="flex gap-[4px]">
-        <a
-         href="tel:{{ properties.phone }}"
-         class="button-rounded gap-[8px] rounded-[8px] border border-#E9F4F6 bg-[#8CB0C8] text-white shadow-sm p-[4px] pr-[16px] flex-1"
-        >
-          <img class="size-[32px] bg-[#F5FAFF] rounded-[5px] p-[5px]" src="/images/phone.svg" alt="">
-          <span class="m-auto">{{ properties.phone }}</span>
-        </a>
-        <a
-          href="{{ properties.website }}"
-          class="button-rounded bg-[#E9F4F6] rounded-[10px] p-[10px]"
-        >
-          <img src="/images/site.svg" alt="">
-        </a>
+        <div class="grid gap-[8px]">
+          <a
+           href="tel:{{ properties.phone }}"
+           class="button button-primary rounded-[10px] p-[10px]"
+          >
+            <img src="/images/phone.svg" alt="">
+            <span>{{ properties.phone }}</span>
+          </a>
+          <a
+            href="{{ properties.website }}"
+            class="button button-secondary rounded-[10px] p-[10px]"
+          >
+            <img src="/images/site.svg" alt="">
+            <span>Сайт магазина</span>
+          </a>
+        </div>
       </div>
     </div>
   `)
@@ -75,8 +83,8 @@ function initMap() {
       {
         iconLayout: 'default#imageWithContent',
         iconImageHref: '/images/map-marker.svg',
-        iconImageSize: [48, 48],
-        iconImageOffset: [-24, 8],
+        iconImageSize: [40, 40],
+        iconImageOffset: [-20, 8],
         hideIconOnBalloonOpen: false,
         balloonLayout: LayoutClass,
       }
@@ -108,27 +116,38 @@ watch(
 
 const tabs = {
  offline: { icon: 'tab-list', title: 'Оффлайн-партнеры' },
- map: { icon: 'tab-globe' },
- online: { icon: 'tab-location' },
+ online: { icon: 'tab-globe', title: 'Онлайн-партнеры' },
+ map: { icon: 'tab-location', title: 'Карта' },
 }
 
 const currentTab = ref('offline')
+
+const days = {
+  monday: 'Понедельник',
+  tuesday: 'Вторник',
+  wednesday: 'Среда',
+  thursday: 'Четверг',
+  friday: 'Пятница',
+  saturday: 'Суббота',
+  sunday: 'Воскресенье'
+}
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="pt-[24px] desktop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
-        class="mb-[64px]"
+        class="mb-[32px]"
+        :light="true"
       />
 
-      <div class="layout max-desktop:gap-[16px]">
+      <div class="grid gap-[16px] desktop:gap-[64px]">
         <section>
-          <h1 class="desktop:mb-[40px]">{{ title }}</h1>
+          <h1 class="desktop:mb-[32px]">{{ title }}</h1>
 
-          <div class="flex items-center gap-[12px] bg-[#FFF7ED] border-2 border-[#FED7AA] rounded-[16px] p-[16px]">
-            <img class="size-[24px]" src="~/assets/icons/error.png" alt="">
+          <div class="flex items-center gap-[12px] bg-warning-50 border-2 border-warning-100 text-neutral-800 rounded-[16px] p-[16px]">
+            <img class="size-[24px]" src="~/assets/icons/warning.svg" alt="">
             <span class="text-[14px]">
               {{ warning }}
             </span>
@@ -139,14 +158,14 @@ const currentTab = ref('offline')
               v-for="(tab, id) in tabs"
               :key="id"
               :class="{
-                'flex gap-[4px] items-center rounded-full p-[8px_16px] text-[14px] font-medium shrink-0': true,
-                'bg-[#F1F5F9] text-tertiary': id !== currentTab,
-                'bg-[#7195B5] text-white': id === currentTab,
+                'button rounded-full p-[8px_16px] text-[14px] font-medium': true,
+                'button-secondary': id !== currentTab,
+                'bg-brand-950 text-white': id === currentTab,
               }"
               @click="currentTab = id"
             >
-              <img :src="`/images/${tab.icon}.svg`" alt="">
-              <span v-if="tab.title">
+              <img :src="`/images/${tab.icon}${id === currentTab ? '-selected' : ''}.svg`" alt="">
+              <span v-show="id === currentTab">
                 {{ tab.title }}
               </span>
             </button>
@@ -154,16 +173,16 @@ const currentTab = ref('offline')
 
           <div
             v-show="currentTab !== 'online'"
-            class="flex gap-[24px] h-[764px] mt-[16px] desktop:mt-[24px]"
+            class="flex gap-[24px] mt-[16px] desktop:mt-[24px]"
           >
             <div
               :class="{
-                'grid gap-[16px] content-start w-[446px] bg-[#F1F5F9] rounded-[28px] p-[12px]': true,
+                'grid gap-[16px] content-start h-[764px] desktop:w-[464px] bg-neutral-100 rounded-[28px] p-[12px]': true,
                 'max-desktop:hidden': currentTab !== 'offline'
               }"
             >
               <label class="search-field w-full bg-white px-[12px]">
-                <input class="search-input" type="text" placeholder="Введите название, город или адрес">
+                <input class="search-input" type="text" placeholder="Введите название/город/адрес">
               </label>
 
               <div
@@ -202,41 +221,25 @@ const currentTab = ref('offline')
                   <div class="store-schedule">
                     <span class="store-status"></span>
                     <span> · </span>
-                    <details class="store-schedule-details">
-                      <summary class="store-schedule-open" @click.stop>Откроется в 8:00</summary>
+                    <details
+                      v-if="Object.keys(dealer.schedule).length"
+                      class="store-schedule-details"
+                    >
+                      <summary class="store-schedule-open" @click.stop>
+                        {{ dealer.status_text }}
+                      </summary>
                       <table class="store-schedule-table">
                         <colgroup>
                           <col class="w-full">
                           <col>
                         </colgroup>
                         <tbody>
-                          <tr>
-                            <td>Понедельник</td>
-                            <td>08:00 - 22:00</td>
-                          </tr>
-                          <tr>
-                            <td>Вторник</td>
-                            <td>08:00 - 22:00</td>
-                          </tr>
-                          <tr class="today">
-                            <td>Среда</td>
-                            <td>08:00 - 22:00</td>
-                          </tr>
-                          <tr>
-                            <td>Четверг</td>
-                            <td>08:00 - 22:00</td>
-                          </tr>
-                          <tr>
-                            <td>Пятница</td>
-                            <td>08:00 - 22:00</td>
-                          </tr>
-                          <tr>
-                            <td>Суббота</td>
-                            <td>Закрыто</td>
-                          </tr>
-                          <tr>
-                            <td>Воскресенье</td>
-                            <td>Закрыто</td>
+                          <tr
+                            v-for="(hours, day) in dealer.schedule"
+                            :class="{ 'today': today === day }"
+                          >
+                            <td>{{ days[day] }}</td>
+                            <td>{{ hours.open }} - {{ hours.close }}</td>
                           </tr>
                         </tbody>
                       </table>
@@ -246,19 +249,28 @@ const currentTab = ref('offline')
               </div>
             </div>
 
+
             <div
               :class="{
-                'flex-1 rounded-[40px] overflow-hidden': true,
+                'grid gap-[16px] bg-neutral-100 rounded-[28px] desktop:rounded-[40px] overflow-hidden max-desktop:p-[12px] flex-1': true,
                 'max-desktop:hidden': currentTab !== 'map'
               }"
-              id="map"
-            ></div>
+            >
+              <label class="search-field w-full bg-white px-[12px] desktop:hidden">
+                <input class="search-input" type="text" placeholder="Введите название/город/адрес">
+              </label>
+
+              <div
+                class="rounded-[16px] desktop:rounded-[40px] overflow-hidden max-desktop:h-[487px]"
+                id="map"
+              ></div>
+            </div>
           </div>
         </section>
 
         <section :class="{ 'max-desktop:hidden': currentTab !== 'online' }">
-          <h2 class="mb-[40px] max-desktop:hidden">Онлайн-дистрибьюторы</h2>
-          <div class="flex flex-wrap max-desktop:flex-col desktop:items-center justify-center gap-[24px]">
+          <h2 class="mb-[32px] max-desktop:hidden">Онлайн-дистрибьюторы</h2>
+          <div class="grid desktop:grid-cols-3 items-center gap-[12px] desktop:gap-[24px]">
             <div
               v-for="distributor in online_distributors"
               :key="distributor.id"
@@ -272,14 +284,14 @@ const currentTab = ref('offline')
                     <div class="font-semibold">
                       {{ distributor.name }}
                     </div>
-                    <div class="font-medium text-tertiary text-[14px]">
+                    <div class="font-medium text-neutral-600 text-[14px]">
                       {{ distributor.schedule_text }}
                     </div>
                   </div>
 
                   <div class="flex items-baseline gap-[4px] text-[14px]">
-                    <span>{{ distributor.rating.toFixed(1) }}</span>
-                    <span class="flex gap-[2px]">
+                    <span class="font-semibold">{{ distributor.rating.toFixed(1) }}</span>
+                    <span class="flex gap-[3px]">
                       <img
                         v-for="i in 5"
                         :key="i"
@@ -290,12 +302,12 @@ const currentTab = ref('offline')
                         }"
                       >
                     </span>
-                    <span class="text-quaternary">({{ distributor.reviews_count }})</span>
+                    <span class="text-neutral-500">({{ distributor.reviews_count }})</span>
                   </div>
                 </div>
               </div>
 
-              <div class="distributor-badges">
+              <div v-if="distributor.badges?.length" class="distributor-badges">
                 <div
                   v-for="badge in distributor.badges"
                   class="distributor-badge"
@@ -307,8 +319,10 @@ const currentTab = ref('offline')
 
               <NuxtLink
                 :to="distributor.website"
-                class="button-rounded w-full mt-[24px]">
-                Перейти на сайт
+                class="button button-secondary w-full mt-[16px] py-[10px]"
+              >
+                <img src="~/assets/icons/site.svg" alt="">
+                <span>Перейти на сайт</span>
               </NuxtLink>
             </div>
           </div>
@@ -319,34 +333,36 @@ const currentTab = ref('offline')
 </template>
 
 <style>
+@reference "~/assets/css/main.css";
+
 .store-item {
   display: grid;
   gap: 14px;
   background: white;
   border-radius: 16px;
   padding: 12px 16px;
-  color: var(--color-tertiary);
+  color: var(--color-neutral-600);
   font-size: 14px;
   cursor: pointer;
 }
 
 .store-item:hover {
-  background: #F8FAFC;
+  background: var(--color-neutral-50);
 }
 
 .store-item.selected {
-  background: #F8FAFC;
-  outline: 1px solid #3B82F6;
+  background: var(--color-neutral-50);
+  outline: 1px solid var(--color-info-500);
   outline-offset: -1px;
 }
 
 .open {
-  --status-color: #22C55E;
+  --status-color: var(--color-success-500);
   --status-content: 'Открыто';
 }
 
 .closed {
-  --status-color: #EF4444;
+  --status-color: var(--color-error-500);
   --status-content: 'Закрыто';
 }
 
@@ -356,7 +372,7 @@ const currentTab = ref('offline')
 }
 
 .store-name {
-  color: var(--color-primary);
+  color: var(--color-brand-950);
   font-size: 16px;
   font-weight: 600;
 }
@@ -376,14 +392,14 @@ const currentTab = ref('offline')
   display: flex;
   align-items: center;
   gap: 4px;
-  color: var(--color-secondary);
+  color: var(--color-neutral-700);
 }
 
 .store-schedule {
   display: flex;
   align-items: baseline;
   gap: 4px;
-  color: var(--color-quaternary);
+  color: var(--color-neutral-500);
 }
 
 .store-status::before {
@@ -428,58 +444,50 @@ const currentTab = ref('offline')
 }
 
 .today {
-  color: var(--color-secondary);
+  color: var(--color-neutral-700);
   font-weight: 600;
 }
 
 .store-balloon {
   display: grid;
-  gap: 24px;
-  width: max-content;
-  max-width: 250px;
+  width: 256px;
   background: white;
-  border-radius: 16px;
+  border-radius: 20px;
   box-shadow: var(--shadow-md);
-  padding: 8px;
   font-family: 'Lato', sans-serif;
   font-size: 14px;
   translate: -50% -100%;
+  overflow: hidden;
+
+  @variant desktop {
+    width: 320px;
+  }
 }
 
 .store-balloon-content {
   display: grid;
   gap: 8px;
+  padding: 16px;
 }
 
 .store-balloon-image {
   width: 100%;
-  height: 120px;
-  border-radius: 8px;
+  height: 160px;
   object-fit: cover;
 }
 
-.store-balloon-schedule {
-  display: grid;
-  gap: 4px;
-  color: #999999;
-  font-size: 12px;
-  line-height: 16px;
-}
-
 .distributor-item {
-  max-width: 464px;
   background: white;
-  border: 1px solid #E2E8F0;
+  border: 1px solid var(--color-neutral-100);
   border-radius: 24px;
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-md);
   padding: 16px;
-  flex: 1 30%;
 }
 
 .distributor-logo {
   width: 48px;
   height: 48px;
-  border: 1px solid #CBD5E1;
+  border: 1px solid var(--color-neutral-200);
   border-radius: 8px;
 }
 

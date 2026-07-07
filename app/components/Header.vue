@@ -11,52 +11,42 @@ const mobileMenuOpen = ref(false)
 
 <template>
   <header class="font-medium desktop:shadow-md">
-    <div class="bg-[#29333D] text-[#FCFCFD] text-[14px] max-desktop:hidden">
+    <div class="bg-neutral-900 text-white text-[14px] max-desktop:hidden">
       <div class="container flex justify-between items-center py-[8px]">
-        <div>
-          <div class="flex items-center gap-[4px] cursor-pointer">
-            <img src="~/assets/icons/location.svg" alt="">
-            <span>
-              Москва
-            </span>
-          </div>
+        <div class="flex items-center gap-[4px]">
+          <img src="~/assets/icons/clock.svg" alt="">
+          <span>
+            {{ settings.working_hours }}
+          </span>
         </div>
 
-        <div class="flex gap-[24px]">
-          <div class="flex items-center gap-[4px]">
-            <img src="~/assets/icons/clock.svg" alt="">
-            <span>
-              {{ settings.working_hours }}
-            </span>
-          </div>
-          <NuxtLink
-            class="flex items-center gap-[4px]"
-            :to="`mailto:${settings.email}`"
-          >
-            <img src="~/assets/icons/email.svg" alt="">
-            <span>
-              {{ settings.email }}
-            </span>
-          </NuxtLink>
-        </div>
+        <NuxtLink
+          class="flex items-center gap-[4px]"
+          :to="`mailto:${settings.email}`"
+        >
+          <img src="~/assets/icons/email.svg" alt="">
+          <span>
+            {{ settings.email }}
+          </span>
+        </NuxtLink>
       </div>
     </div>
 
-    <nav class="text-secondary py-[16px]">
+    <nav class="text-neutral-700 py-[16px]">
       <div class="container">
-        <div class="flex justify-between max-desktop:flex-col gap-[16px]">
+        <div class="flex justify-between max-desktop:flex-col gap-[16px_64px]">
           <div class="flex items-center gap-[60px]">
-            <NuxtLink to="/" class="">
+            <NuxtLink to="/" class="shrink-0">
               <img src="~/assets/icons/logo.svg" alt="">
             </NuxtLink>
             <ul
               :class="{
-                'flex gap-[24px_40px] list-none max-desktop:fixed max-desktop:inset-0  max-desktop:flex-col max-desktop:bg-white max-desktop:z-999 max-desktop:p-[16px]': true,
+                'flex gap-[24px_36px] desktop-xl:gap-x-[40px] list-none max-desktop:fixed max-desktop:inset-0  max-desktop:flex-col max-desktop:bg-white max-desktop:z-999 max-desktop:p-[16px]': true,
                 'max-desktop:hidden': !mobileMenuOpen,
               }"
             >
               <button
-                class="absolute top-0 right-0 p-[16px]"
+                class="absolute top-0 right-0 p-[16px] desktop:hidden"
                 @click="mobileMenuOpen = false"
               >
                 <img src="~/assets/icons/delete.svg" alt="">
@@ -68,55 +58,63 @@ const mobileMenuOpen = ref(false)
               </li>
               <li>
                 <Dropdown
-                  label="Галерея"
-                  class="p-0! text-inherit! [--bg:none]!"
-                  content-class="max-desktop:hidden"
+                  content-class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] rounded-[20px] p-[64px_96px] max-desktop:hidden"
                   :hover="true"
-                  to="/gallery"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
+                  <template #button>
                     <NuxtLink
-                      v-for="style in navigation.gallery"
-                      :key="style.id"
-                      :to="`/gallery/${style.slug}`"
-                      class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
+                      to="/gallery"
+                      class="header-dropdown"
                     >
-                      <img
-                        :src="style.thumbnail"
-                        class="size-[56px] rounded-[8px] bg-[#E6E6E6]"
-                        alt=""
-                      >
-                      <div class="font-semibold">{{ style.title }}</div>
+                      Галерея
                     </NuxtLink>
-                  </div>
+                  </template>
+
+                  <NuxtLink
+                    v-for="style in navigation.gallery"
+                    :key="style.id"
+                    :to="`/gallery/${style.slug}`"
+                    class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
+                  >
+                    <img
+                      :src="style.thumbnail"
+                      class="size-[56px] rounded-[8px]"
+                      alt=""
+                    >
+                    <div class="font-semibold">{{ style.title }}</div>
+                  </NuxtLink>
                 </Dropdown>
               </li>
               <li>
                 <Dropdown
-                  label="Каталог"
-                  class="p-0! text-inherit! [--bg:none]!"
-                  content-class="max-desktop:hidden"
+                  content-class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] rounded-[20px] p-[64px_96px] max-desktop:hidden"
                   :hover="true"
-                  to="/catalog"
                 >
-                  <div class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] p-[48px_80px]">
+                  <template #button>
                     <NuxtLink
-                      v-for="category in navigation.catalog"
-                      :key="category.id"
-                      :to="`/catalog/${category.slug}`"
-                      class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
+                      to="/catalog"
+                      class="header-dropdown"
                     >
-                      <img
-                        :src="category.icon"
-                        class="size-[56px] rounded-[8px] bg-[#E6E6E6]"
-                        alt=""
-                      >
-                      <div class="grid gap-[8px]">
-                        <div class="font-semibold">{{ category.name }}</div>
-                        <div class="text-quaternary">{{ category.product_count }} товаров</div>
-                      </div>
+                      Каталог
                     </NuxtLink>
-                  </div>
+                  </template>
+
+                  <NuxtLink
+                    v-for="category in navigation.catalog"
+                    :key="category.id"
+                    :to="`/catalog/${category.slug}`"
+                    class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
+                  >
+                    <img
+                      :src="category.icon"
+                      class="size-[56px] rounded-[8px]"
+                      alt=""
+                    >
+                    <div class="grid gap-[8px]">
+                      <div class="font-semibold">{{ category.name }}</div>
+                      <div class="text-neutral-500">{{ category.product_count }} товаров</div>
+                    </div>
+                  </NuxtLink>
                 </Dropdown>
               </li>
               <li>
@@ -137,7 +135,7 @@ const mobileMenuOpen = ref(false)
             </ul>
           </div>
 
-          <div class="flex gap-[8px] desktop:gap-[32px]">
+          <div class="flex gap-[8px] desktop:gap-[24px] desktop-xl:gap-[32px] justify-end flex-1">
             <button
               class="header-button desktop:hidden"
               @click="mobileMenuOpen = !mobileMenuOpen"
@@ -170,11 +168,20 @@ const mobileMenuOpen = ref(false)
 @reference "~/assets/css/main.css";
 
 @layer components {
+  .header-search {
+    flex: 1;
+    max-width: 280px;
+
+    @variant desktop {
+      font-size: 14px;
+    }
+  }
+
   .header-button {
     display: flex;
     width: 40px;
     height: 40px;
-    background: #F1F5F9;
+    background: var(--color-neutral-100);
     border-radius: 8px;
     flex-shrink: 0;
 
@@ -192,6 +199,17 @@ const mobileMenuOpen = ref(false)
       width: 24px;
       height: 24px;
     }
+  }
+
+  .header-dropdown {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .header-dropdown::after {
+    content: url("/images/arrow-down.svg");
+    line-height: 0;
   }
 }
 </style>

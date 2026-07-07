@@ -1,6 +1,5 @@
 <script setup>
 import Breadcrumb from "@/components/Breadcrumb.vue";
-import ColorSelect from "@/components/ColorSelect.vue";
 import DownloadItem from "@/components/DownloadItem.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import {formatCurrency} from "@/assets/js/funcs";
@@ -44,18 +43,15 @@ watch(
   }
 )
 
-const targetSet = ref(false)
-const activeImage = ref(0)
-
 const tabs = {
   specs: 'Характеристики',
-  documents: 'Инструкции',
-  features: 'Особенности'
+  documents: 'Материалы',
+  features: 'Комплектация'
 }
 
 const currentTab = ref(Object.keys(tabs)[0])
 
-const attributes = Object.fromEntries(productData.value.attributes.map((item) => [item.group, item.items]))
+const attributes = productData.value.attributes.flatMap((group) => group.items)
 
 const isFavorite = ref(productData.value.is_favorite)
 const isInComparison = ref(productData.value.is_in_comparison)
@@ -74,201 +70,163 @@ function toggleComparison() {
     })
 }
 
+const imagesSliderContainer = useTemplateRef('images-slider')
+const imagesSliderItems = ref([])
+const imagesSlider = useSlider(imagesSliderContainer, imagesSliderItems)
+
 const productsSliderContainer = useTemplateRef('products-slider')
 const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="desktop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: 'Каталог', path: '/catalog' }, { name: title } ]"
         class="mb-[48px]"
+        :light="true"
       />
 
-      <div class="flex flex-col desktop:grid desktop:grid-cols-[auto_1fr] gap-[24px] mb-[32px] desktop:mb-[80px]">
-        <div class="flex justify-center relative rounded-[24px] desktop:hidden">
-          <div class="slider">
-            <template v-for="media in productData.gallery">
+      <div class="flex flex-col desktop:grid desktop:grid-cols-2 items-start gap-[24px] mb-[48px] desktop:mb-[64px]">
+        <div class="flex items-center justify-center relative rounded-[24px] desktop:rounded-[40px] overflow-hidden">
+          <button
+            class="arrow arrow-left absolute left-[12px] max-desktop:hidden"
+            :disabled="imagesSlider.activeItem.value === 1"
+            @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
+          ></button>
+          <button
+            class="arrow arrow-right absolute right-[12px] max-desktop:hidden"
+            :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
+            @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
+          ></button>
+
+          <div
+            class="slider"
+            ref="images-slider"
+          >
+            <template v-for="(media, i) in productData.gallery">
               <img
                 v-if="media.media_type === 'image'"
+                :ref="(el) => imagesSliderItems[i] = el"
                 class="slider-item size-full"
                 :src="media.url"
                 alt=""
               >
               <video
                 v-else-if="media.media_type === 'video'"
+                :ref="(el) => imagesSliderItems[i] = el"
                 class="slider-item size-full"
                 :src="media.url"
               ></video>
             </template>
           </div>
 
-          <button
-            class="absolute top-[16px] right-[16px] bg-[#F8FAFC] rounded-full p-[8px]"
-            @click="toggleFavorite"
-          >
-            <img
-              v-if="isFavorite"
-              src="~/assets/icons/favorite-full.svg"
-              alt=""
-            >
-            <img
-              v-else
-              src="~/assets/icons/favorite.svg"
-              alt=""
-            >
-          </button>
-
-          <div class="stripe-pagination absolute bottom-[16px]">
+          <div class="pill-pagination absolute bottom-[16px]">
             <div
-              v-for="index in productData.gallery.length"
-              :key="index"
+              v-for="index in imagesSlider.scrollPointsCount.value"
               :class="{
-                'stripe-pagination-item': true,
-                'active': activeImage === index - 1
+                'pill-pagination-item': true,
+                'active': imagesSlider.activeItem.value === index
               }"
-              @click="() => { targetSet = true; activeImage = index - 1; }"
+              @click="imagesSlider.goToSlide(index)"
             ></div>
           </div>
         </div>
 
-        <div class="flex gap-[12px] desktop:h-[622px] max-desktop:hidden">
-          <div class="relative flex flex-col h-full shrink-0">
-            <button class="gallery-arrow gallery-arrow-up"></button>
-            <div class="absolute top-[50px] bg-linear-to-t to-white h-[32px] w-full pointer-events-none"></div>
-
-            <div class="flex flex-col flex-1 p-[8px_4px] gap-[8px] overflow-y-auto scrollbar-none">
-              <template v-for="(media, index) in productData.gallery">
-                <img
-                  v-if="media.media_type === 'image'"
-                  :key="index"
-                  :class="{
-                     'gallery-preview': true,
-                     'selected': activeImage === index
-                   }"
-                  @click="activeImage = index" :src="media.url" alt="">
-                <video
-                  v-else-if="media.media_type === 'video'"
-                  class="slider-item size-full"
-                  :src="media.url"
-                ></video>
-              </template>
-            </div>
-
-            <div class="absolute bottom-[50px] bg-linear-to-b to-white h-[32px] w-full pointer-events-none"></div>
-            <button class="gallery-arrow gallery-arrow-down"></button>
-          </div>
-
-          <div class="relative">
-            <img class="size-full" :src="productData.gallery[activeImage].url" alt="">
-            <div class="absolute top-[16px] right-[16px] flex gap-[8px]">
-              <button
-                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014] shrink-0"
-                @click="toggleComparison"
-              >
-                <img
-                  v-if="isInComparison"
-                  class="size-[24px]"
-                  src="~/assets/icons/trash-white.svg"
-                  alt=""
-                >
-                <img
-                  v-else
-                  class="size-[24px]"
-                  src="~/assets/icons/compare-white.svg"
-                  alt=""
-                >
-              </button>
-              <button
-                class="bg-primary rounded-[8px] p-[8px] shadow-[0_2px_8px_#00000014] shrink-0"
-                @click="toggleFavorite"
-              >
-                <img
-                  v-if="isFavorite"
-                  class="size-[24px]"
-                  src="~/assets/icons/favorite-full-white.svg"
-                  alt=""
-                >
-                <img
-                  v-else
-                  class="size-[24px]"
-                  src="~/assets/icons/favorite-white.svg"
-                  alt=""
-                >
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="grid gap-[24px] desktop:gap-[8px] self-start">
-          <div class="product-block grid gap-[12px_18px]">
-            <h3 class="m-0">
-              {{ productData.name }}
-            </h3>
-            <div class="flex items-center justify-between gap-[12px] text-[14px]">
-              <div class="bg-[#F1F5F9] rounded-full p-[4px_12px] font-medium">
-                {{ productData.collection.name }}
-              </div>
-              <div class="text-quaternary">
-                Артикул {{ currentColorData?.article || productData.article }}
-              </div>
-            </div>
-          </div>
-
-          <div
-            v-if="productData.colors?.length"
-            class="product-block flex items-center justify-between"
-          >
-            <h5 class="m-0">Цветовая гамма</h5>
-            <ColorSelect
-              :colors="productData.colors"
-              v-model="currentColor"
-              size="40"
-              gap="8"
-            />
-          </div>
-
-          <div class="product-block grid gap-[24px] desktop:gap-[14px] text-tertiary">
+        <div class="grid gap-[24px] desktop:gap-[44px]">
+          <div class="grid gap-[24px] desktop:gap-[32px]">
             <div>
-              <h5 class="mb-[7px]">Описание</h5>
+              <h3 class="mb-[8px]">
+                {{ productData.name }}
+              </h3>
+
+              <div class="flex desktop:flex-col-reverse items-center desktop:items-start justify-between gap-[16px] text-[14px]">
+                <div class="bg-neutral-100 rounded-full p-[4px_12px] font-medium">
+                  {{ productData.collection.name }}
+                </div>
+                <div class="text-neutral-500">
+                  Артикул {{ currentColorData?.article || productData.article }}
+                </div>
+              </div>
+            </div>
+
+            <div
+              v-if="productData.colors?.length"
+            >
               <div>
+                <span class="text-neutral-500">Цвет: </span>
+                <span>{{ currentColorData?.name }}</span>
+              </div>
+
+              <div class="flex gap-[8px] overflow-x-auto scrollbar-none mt-[12px] max-desktop:-mx-[16px] max-desktop:px-[16px]">
+                <img
+                  v-for="color in productData.colors"
+                  :key="color.id"
+                  :class="{
+                  'color-preview': true,
+                  'selected': currentColor === color.variant_id
+                }"
+                  :src="color.image"
+                  :alt="color.name"
+                  :title="color.name"
+                  @click="currentColor = color.variant_id"
+                >
+              </div>
+            </div>
+
+            <div>
+              <h5 class="mb-[8px]">Описание</h5>
+              <div class="text-neutral-500">
                 {{ productData.description }}
               </div>
             </div>
-            <div>
-              <h5 class="mb-[7px]">Комплектация</h5>
-              <ul class="grid gap-[4px] list-inside list-disc">
-                <li>Унитаз подвесной</li>
-                <li>Сиденье</li>
-                <li>Комплект креплений для сиденья и монтажа унитаза</li>
-                <li>Гарантийный талон</li>
-                <li>Инструкция</li>
-              </ul>
-            </div>
           </div>
 
-          <div class="product-block flex items-center justify-between max-desktop:hidden">
-            <div>
-              <h4>
-                {{ formatCurrency(currentColorData?.price || productData.price) }}
-              </h4>
-              <div class="text-[14px]/[20px] text-quaternary">
-                Рекоменд. розничная цена
-              </div>
+          <div>
+            <h3 class="m-0">
+              {{ formatCurrency(currentColorData?.price || productData.price) }}
+            </h3>
+            <div class="text-[14px]/[20px] text-neutral-500">
+              Рекоменд. розничная цена
             </div>
-            <NuxtLink
-              :to="productData.buy_url"
-              class="button-rounded w-[260px] bg-[#8CB0C8] text-[#FCFCFD]"
-            >
-              Купить у партнеров
-             </NuxtLink>
+
+            <div class="flex flex-wrap gap-[8px] mt-[16px]">
+              <NuxtLink
+                :to="productData.buy_url"
+                class="button button-primary py-[12px] leading-[24px] w-full"
+              >
+                Купить у партнеров
+              </NuxtLink>
+
+              <button
+                class="button button-secondary py-[12px] leading-[24px] flex-1 whitespace-nowrap"
+                @click="toggleFavorite"
+              >
+                <img class="size-[20px]" src="~/assets/icons/favorite.svg" alt="">
+                <span>
+                  {{ isFavorite ? 'В избранном' : 'В “Избранное”' }}
+                </span>
+              </button>
+
+              <button
+                class="button button-secondary py-[12px] leading-[24px] flex-1 whitespace-nowrap"
+                @click="toggleComparison"
+              >
+                <img class="size-[20px]" src="~/assets/icons/compare.svg" alt="">
+                <span class="max-desktop:hidden">
+                  {{ isInComparison ? 'В сравнении' : 'Добавить к сравнению' }}
+                </span>
+                <span class="desktop:hidden">
+                  {{ isInComparison ? 'В сравнении' : 'К сравнению' }}
+                </span>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <section class="grid gap-[24px] mb-[64px]">
-        <div class="flex gap-[8px] desktop:gap-[32px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto">
+      <section class="grid gap-[16px] desktop:gap-[32px] mb-[64px] desktop:mb-[128px]">
+        <div class="flex desktop:justify-center gap-[8px] desktop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto">
           <button
             v-for="(name, id) in tabs"
             :key="id"
@@ -284,125 +242,15 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
         <div
           v-show="currentTab === 'specs'"
-          class="grid gap-[24px] desktop:grid-cols-2 items-start"
+          class="spec-list"
         >
-          <div class="grid gap-[24px]">
-            <div
-              v-if="'main' in attributes"
-              class="specs-block"
-            >
-              <h5>Основные характеристики</h5>
-              <div class="spec-rows">
-                <div
-                  v-for="(spec, i) in attributes.main"
-                  :key="spec.key"
-                  class="spec-row"
-                >
-                  <span class="spec-name">{{ spec.name }}</span>
-                  <span class="spec-value">{{ spec.value }}</span>
-                </div>
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Артикул</span>-->
-<!--                  <span class="spec-value">OVO0110</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Коллекция</span>-->
-<!--                  <span class="spec-value">OVO</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Цвет</span>-->
-<!--                  <span class="spec-value">Белый глянцевый</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Форма</span>-->
-<!--                  <span class="spec-value">Округлая</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Материал корпуса</span>-->
-<!--                  <span class="spec-value">Санфарфор</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Покрытие</span>-->
-<!--                  <span class="spec-value">Антибактериальное</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Тип установки</span>-->
-<!--                  <span class="spec-value">Подвесной</span>-->
-<!--                </div>-->
-<!--                <div class="spec-row">-->
-<!--                  <span class="spec-name">Гарантия</span>-->
-<!--                  <span class="spec-value">15 лет</span>-->
-<!--                </div>-->
-              </div>
-            </div>
-
-            <div class="specs-block">
-              <h5>Размеры и вес</h5>
-              <div class="spec-rows">
-                <div class="spec-row">
-                  <span class="spec-name">Размеры товара <span class="max-desktop:hidden">(Д x Ш x В)</span></span>
-                  <span class="spec-value">525x360x320 мм</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Вес товара</span>
-                  <span class="spec-value">26.5 кг</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Размеры упаковки <span class="max-desktop:hidden">(Д x Ш  В)</span></span>
-                  <span class="spec-value">545x450x420 мм</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Вес в упаковке</span>
-                  <span class="spec-value">30.5 кг</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="grid gap-[24px]">
-            <div class="specs-block">
-              <h5>Смыв и функции</h5>
-              <div class="spec-rows">
-                <div class="spec-row">
-                  <span class="spec-name">Организация сливного потока</span>
-                  <span class="spec-value">Традиционная</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Смыв</span>
-                  <span class="spec-value">Прямой</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Режим слива</span>
-                  <span class="spec-value">Определяется инсталляцией</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Функции</span>
-                  <span class="spec-value">Антивсплеск, микролифт</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="specs-block">
-              <h5>Монтаж и подключение</h5>
-              <div class="spec-rows">
-                <div class="spec-row">
-                  <span class="spec-name">Выпуск в канализацию</span>
-                  <span class="spec-value">Горизонтальный</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Подвод воды</span>
-                  <span class="spec-value">Определяется инсталляцией</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Смывной бачок</span>
-                  <span class="spec-value">Скрытый</span>
-                </div>
-                <div class="spec-row">
-                  <span class="spec-name">Инсталляция в комплекте</span>
-                  <span class="spec-value">Нет</span>
-                </div>
-              </div>
-            </div>
+          <div
+            v-for="spec in attributes"
+            :key="spec.key"
+            class="spec-row"
+          >
+            <span class="spec-name">{{ spec.name }}</span>
+            <span class="spec-value">{{ spec.value }}</span>
           </div>
         </div>
 
@@ -414,11 +262,12 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             v-for="document in productData.documents"
             :title="document.title"
             :url="document.url"
+            :type="document.type"
           />
         </div>
 
         <div v-show="currentTab === 'features'">
-          <ul class="grid gap-[4px] list-inside list-disc text-secondary">
+          <ul class="grid gap-[4px] list-inside list-disc text-neutral-700">
             <li>Безободковая конструкция для максимальной гигиены и лёгкой очистки</li>
             <li>Быстросъёмное сиденье из высококачественного дюропласта с функцией плавного закрывания (микролифт)</li>
             <li>Антигрязевое покрытие, которое отталкивает загрязнения и сохраняет белизну надолго</li>
@@ -462,99 +311,87 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 <style scoped>
 @reference "~/assets/css/main.css";
 
-.product-block {
-  @variant desktop {
-    border: 1px solid #F8FAFC;
-    border-radius: 24px;
-    box-shadow: 0 2px 4px #0000000F;
-    padding: 18px 24px;
-  }
+.color-preview {
+  width: 80px;
+  height: 80px;
+  border: 2px solid var(--color-neutral-200);
+  border-radius: 12px;
+  background: var(--color-backdrop);
+  padding: 12px;
+  cursor: pointer;
 }
 
-.gallery-preview {
-  width: 90px;
-  height: 90px;
-  border-radius: 13px;
-  background: #E6E6E6;
-}
-
-.gallery-preview.selected {
-  outline: 3px solid #A1A1A1;
-  outline-offset: -3px;
-}
-
-.gallery-arrow {
-  width: 100%;
-  height: 50px;
-  background: url(~/assets/icons/button-down.svg) center no-repeat;
-  flex-shrink: 0;
-}
-
-.gallery-arrow-up {
-  rotate: 180deg;
+.color-preview.selected {
+  background: var(--color-brand-25);
+  border-color: var(--color-brand-600);
 }
 
 .tab {
   @variant max-desktop {
-    background: #F1F5F9;
+    background: var(--color-neutral-100);
     border-radius: 9999px;
-    color: var(--color-tertiary);
-    padding: 10px 20px;
+    color: var(--color-neutral-600);
+    padding: 10px 16px;
   }
 
   @variant desktop {
-    font-size: 28px;
-    line-height: 36px;
+    font-size: 24px;
+    line-height: 32px;
     font-weight: 700;
-    color: var(--color-quaternary);
+    color: var(--color-neutral-500);
+    padding: 10px 12px;
   }
 }
 
 .tab.selected {
   @variant max-desktop {
-    background: #7195B5;
-    color: white;
+    background: var(--color-neutral-300);
+    color: var(--color-neutral-800);
   }
 
   @variant desktop {
-    color: var(--color-primary);
-  }
-}
-
-.specs-block {
-  display: grid;
-  gap: 16px;
-
-  @variant desktop {
-    background: #F1F5F9;
-    border-radius: 24px;
-    padding: 24px;
+    position: relative;
+    color: var(--color-brand-950);
   }
 }
 
-.spec-rows {
-  display: grid;
-  gap: 16px;
+@variant desktop {
+  .tab.selected::after {
+    content: "";
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 2px;
+    width: 100%;
+    background: var(--color-brand-500);
+  }
+}
 
+.spec-list {
   @variant desktop {
-    gap: 12px;
+    columns: 2;
+    gap: 80px;
   }
 }
 
 .spec-row {
   display: flex;
   justify-content: space-between;
+  border-bottom: 1px solid var(--color-neutral-300);
+  padding-block: 16px;
 }
 
 .spec-name {
-  color: var(--color-quaternary);
+  color: var(--color-neutral-500);
 }
 
 .spec-value {
   font-weight: 600;
+  text-align: right;
 
   @variant max-desktop {
-    color: var(--color-secondary);
+    color: var(--color-neutral-700);
   }
 }
 </style>

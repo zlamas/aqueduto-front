@@ -5,20 +5,38 @@ import {useAPI} from "@/composables/useAPI.js";
 
 const onlyDifferences = ref(false)
 const refreshListToggle = ref(false)
+const selectedCategory = ref(null)
+const items = ref([])
 
 const { data: comparisonData } = await useAPI('/comparison', {
-    query: { only_differences: onlyDifferences },
-    watch: [refreshListToggle]
+    query: {
+      only_differences: onlyDifferences,
+      category: selectedCategory
+    },
+    watch: [refreshListToggle],
+
+    onResponse({ response }) {
+      items.value = response._data.data
+    }
 })
 const { data: similar } = await useAPI('comparison/similar')
 
-const items = computed(() => comparisonData.value.data)
+items.value = comparisonData.value.data
 const categories = computed(() => comparisonData.value.categories)
 const similarData = similar.value.data
 
 const title = 'Сравнение'
 
 useHead({ title })
+
+const allCategories = computed(() => [
+  {
+    name: 'Все',
+    slug: null,
+    count: categories.value.reduce((a, b) => a + b.count, 0)
+  },
+  ...categories.value
+])
 
 const attributes = computed(() =>
   items.value.map((item) => item.attributes.flatMap((group) => group.items))
@@ -39,33 +57,6 @@ const attributeValues = computed(() =>
     )
 )
 
-// const itemsGrouped = computed(() =>
-//   items.value.map((item) =>
-//     Object.groupBy(
-//       item.attributes,
-//       ({ group }) => group
-//     )
-//   )
-// )
-//
-// const attributes = computed(() =>
-//   itemsGrouped.value?.length ?
-//     Object.fromEntries(
-//       Object.keys(itemsGrouped.value[0])
-//         .map((group) => [
-//           group,
-//           itemsGrouped.value.flatMap((item) => item[group].map(({ items }) => items))]
-//         )
-//     ) : {}
-// )
-//
-// const attributeMeta = computed(() =>
-//   Object.fromEntries(
-//     Object.entries(attributes.value)
-//       .map(([group, items]) => [group, items[0]])
-//   )
-// )
-
 function deleteFromComparison(id) {
   useAPI(`/comparison/${id}`, { method: 'DELETE' })
     .then(({data}) => {
@@ -75,24 +66,64 @@ function deleteFromComparison(id) {
     })
 }
 
-const compareSliderContainers = ref(new Set())
-const compareSlider = useSimpleSlider(compareSliderContainers)
+const compareSliderContainer = useTemplateRef('compare-slider')
+const compareSlider = useSimpleSlider(compareSliderContainer)
 
 const productsSliderContainer = useTemplateRef('products-slider')
 const productsSlider = useSimpleSlider(productsSliderContainer)
+
+function updateScrollWidth(element) {
+  element.style.setProperty('--container-width', null)
+  nextTick().then(() =>
+    element.style.setProperty('--container-width', element.scrollWidth)
+  )
+}
+
+onMounted(() => updateScrollWidth(compareSliderContainer.value))
+onUpdated(() => updateScrollWidth(compareSliderContainer.value))
+
+let draggedIndex = null
+const dragOverIndex = ref(null)
+
+const onDragStart = (index) => {
+  draggedIndex = index
+}
+
+const onDragEnter = (index) => {
+  if (index !== draggedIndex) {
+    dragOverIndex.value = index
+  }
+}
+
+const onDragLeave = (index) => {
+  if (dragOverIndex.value === index) {
+    dragOverIndex.value = null
+  }
+}
+
+const onDrop = (targetIndex) => {
+  if (draggedIndex === null || draggedIndex === targetIndex) return
+
+  const [moved] = items.value.splice(draggedIndex, 1)
+  items.value.splice(targetIndex, 0, moved)
+
+  draggedIndex = null
+  dragOverIndex.value = null
+}
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="pt-[24px] desktop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
-        class="mb-[64px]"
+        class="mb-[32px]"
+        :light="true"
       />
 
       <div class="layout">
         <section>
-          <div class="flex justify-between items-end mb-[24px]">
+          <div class="flex justify-between items-end mb-[16px] desktop:mb-[32px]">
             <h1 class="m-0">{{ title }}</h1>
 
             <div class="arrows max-desktop:hidden">
@@ -107,94 +138,120 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             </div>
           </div>
 
-          <div
-            class="slider desktop:py-[32px]"
-            :ref="(el) => compareSliderContainers.add(el)"
-          >
-            <div class="slider-item desktop:content-start max-desktop:order-1">
-              <NuxtLink
-                to="/catalog"
-                class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-[#CBD5E1] text-center text-quaternary font-semibold cursor-pointer"
-              >
-                <div>Добавить товар <br> к сравнению</div>
-                <img src="~/assets/icons/compare-add.svg" alt="">
-              </NuxtLink>
-
-              <label class="flex items-center justify-between text-tertiary max-desktop:hidden">
-                <span>Показать только различия</span>
-                <input v-model="onlyDifferences" type="checkbox" class="hidden">
-                <span class="switch">
-                  <span class="switch-knob"></span>
-                </span>
-              </label>
-            </div>
-
-            <div
-              v-for="item in items"
-              :key="item.product.id"
-              class="compare-item slider-item"
-            >
-              <div class="compare-controls">
-                <button
-                  class="p-[8px]"
-                  @click="deleteFromComparison(item.product.id)"
+          <div class="flex flex-wrap gap-[16px] mb-[24px] desktop:mb-[32px]">
+            <button
+              v-for="category in allCategories"
+              :key="category.slug"
+              :class="{
+                'group flex items-center gap-[8px] rounded-full p-[6px] pr-[16px] font-medium': true,
+                'button-secondary hover:bg-neutral-200 active:bg-neutral-300': category.slug !== selectedCategory,
+                'bg-brand-950': category.slug === selectedCategory,
+              }"
+                  @click="selectedCategory = category.slug"
                 >
-                  <img src="~/assets/icons/compare-remove.svg" alt="">
-                </button>
-                <button class="p-[8px] cursor-grab active:cursor-grabbing">
-                  <img src="~/assets/icons/drag.svg" alt="">
-                </button>
-              </div>
-
-              <ProductCard
-                v-bind="item.product"
-                class="w-full"
-                :compare-button="false"
-              />
-            </div>
+              <span
+                :class="{
+                  'p-[4px_12px] bg-white border rounded-full font-bold': true,
+                  'text-neutral-600 border-neutral-300 group-hover:text-neutral-700 group-hover:border-neutral-400 group-active:text-neutral-800 group-active:border-neutral-500': category.slug !== selectedCategory,
+                  'border-transparent text-brand-950': category.slug === selectedCategory
+                }"
+              >
+                {{ category.count }}
+              </span>
+                  <span
+                    :class="{
+                  'text-neutral-600 group-hover:text-neutral-700 group-active:text-neutral-800': category.slug !== selectedCategory,
+                  'text-neutral-25 font-bold': category.slug === selectedCategory
+                }"
+                  >
+                {{ category.name }}
+              </span>
+            </button>
           </div>
 
-          <label class="flex items-center justify-between text-tertiary mt-[18px] desktop:hidden">
-            <span>Показать только различия</span>
-            <input v-model="onlyDifferences" type="checkbox" class="hidden">
-            <span class="switch">
-              <span class="switch-knob"></span>
-            </span>
-          </label>
+          <div
+            ref="compare-slider"
+            class="slider compare-slider"
+          >
+            <div class="compare-col slider-item max-desktop:order-1">
+              <div class="compare-item gap-[32px] content-start mt-[44px]">
+                <NuxtLink
+                  to="/catalog"
+                  class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-neutral-300 text-center text-neutral-400 font-semibold cursor-pointer hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-500 active:bg-neutral-100 active:border-neutral-500 active:text-neutral-600"
+                >
+                  <div>Добавить товар <br> к сравнению</div>
+                  <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M0 24C0 10.7452 10.7452 0 24 0C37.2548 0 48 10.7452 48 24C48 37.2548 37.2548 48 24 48C10.7452 48 0 37.2548 0 24Z" fill="currentColor"/>
+                    <path d="M32.4958 24.0009H15.5252M24.0105 15.5156V32.4862" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </NuxtLink>
 
-          <details class="compare-group" open>
-            <summary class="compare-group-title">
-              <h5>Основные характеристики</h5>
-            </summary>
-            <div
-              class="slider compare-slider"
-              :ref="(el) => compareSliderContainers.add(el)"
-            >
-              <div class="compare-col slider-item">
-                <div v-for="name in attributeMeta">
-                  {{ name }}
+                <div class="show-differences">
+                  <label class="show-differences-label">
+                    <span>Показать только различия</span>
+                    <input v-model="onlyDifferences" type="checkbox" class="hidden">
+                    <span class="switch">
+                      <span class="switch-knob"></span>
+                    </span>
+                  </label>
                 </div>
               </div>
 
               <div
-                v-for="(product, productIndex) in items"
-                :key="product.id"
-                class="compare-col slider-item"
+                v-for="name in attributeMeta"
+                class="max-desktop:hidden"
               >
-                <div
-                  v-for="(name, key, attrIndex) in attributeMeta"
-                  class="flex flex-col gap-[8px]"
-                >
-                  <div class="desktop:hidden text-quaternary font-normal">
-                    {{ name }}
-                  </div>
-                  <div>
-                    {{ attributeValues[attrIndex][productIndex] }}
-                  </div>
+                {{ name }}
+              </div>
+            </div>
+
+            <div
+              v-for="(item, itemIndex) in items"
+              :key="item.product.id"
+              class="compare-col slider-item"
+              draggable="true"
+              @dragstart="onDragStart(itemIndex)"
+              @dragenter.prevent="onDragEnter(itemIndex)"
+              @dragover.prevent
+              @dragleave="onDragLeave(itemIndex)"
+              @drop="onDrop(itemIndex)"
+
+            >
+              <div class="compare-item">
+                <div class="compare-controls">
+                  <button class="compare-button cursor-grab active:cursor-grabbing">
+                    <img src="~/assets/icons/drag.svg" alt="">
+                  </button>
+
+                  <button
+                    class="group compare-button"
+                    @click="deleteFromComparison(item.product.id)"
+                  >
+                    <img class="group-hover:hidden" src="~/assets/icons/compare-remove.svg" alt="">
+                    <img class="not-group-hover:hidden" src="~/assets/icons/compare-remove-full.svg" alt="">
+                  </button>
+                </div>
+
+                <ProductCard
+                  v-bind="item.product"
+                  class="w-full"
+                  :compare-button="false"
+                />
+              </div>
+
+              <div
+                v-for="(name, key, attrIndex) in attributeMeta"
+                class="flex flex-col gap-[8px]"
+              >
+                <div class="desktop:hidden text-neutral-500 font-normal">
+                  {{ name }}
+                </div>
+                <div>
+                  {{ attributeValues[attrIndex][itemIndex] || '-' }}
                 </div>
               </div>
             </div>
-          </details>
+        </div>
         </section>
 
         <section v-if="similarData?.length">
@@ -232,49 +289,15 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 <style scoped>
 @reference "~/assets/css/main.css";
 
-.compare-item {
-  display: grid;
-  gap: 8px;
-
-  @variant max-desktop {
-    grid-template-rows: auto 1fr;
-  }
-}
-
-.compare-controls {
-  display: flex;
-  justify-content: space-between;
-}
-
-.compare-group {
-  margin-top: 32px;
-}
-
-@variant max-desktop {
-  .compare-group-title {
-    justify-content: space-between;
-  }
-
-  .compare-group-title::after {
-    content: url(~/assets/icons/arrow-collapse.svg);
-    line-height: 0;
-  }
-
-  [open] > .compare-group-title::after {
-    rotate: 180deg;
-  }
-}
-
 .compare-slider {
+  position: relative;
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: calc(50% - 6px);
-  margin-top: 20px;
   overflow-wrap: anywhere;
 
   @variant desktop {
     grid-auto-columns: calc(25% - 18px);
-    margin-top: 32px;
   }
 }
 
@@ -285,15 +308,61 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
   width: auto;
   grid-template-rows: subgrid;
   grid-template-columns: 100%;
-  grid-row: span v-bind(Object.keys(attributeMeta).length);
+  grid-row: span v-bind(Object.keys(attributeMeta).length + 1);
 }
 
 .compare-col:first-child {
-  color: var(--color-quaternary);
+  color: var(--color-neutral-500);
   font-weight: 400;
+}
+
+.compare-item {
+  display: grid;
+  margin-bottom: 64px;
+}
+
+.compare-col:not(:first-child) .compare-item {
+  grid-template-rows: auto 1fr;
+}
+
+.compare-controls {
+  display: flex;
+  justify-content: space-between;
+}
+
+.compare-button {
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.compare-button:hover {
+  background: var(--color-neutral-100);
+}
+
+.show-differences {
+  @variant max-desktop {
+    position: absolute;
+    left: 0;
+    width: calc(var(--container-width, 0) * 1px);
+    align-self: end;
+    translate: 0 calc(100% + 24px);
+    padding-inline: 16px;
+    z-index: 9;
+  }
+}
+
+.show-differences-label {
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: var(--color-neutral-600);
 
   @variant max-desktop {
-    display: none;
+    position: sticky;
+    left: 0;
+    width: calc(100vw - 32px);
+    padding-inline: 8px;
   }
 }
 </style>

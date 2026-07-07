@@ -1,5 +1,6 @@
 <script setup>
 import {useAPI} from "@/composables/useAPI.js";
+import Dropdown from "../components/Dropdown.vue";
 
 const { data: contactsData } = await useAPI('/contacts')
 
@@ -15,50 +16,10 @@ let hoverTimeout = null
 
 const selectedLocationDropdown = ref(0)
 
-// const locations = [
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '58.0%', left: '12.3%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '80.8%', left:  '6.2%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '78.4%', left: '11.8%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '75.1%', left: '23.0%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '53.2%', left: '28.3%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '68.2%', left: '38.0%' }
-//   },
-//   {
-//     name: 'Москва и МО',
-//     icon: '/images/coat-of-arms.png',
-//     phones: [ '+7 968 765 83 87', '+7 903 725 20 91' ],
-//     style: { top: '55.6%', left: '69.8%' }
-//   },
-// ]
+function clearLocation() {
+  selectedLocation.value = null
+  activeLocation.value = null
+}
 
 function onLocationHover(location) {
   if (activeLocation.value === null) {
@@ -71,7 +32,7 @@ function onLocationHover(location) {
 
 function onLocationLeave() {
   if (activeLocation.value === null) {
-    selectedLocation.value = null
+    clearLocation()
   }
 
   clearTimeout(hoverTimeout)
@@ -84,21 +45,27 @@ function onLocationClick(location, index) {
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="desktop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
-        class="mb-[64px]"
+        class="mb-[32px]"
+        :light="true"
       />
 
       <section class="text-center">
-        <h1>{{ title }}</h1>
-        <p class="text-tertiary subtitle">
+        <h1 class="mb-[12px]">{{ title }}</h1>
+        <p class="subtitle">
           Готовы помочь вам в любой точке России!
         </p>
 
         <div class="relative max-w-[1200px] mx-auto mt-[64px] max-desktop:hidden">
-          <img class="w-full pointer-events-none" src="/images/map.svg" alt="">
+          <img
+            class="w-full"
+            src="/images/map.svg"
+            alt=""
+            @click="clearLocation"
+          >
 
           <button
             v-for="(location, index) in regions"
@@ -114,14 +81,14 @@ function onLocationClick(location, index) {
 
           <div
             v-show="selectedLocation"
-            class="absolute grid gap-[8px] justify-items-center bg-white border border-[#E2E8F0] rounded-[8px] p-[12px_24px] text-[14px] shadow-lg -translate-x-1/2 -translate-y-[calc(100%+36px)]"
+            class="absolute grid gap-[8px] justify-items-center bg-white border border-neutral-200 rounded-[8px] p-[12px_24px] text-[14px] shadow-lg -translate-x-1/2 -translate-y-[calc(100%+36px)]"
             :style="{ left: `${selectedLocation?.map_x}%`, top: `${selectedLocation?.map_y}%` }"
           >
             <img width="20" :src="selectedLocation?.icon" alt="">
             <div class="font-semibold">
               {{ selectedLocation?.name }}
             </div>
-            <div class="grid gap-[4px] text-secondary text-[12px]/[18px]">
+            <div class="grid gap-[4px] text-neutral-700 text-[12px]/[18px]">
               <div v-for="phone in selectedLocation?.phones">
                 {{ phone }}
               </div>
@@ -130,60 +97,70 @@ function onLocationClick(location, index) {
         </div>
       </section>
 
-      <section class="flex max-desktop:grid items-start gap-[16px_24px] mt-[24px] desktop:mt-[80px]">
+      <section class="flex max-desktop:grid items-start gap-[16px_24px] mt-[24px] desktop:mt-[64px]">
         <div class="contact-block">
           <div class="flex justify-between items-start">
             <img src="~/assets/icons/contact-phone.svg" alt="" class="contact-icon">
-            <select v-model="selectedLocationDropdown">
-              <option
+
+            <Dropdown
+              class="ml-auto"
+              :label="regions[selectedLocationDropdown].name"
+              button-class="rounded-[10px]! px-[12px]"
+              content-class="dropdown-content"
+              :close-on-click="true"
+            >
+              <div
                 v-for="(location, index) in regions"
-                :value="index"
+                class="dropdown-item"
+                @click="selectedLocationDropdown = index"
               >
                 {{ location.name }}
-              </option>
-            </select>
+              </div>
+            </Dropdown>
           </div>
 
           <h6 class="mb-[4px]">
             Позвоните нам
           </h6>
-          <div class="text-quaternary">
-            ПН-ПТ: 10.00 - 19.00
+          <div class="text-neutral-500">
+            {{ general.working_hours }}
           </div>
 
           <div class="grid gap-[8px] mt-[20px]">
             <NuxtLink
               v-for="phone in regions[selectedLocationDropdown].phones"
               :to="`tel:${phone}`"
-              class="button-rounded"
+              class="button button-secondary text-neutral-700 py-[10px]"
             >
               {{ phone }}
              </NuxtLink>
           </div>
         </div>
+
         <div class="contact-block">
           <img src="~/assets/icons/contact-email.svg" alt="" class="contact-icon">
 
           <h6 class="mb-[4px]">
             Почтовый адрес
           </h6>
-          <div class="text-quaternary">
-            Если вам больше нравится писать
+          <div class="text-neutral-500">
+            Получите ответы на почту
           </div>
 
           <div class="grid gap-[8px] mt-[20px]">
-            <NuxtLink :to="`mailto:${general.email}`" class="button-rounded">
+            <NuxtLink :to="`mailto:${general.email}`" class="button button-secondary text-neutral-700 py-[10px]">
               {{ general.email }}
              </NuxtLink>
           </div>
         </div>
+
         <div class="contact-block">
           <img src="~/assets/icons/contact-social.svg" alt="" class="contact-icon">
 
           <h6 class="mb-[4px]">
             Соц. сети
           </h6>
-          <div class="text-quaternary">
+          <div class="text-neutral-500">
             Наши каналы в мессенджерах
           </div>
 
@@ -192,24 +169,25 @@ function onLocationClick(location, index) {
               v-for="link in general.social_links"
               :key="link.type"
               :to="link.url"
-              class="button-rounded"
+              class="button button-secondary text-neutral-700 py-[10px]"
             >
               {{ link.label }}
              </NuxtLink>
           </div>
         </div>
+
         <div class="contact-block">
           <img src="~/assets/icons/contact-service.svg" alt="" class="contact-icon">
 
           <h6 class="mb-[4px]">
             {{ general.service_label }}
           </h6>
-          <div class="text-quaternary">
-            Поможем с любыми вопросами
+          <div class="text-neutral-500">
+            По вопросам эксплуатации
           </div>
 
           <div class="grid gap-[8px] mt-[20px]">
-            <NuxtLink :to="`tel:${general.service_phone}`" class="button-rounded">
+            <NuxtLink :to="`tel:${general.service_phone}`" class="button button-secondary text-neutral-700 py-[10px]">
               {{ general.service_phone }}
              </NuxtLink>
           </div>
@@ -223,25 +201,42 @@ function onLocationClick(location, index) {
 @reference "~/assets/css/main.css";
 
 .map-location {
+  --inner-size: 12px;
+  --middle-size: 7px;
+  --outer-size: 14px;
+  --middle-opacity: 25%;
+  --outer-opacity: 10%;
+
   position: absolute;
-  width: 8px;
-  height: 8px;
-  background: #8CB0C8;
-  box-shadow: 0 0 0 8px #8CB0C833, 0 0 0 16px #8CB0C81A;
+  width: var(--inner-size);
+  height: var(--inner-size);
+  background: var(--color-info-500);
+  box-shadow:
+          0 0 0 var(--middle-size) color-mix(in oklab, var(--color-info-500) var(--middle-opacity), transparent),
+          0 0 0 var(--outer-size) color-mix(in oklab, var(--color-info-500) var(--outer-opacity), transparent);
   border-radius: 50%;
   translate: -50% -50%;
+  transition: 0.2s;
 }
 
-.map-location:hover,
+.map-location:hover {
+  --inner-size: 16px;
+  --middle-size: 8px;
+  --middle-opacity: 30%;
+  --outer-opacity: 12%;
+}
+
 .map-location.active {
-  width: 16px;
-  height: 16px;
-  box-shadow: 0 0 0 6px #8CB0C833, 0 0 0 12px #8CB0C81A;
+  --inner-size: 16px;
+  --middle-size: 14px;
+  --middle-opacity: 30%;
+  --outer-opacity: 15%;
+  background: var(--color-info-600);
 }
 
 .contact-block {
   background: white;
-  border: 1px solid #F3F9FA;
+  border: 1px solid var(--color-neutral-100);
   border-radius: 32px;
   box-shadow: var(--shadow-md);
   padding: 16px;
@@ -253,7 +248,7 @@ function onLocationClick(location, index) {
 }
 
 .contact-icon {
-  background: #E9F4F6;
+  background: var(--color-brand-600);
   border-radius: 12px;
   padding: 12px;
   margin-bottom: 32px;

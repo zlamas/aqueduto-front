@@ -1,19 +1,14 @@
 <script setup>
 const props = defineProps({
-  type: String,
   label: String,
   iconLeft: String,
   iconRight: {
     type: String,
     default: 'arrow-down',
   },
-  bgColor: {
+  buttonClass: {
     type: String,
-    default: 'var(--color-bg-tertiary)'
-  },
-  textColor: {
-    type: String,
-    default: 'var(--color-tertiary)'
+    default: '',
   },
   contentClass: {
     type: String,
@@ -23,7 +18,10 @@ const props = defineProps({
     type: Boolean,
     default: false
   },
-  to: String,
+  closeOnClick: {
+    type: Boolean,
+    default: false
+  }
 })
 
 const button = useTemplateRef('button')
@@ -84,48 +82,46 @@ function onPointerLeave() {
 </script>
 
 <template>
-  <button
+  <div
     ref="button"
-    class="flex gap-[4px] items-center justify-between bg-(--bg) text-(--text) rounded-full p-[10px_16px] before:content-(--icon-left) before:leading-0 after:content-(--icon-right) after:leading-0"
-    :style="{
-      '--bg': bgColor,
-      '--text': textColor,
-      '--icon-left': iconLeft && `url(/images/${iconLeft}.svg)`,
-      '--icon-right': iconRight && `url(/images/${iconRight}.svg)`,
-     }"
     @click="!hover && (open = !open)"
     @pointerenter="onPointerEnter"
     @pointerleave="onPointerLeave"
   >
-    <NuxtLink
-      v-if="to"
-      :to="to"
-      :class="{ 'max-desktop:hidden': iconLeft }"
-    >
-      {{ label }}
-    </NuxtLink>
-    <span
+    <slot v-if="$slots.button" name="button" />
+
+    <button
       v-else
-      :class="{ 'max-desktop:hidden': iconLeft }"
+      :class="`button button-secondary rounded-full ${buttonClass}`"
     >
-      {{ label }}
-    </span>
+      <img v-if="iconLeft" :src="`/images/${iconLeft}.svg`" alt="">
+      <span :class="{ 'max-desktop:hidden': iconLeft }">
+        {{ label }}
+      </span>
+      <img
+        v-if="iconRight"
+        :class="{ 'rotate-180': open }"
+        :src="`/images/${iconRight}.svg`"
+        alt=""
+      >
+    </button>
 
     <Teleport to="body">
       <div
         ref="dropdown"
         :class="{
-          [`absolute top-0 mt-[8px] bg-white p-[16px] rounded-[20px] shadow-md z-999 ${contentClass}`]: true,
+          [`absolute top-0 mt-[8px] bg-white shadow-md z-999 ${contentClass}`]: true,
           'invisible': !open,
         }"
         :style="popupPosition"
         @pointerenter="onPointerEnter"
         @pointerleave="onPointerLeave"
+        @click="closeOnClick && (open = false)"
       >
         <slot />
       </div>
     </Teleport>
-  </button>
+  </div>
 </template>
 
 <style scoped>

@@ -40,24 +40,24 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
 
         <div
           v-if="item.title || item.subtitle || item.cta"
-          class="grid desktop:justify-items-start gap-[16px] max-w-[904px] z-9 max-desktop:text-center max-desktop:bg-[#00000033] max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] max-desktop:p-[24px_12px]"
+          class="grid desktop:justify-items-start gap-[16px] max-w-[904px] z-9 max-desktop:text-center max-desktop:bg-black/20 max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] max-desktop:p-[24px_12px]"
         >
           <h1
             v-if="item.title"
-            class="text-[#FCFCFD] m-0"
+            class="text-text-inverse m-0"
           >
             {{ item.title }}
           </h1>
           <p
             v-if="item.subtitle"
-            class="text-[#FCFCFD] desktop:text-[20px]/[32px] max-desktop:text-[14px]/[20px]"
+            class="text-white desktop:text-[20px]/[32px] max-desktop:text-[14px]/[20px]"
           >
             {{ item.subtitle }}
           </p>
           <NuxtLink
             v-if="item.cta?.text"
             :to="item.cta.url"
-            class="button-rounded"
+            class="button button-secondary"
           >
             {{ item.cta.text }}
            </NuxtLink>
@@ -66,12 +66,12 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
     </div>
 
     <div class="hero-slider-controls">
-      <div class="stripe-pagination">
+      <div class="pill-pagination stripe-pagination">
         <button
           v-for="index in scrollPointsCount"
           :key="index"
           :class="{
-            'stripe-pagination-item': true,
+            'pill-pagination-item stripe-pagination-item': true,
             'active': activeItem === index
           }"
           @click="goToSlide(index)"
@@ -140,7 +140,7 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
     justify-content: center;
 
     @variant desktop {
-      bottom: v-bind(`${paginationOffset}px`);
+      bottom: var(--pagination-offset, 44px);
     }
   }
 

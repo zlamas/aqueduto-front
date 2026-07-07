@@ -14,17 +14,29 @@ const title = `Результаты поиска “${query}”`
 
 useHead({ title })
 
-const categories = {
-  all: { name: 'Все', count: products.length },
-  products: { name: 'Товары', count: products.length },
-  manuals: { name: 'Материалы', count: 3 },
-  collections: { name: 'Коллекции', count: 2 },
-}
+const page = ref(1)
+const perPage = 8
 
-const selectedCategory = ref('all')
+const categories = [
+  { name: 'Товары', slug: 'products', count: products.length },
+  { name: 'Материалы', slug: 'manuals', count: 3 },
+  { name: 'Коллекции', slug: 'collections', count: 2 },
+]
+
+const allCategories = [
+  {
+    name: 'Все',
+    slug: null,
+    count: categories.reduce((a, b) => a + b.count, 0)
+  },
+  ...categories
+]
+
+const selectedCategory = ref(null)
 
 const manuals = ref([
   {
+    type: 'manual',
     name: 'Инструкции',
     items: [
       { title: 'Инструкция по монтажу подвесных унитазов', url: '/' },
@@ -32,6 +44,7 @@ const manuals = ref([
     ]
   },
   {
+    type: 'model3d',
     name: '3D модели',
     items: [
       { title: '3D модели унитазов', url: '/' },
@@ -41,82 +54,92 @@ const manuals = ref([
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="pt-[24px] desktop:pt-[48px]">
     <div class="container">
-      <h1 class="mb-[24px] desktop:mb-[40px]">{{ title }}</h1>
+      <Breadcrumb
+        :items="[ { name: title } ]"
+        class="mb-[32px]"
+        :light="true"
+      />
 
-      <div class="flex max-desktop:flex-col justify-between gap-[24px] mb-[24px] desktop:mb-[32px]">
-        <div class="flex gap-[16px] desktop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto overflow-y-hidden">
-          <button
-            v-for="(category, id) in categories"
+      <h1 class="mb-[24px] desktop:mb-[32px]">{{ title }}</h1>
+
+      <div class="flex gap-[16px] mb-[24px] desktop:mb-[32px] px-[16px] -mx-[16px] overflow-auto scrollbar-none">
+        <button
+          v-for="category in allCategories"
+          :key="category.slug"
+          :class="{
+            'group flex items-center gap-[8px] rounded-full p-[6px] pr-[16px] font-medium': true,
+            'button-secondary hover:bg-neutral-200 active:bg-neutral-300': category.slug !== selectedCategory,
+            'bg-brand-950': category.slug === selectedCategory,
+          }"
+          @click="selectedCategory = category.slug"
+        >
+          <span
             :class="{
-              'flex gap-[6px] rounded-full p-[10px_20px] font-medium': true,
-              'bg-[#F1F5F9]': id !== selectedCategory,
-              'bg-[#7195B5]': id === selectedCategory,
+              'p-[4px_12px] bg-white border rounded-full font-bold': true,
+              'text-neutral-600 border-neutral-300 group-hover:text-neutral-700 group-hover:border-neutral-400 group-active:text-neutral-800 group-active:border-neutral-500': category.slug !== selectedCategory,
+              'border-transparent text-brand-950': category.slug === selectedCategory
             }"
-            @click="selectedCategory = id"
           >
-            <span
-              :class="{
-                'text-tertiary': id !== selectedCategory,
-                'text-white': id === selectedCategory
-              }"
-            >
-              {{ category.name }}
-            </span>
-            <span
-              :class="{
-                'text-quaternary': id !== selectedCategory,
-                'text-[#F1F5F9]': id === selectedCategory
-              }"
-            >
-              {{ category.count }}
-            </span>
-          </button>
-        </div>
-
-        <Dropdown
-          v-show="(selectedCategory === 'all' || selectedCategory === 'products') && products.length"
-          label="Тип товара"
-        />
+            {{ category.count }}
+          </span>
+          <span
+            :class="{
+              'text-neutral-600 group-hover:text-neutral-700 group-active:text-neutral-800': category.slug !== selectedCategory,
+              'text-neutral-25 font-bold': category.slug === selectedCategory
+            }"
+          >
+            {{ category.name }}
+          </span>
+        </button>
       </div>
 
-      <div class="layout">
+      <div class="layout desktop:gap-[64px]">
         <section
-          v-show="(selectedCategory === 'all' || selectedCategory === 'products') && products.length"
+          v-show="(selectedCategory === null || selectedCategory === 'products') && products.length"
           class="search-section"
         >
           <h5>Товары</h5>
+
           <div class="product-grid">
             <ProductCard
-              v-for="product in products"
+              v-for="product in products.slice(0, page * perPage)"
               :key="product.id"
               v-bind="product"
             />
           </div>
+
+          <button
+              v-show="page * perPage < products.length"
+              class="button button-tertiary desktop:mx-auto"
+              @click="page += 1"
+            >
+            Показать еще
+          </button>
         </section>
 
         <section
-          v-show="selectedCategory === 'all' || selectedCategory === 'collections'"
+          v-show="selectedCategory === null || selectedCategory === 'collections'"
           class="search-section"
         >
           <h5>Коллекции</h5>
-          <div class="flex max-desktop:flex-col desktop:flex-wrap justify-center gap-[12px] desktop:gap-[24px]">
+          <div class="bento">
             <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-4.jpg)]" data-name="OVO
-(6 товаров)"> </NuxtLink>
+(6 товаров)"/>
             <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-11.jpg)]" data-name="MACIO
-(6 товаров)"> </NuxtLink>
+(6 товаров)"/>
             <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-3.jpg)]" data-name="FORMA
-(6 товаров)"> </NuxtLink>
+(6 товаров)"/>
             <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-4.jpg)]" data-name="CANO
-(6 товаров)"> </NuxtLink>
+(6 товаров)"/>
             <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-3.jpg)]" data-name="CHUVA
-(6 товаров)"> </NuxtLink>
+(6 товаров)"/>
           </div>
         </section>
 
         <section
-          v-show="selectedCategory === 'all' || selectedCategory === 'manuals'"
+          v-show="selectedCategory === null || selectedCategory === 'manuals'"
           class="search-section"
         >
           <h5>Материалы</h5>
@@ -125,13 +148,14 @@ const manuals = ref([
               v-for="group in manuals"
               class="grid gap-[8px]"
             >
-              <h6 class="m-0 font-semibold text-secondary">
+              <h6 class="m-0 font-semibold text-neutral-700">
                 {{ group.name }}
               </h6>
               <DownloadItem
                 v-for="item in group.items"
                 :title="item.title"
                 :url="item.url"
+                :type="group.type"
               />
             </div>
           </div>
@@ -147,9 +171,5 @@ const manuals = ref([
 .search-section {
   display: grid;
   gap: 24px;
-
-  @variant desktop {
-    gap: 40px;
-  }
 }
 </style>

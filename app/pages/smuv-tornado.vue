@@ -34,6 +34,13 @@ const advantages = [
   },
 ]
 
+const tableData = {
+  'Охват чаши': [ 'Неполное покрытие чаши', 'Полное покрытие чаши' ],
+  'Эффективность': [ 'Требуется повторный смыв', 'Чистота с первого раза' ],
+  'Расход воды': [ 'Повышенный расход воды', 'Экономный расход воды' ],
+  'Уровень шума': [ 'Шумный слив', 'Слив заметно тише' ],
+}
+
 const advantagesSliderContainer = useTemplateRef('advantages-slider')
 const advantagesSliderItems = ref([])
 const advantagesSlider = useSlider(advantagesSliderContainer, advantagesSliderItems)
@@ -43,19 +50,19 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
-  <main class="layout pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
-    <section class="hero-banner image-gradient grid [--bg:url(/images/style-6.jpg)] desktop:h-[800px] desktop:rounded-[32px] desktop:p-[32px_160px] desktop:shadow-[0_4px_4px_#00000040]">
-      <Breadcrumb
-        :items="[ { name: title } ]"
-        class="place-self-start"
-      />
-      <div class="absolute place-self-center bg-[#00000033] backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
-        <h1 class="text-[#FCFCFD]">
-          Смыв торнадо: чистота <br> за одно движение
-        </h1>
-        <p class="text-[#FCFCFD] max-desktop:text-[14px]/[20px]">
-          Мощный поток воды закручивается внутри чаши, обеспечивая быстрое и равномерное очищение без лишнего шума и расхода.
-        </p>
+  <main>
+    <section class="hero-banner hero-banner-large image-gradient [--bg:url(/images/style-6.jpg)] mb-[32px] desktop:mb-[128px]">
+      <div class="container grid">
+        <Breadcrumb :items="[ { name: title } ]" />
+
+        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
+          <h1 class="text-text-inverse">
+            Смыв торнадо: чистота <br> за одно движение
+          </h1>
+          <p class="text-text-inverse max-desktop:text-[14px]/[20px]">
+            Мощный поток воды закручивается внутри чаши, обеспечивая быстрое и равномерное очищение без лишнего шума и расхода.
+          </p>
+        </div>
       </div>
     </section>
 
@@ -63,8 +70,8 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
       <div class="layout">
         <section class="image-aside">
           <div>
-            <h2>Как это работает</h2>
-            <p class="text-secondary">
+            <h2 class="max-desktop:text-center">Как это работает</h2>
+            <p class="text-neutral-600">
               Система торнадо-смыва направляет поток воды по кругу, создавая вихревое движение. Вода охватывает всю поверхность чаши, эффективно удаляя загрязнения даже в труднодоступных местах.
               <br><br>
               В отличие от классического смыва, здесь нет «слепых зон» — чистота достигается быстрее и с меньшим расходом воды.
@@ -73,11 +80,8 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
           <img src="/images/material-1.jpg" alt="">
         </section>
 
-        <section class="grid gap-[24px] desktop:gap-[32px]">
-          <div class="text-center">
-            <h2>Почему это удобно</h2>
-            <p class="text-quaternary font-medium">6 причин выбрать смыв торнадо</p>
-          </div>
+        <section>
+          <h2 class="mb-[24px] desktop:mb-[32px] text-center">Почему это удобно</h2>
 
           <div
             ref="advantages-slider"
@@ -94,12 +98,12 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
               </div>
               <div>
                 <h6>{{ item.title }}</h6>
-                <p>{{ item.description }}</p>
+                <div class="advantage-text">{{ item.description }}</div>
               </div>
             </div>
           </div>
 
-          <div class="dot-pagination">
+          <div class="dot-pagination mt-[12px]">
             <div
               v-for="index in advantagesSlider.scrollPointsCount.value"
               :key="index"
@@ -113,14 +117,35 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <div class="text-center">
-            <h2>Разница в работе смыва</h2>
-            <p class="text-quaternary font-medium">
-              Технология торнадо не просто усиливает поток — она меняет принцип работы смыва. <br> Вместо прямого потока создаётся управляемое движение, которое использует воду максимально эффективно.
+          <div class="text-center mb-[24px] desktop:mb-[32px]">
+            <h2 class="mb-[8px]">Разница в работе смыва</h2>
+            <p class="text-neutral-500 font-medium">
+              Технология “Торнадо” не просто усиливает поток — она меняет принцип работы смыва
             </p>
           </div>
 
-          <div class="table-wrapper mt-[24px] desktop:mt-[32px]">
+          <div class="grid gap-[24px] desktop:hidden">
+            <div
+              v-for="(row, header) in tableData"
+              class="grid gap-[8px]"
+            >
+              <h4>{{ header }}</h4>
+              <div class="tornado-row-point old">
+                <div>
+                  <span class="font-semibold">Обычный: </span>
+                  <span class="text-neutral-600">{{ row[0] }}</span>
+                </div>
+              </div>
+              <div class="tornado-row-point new">
+                <div>
+                  <span class="font-semibold">“Торнадо”: </span>
+                  <span class="text-neutral-600">{{ row[1] }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="table-wrapper max-desktop:hidden">
             <table class="tornado-table">
               <thead>
                 <tr>
@@ -130,55 +155,16 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                 </tr>
               </thead>
               <tbody>
-                <tr>
-                  <td>Охват чаши</td>
+                <tr v-for="(row, header) in tableData">
+                  <td>{{ header }}</td>
                   <td>
                     <div class="tornado-table-point">
-                      Неполное покрытие чаши
+                      {{ row[0] }}
                     </div>
                   </td>
                   <td>
                     <div class="tornado-table-point">
-                      Полное покрытие чаши
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Эффективность</td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Требуется повторный смыв
-                    </div>
-                  </td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Чистота с первого раза
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Расход воды</td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Повышенный расход воды
-                    </div>
-                  </td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Экономный расход воды
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>Уровень шума</td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Шумный слив
-                    </div>
-                  </td>
-                  <td>
-                    <div class="tornado-table-point">
-                      Слив заметно тише
+                      {{ row[1] }}
                     </div>
                   </td>
                 </tr>
@@ -188,13 +174,8 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <div class="flex max-desktop:flex-col justify-between items-center gap-[24px] max-desktop:mb-[16px]">
-            <div class="max-desktop:text-center">
-              <h2>Попробуйте в реальной жизни</h2>
-              <p class="text-tertiary subtitle">
-                Ознакомьтесь с моделями и выберите подходящее решение для вашей ванной комнаты
-              </p>
-            </div>
+          <div class="flex max-desktop:flex-col justify-between items-center gap-[16px] max-desktop:mb-[16px]">
+            <h3 class="m-0">Товары со смывом “Торнадо”</h3>
 
             <div class="arrows self-end">
               <button
@@ -228,27 +209,19 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 @reference "~/assets/css/main.css";
 
 .table-wrapper {
-  --border: #F1F5F9;
+  --border: var(--color-neutral-200);
   border: 1px solid var(--border);
   border-radius: 20px;
   box-shadow: var(--shadow-md);
   overflow: hidden;
-
-  @variant desktop {
-    --border: #E2E8F0;
-  }
 }
 
 .tornado-table {
   width: 100%;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
   text-align: center;
   table-layout: fixed;
-
-  @variant desktop {
-    font-size: 16px;
-  }
 }
 
 .tornado-table tr:not(tbody > :last-child) {
@@ -260,46 +233,31 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 }
 
 .tornado-table th {
-  font-size: 20px;
+  font-size: 24px;
   line-height: 32px;
   font-weight: 600;
-  padding-block: 32px;
-
-  @variant desktop {
-    font-size: 24px;
-  }
+  padding-block: 24px;
 }
 
 .tornado-table td {
   padding-block: 24px;
-
-  @variant max-desktop {
-    color: var(--color-tertiary);
-  }
-}
-
-@variant max-desktop {
-  .tornado-table :is(th, td):nth-child(1) {
-    display: none;
-  }
 }
 
 .tornado-table td:nth-child(1) {
-  background: #F1F5F9;
-  color: var(--color-tertiary);
+  color: var(--color-neutral-600);
   font-size: 20px;
   line-height: 32px;
 }
 
 .tornado-table td:nth-child(2) {
   --icon: url(~/assets/icons/compare-cross.svg);
-  background: #FFFBFB;
+  background: var(--color-error-25);
   vertical-align: top;
 }
 
 .tornado-table td:nth-child(3) {
   --icon: url(~/assets/icons/compare-check.svg);
-  background: #F5FAFF;
+  background: var(--color-brand-25);
   vertical-align: top;
 }
 
@@ -313,12 +271,36 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 .tornado-table-point::before {
   content: '';
   background: var(--icon) center / cover;
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
+}
 
-  @variant desktop {
-    width: 40px;
-    height: 40px;
-  }
+.tornado-row-point {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--background);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+
+.tornado-row-point::before {
+  content: '';
+  background: var(--icon) center / cover;
+  width: 24px;
+  height: 24px;
+}
+
+.tornado-row-point.old {
+  --border: var(--color-error-100);
+  --background: var(--color-error-25);
+  --icon: url(~/assets/icons/compare-cross-sm.svg);
+}
+
+.tornado-row-point.new {
+  --border: var(--color-brand-200);
+  --background: var(--color-brand-50);
+  --icon: url(~/assets/icons/compare-check-sm.svg);
 }
 </style>

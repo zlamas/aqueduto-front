@@ -10,25 +10,32 @@ defineProps({
   },
   type: String,
 })
+
+const icon = {
+  manual: 'pdf',
+  pdf: 'pdf',
+  catalog: 'xls',
+  model3d: 'zip',
+}
 </script>
 
 <template>
   <NuxtLink
     :to="url"
     download
-    class="flex justify-between bg-bg-secondary rounded-[14px] p-[8px_10px_8px_16px]"
+    class="group flex justify-between bg-neutral-50 hover:bg-neutral-100 border border-neutral-100 hover:border-neutral-200 rounded-[14px] p-[8px_10px_8px_16px]"
   >
     <div class="flex items-center gap-[8px]">
-      <img src="~/assets/icons/file-pdf.svg" alt="">
-      <span class="text-secondary font-medium">
+      <img :src="`/images/file-${icon[type]}.svg`" alt="">
+      <span class="text-neutral-600 group-hover:text-brand-950 font-medium">
         {{ title }}
       </span>
     </div>
-    <div class="flex items-center gap-[12px] shrink-0">
-      <span class="text-[14px]/[20px] text-quaternary max-desktop:hidden">
+    <div class="flex items-center gap-[8px] shrink-0">
+      <span class="text-[14px]/[20px] text-neutral-500 group-hover:text-neutral-600 max-desktop:hidden">
         размер файла
       </span>
-      <button class="bg-[#E9F4F6] rounded-[8px] p-[8px]">
+      <button class="bg-brand-600 group-hover:bg-brand-700 rounded-[8px] p-[8px]">
         <img src="~/assets/icons/download.svg" alt="">
       </button>
     </div>

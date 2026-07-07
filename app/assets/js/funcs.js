@@ -22,3 +22,7 @@ export function debounce(func) {
     )
   }
 }
+
+export function getDayOfWeek() {
+  return new Date().toLocaleString('en-US', { weekday: 'long' }).toLowerCase()
+}
