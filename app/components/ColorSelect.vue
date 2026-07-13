@@ -21,19 +21,22 @@ const currentColor = defineModel()
 </script>
 
 <template>
-  <div class="flex items-center" :style="{ gap: `${gap}px` }">
+  <div class="flex flex-wrap items-center" :style="{ gap: `${gap}px` }">
     <ColorSwatch
       v-for="color in colors.slice(0, 4)"
       :key="color.id"
       :color="color"
       :size="size"
       :selected="currentColor === color.variant_id"
+      :class="{
+        'mx-[4px]': currentColor === color.variant_id
+      }"
       @click="currentColor = color.variant_id"
     />
 
     <Dropdown
       v-if="colors.length > 4"
-      content-class="flex flex-wrap gap-[4px] p-[8px] rounded-[16px] border border-neutral-100"
+      content-class="w-max max-w-[300px] flex flex-wrap gap-[4px] p-[8px] rounded-[16px] border border-neutral-100"
     >
       <template #button>
         <button
@@ -53,6 +56,9 @@ const currentColor = defineModel()
         :color="color"
         :size="size"
         :selected="currentColor === color.variant_id"
+        :class="{
+          'mx-[4px]': currentColor === color.variant_id
+        }"
         @click="currentColor = color.variant_id"
       />
     </Dropdown>

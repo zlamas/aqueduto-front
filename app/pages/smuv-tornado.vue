@@ -51,15 +51,15 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
 <template>
   <main>
-    <section class="hero-banner hero-banner-large image-gradient [--bg:url(/images/style-6.jpg)] mb-[32px] desktop:mb-[128px]">
+    <section class="hero-banner hero-banner-large image-gradient [--bg:url(/images/style-6.jpg)] mb-[32px] laptop:mb-[128px]">
       <div class="container grid">
         <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
+        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] laptop:rounded-[30px] mx-[16px] p-[24px_12px] laptop:p-[32px_64px] text-center laptop:w-[836px]">
           <h1 class="text-text-inverse">
             Смыв торнадо: чистота <br> за одно движение
           </h1>
-          <p class="text-text-inverse max-desktop:text-[14px]/[20px]">
+          <p class="text-text-inverse max-laptop:text-[14px]/[20px]">
             Мощный поток воды закручивается внутри чаши, обеспечивая быстрое и равномерное очищение без лишнего шума и расхода.
           </p>
         </div>
@@ -70,7 +70,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
       <div class="layout">
         <section class="image-aside">
           <div>
-            <h2 class="max-desktop:text-center">Как это работает</h2>
+            <h2 class="max-laptop:text-center">Как это работает</h2>
             <p class="text-neutral-600">
               Система торнадо-смыва направляет поток воды по кругу, создавая вихревое движение. Вода охватывает всю поверхность чаши, эффективно удаляя загрязнения даже в труднодоступных местах.
               <br><br>
@@ -81,11 +81,11 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <h2 class="mb-[24px] desktop:mb-[32px] text-center">Почему это удобно</h2>
+          <h2 class="mb-[24px] laptop:mb-[32px] text-center">Почему это удобно</h2>
 
           <div
             ref="advantages-slider"
-            class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]"
+            class="slider laptop:flex-wrap max-laptop:gap-[16px] text-[14px] laptop:text-[16px]/[24px]"
           >
             <div
               v-for="(item, index) in advantages"
@@ -105,7 +105,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div class="dot-pagination mt-[12px]">
             <div
-              v-for="index in advantagesSlider.scrollPointsCount.value"
+              v-for="(_, index) in advantagesSlider.scrollPointsCount.value"
               :key="index"
               :class="{
                 'dot-pagination-item': true,
@@ -117,14 +117,14 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <div class="text-center mb-[24px] desktop:mb-[32px]">
+          <div class="text-center mb-[24px] laptop:mb-[32px]">
             <h2 class="mb-[8px]">Разница в работе смыва</h2>
             <p class="text-neutral-500 font-medium">
               Технология “Торнадо” не просто усиливает поток — она меняет принцип работы смыва
             </p>
           </div>
 
-          <div class="grid gap-[24px] desktop:hidden">
+          <div class="grid gap-[24px] laptop:hidden">
             <div
               v-for="(row, header) in tableData"
               class="grid gap-[8px]"
@@ -145,7 +145,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             </div>
           </div>
 
-          <div class="table-wrapper max-desktop:hidden">
+          <div class="table-wrapper max-laptop:hidden">
             <table class="tornado-table">
               <thead>
                 <tr>
@@ -174,7 +174,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <div class="flex max-desktop:flex-col justify-between items-center gap-[16px] max-desktop:mb-[16px]">
+          <div class="flex max-laptop:flex-col justify-between items-center gap-[16px] max-laptop:mb-[16px]">
             <h3 class="m-0">Товары со смывом “Торнадо”</h3>
 
             <div class="arrows self-end">
@@ -191,7 +191,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div
             ref="products-slider"
-            class="slider desktop:py-[32px]"
+            class="slider laptop:py-[32px]"
           >
             <ProductCard
               v-for="product in homeData.new_products"

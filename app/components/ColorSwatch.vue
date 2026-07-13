@@ -14,6 +14,10 @@ defineProps({
 const colorData = {
   40: { invertCheckmark: true },
   45: { invertCheckmark: true },
+  70: { invertCheckmark: true },
+  71: { invertCheckmark: true },
+  72: { invertCheckmark: true },
+  75: { invertCheckmark: true },
 }
 </script>
 
@@ -25,6 +29,7 @@ const colorData = {
     }"
     :style="{
       '--size': `${size}px`,
+      background: `url(/images/colors/${color.code}.svg)`,
     }"
     :title="color.name"
   >
@@ -50,7 +55,6 @@ const colorData = {
 .swatch {
   width: var(--size);
   height: var(--size);
-  background: v-bind(`url("/images/colors/${color.code}.svg")`);
   border-radius: 50%;
   flex-shrink: 0;
   outline: 2px solid transparent;

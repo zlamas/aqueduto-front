@@ -6,13 +6,12 @@ defineProps({
     type: Array,
     required: true,
   },
-  paginationOffset: Number,
 })
 
 const container = useTemplateRef('container')
 const itemRefs = ref([])
 
-const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRefs)
+const slider = useSlider(container, itemRefs)
 </script>
 
 <template>
@@ -24,7 +23,7 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
         :ref="(el) => itemRefs[index] = el"
         :data-slide="index + 1"
         :class="{
-          'hero-slider-item image-gradient flex items-center max-desktop:justify-center px-[32px] desktop:px-[160px]': true,
+          'hero-slider-item image-gradient flex items-center max-laptop:justify-center px-[32px] laptop:px-[160px]': true,
           'hero-slider-video': item.media_type === 'video'
         }"
         :style="item.media_type === 'image' && { '--bg': `url(${item.media_url})` }"
@@ -36,11 +35,12 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
           autoplay
           playsinline
           muted
+          loop
         ></video>
 
         <div
           v-if="item.title || item.subtitle || item.cta"
-          class="grid desktop:justify-items-start gap-[16px] max-w-[904px] z-9 max-desktop:text-center max-desktop:bg-black/20 max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] max-desktop:p-[24px_12px]"
+          class="grid laptop:justify-items-start gap-[16px] max-w-[904px] z-9 max-laptop:text-center max-laptop:bg-black/20 max-laptop:backdrop-blur-[10px] max-laptop:rounded-[12px] max-laptop:p-[24px_12px]"
         >
           <h1
             v-if="item.title"
@@ -50,7 +50,7 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
           </h1>
           <p
             v-if="item.subtitle"
-            class="text-white desktop:text-[20px]/[32px] max-desktop:text-[14px]/[20px]"
+            class="text-white laptop:text-[20px]/[32px] max-laptop:text-[14px]/[20px]"
           >
             {{ item.subtitle }}
           </p>
@@ -68,26 +68,26 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
     <div class="hero-slider-controls">
       <div class="pill-pagination stripe-pagination">
         <button
-          v-for="index in scrollPointsCount"
+          v-for="(_, index) in slider.scrollPointsCount.value"
           :key="index"
           :class="{
             'pill-pagination-item stripe-pagination-item': true,
-            'active': activeItem === index
+            'active': slider.activeItem.value === index
           }"
-          @click="goToSlide(index)"
+          @click="slider.goToSlide(index)"
         ></button>
       </div>
 
-      <div class="hero-slider-nav arrows max-desktop:hidden">
+      <div class="hero-slider-nav arrows max-laptop:hidden">
         <button
           class="arrow arrow-left"
-          :disabled="activeItem === 1"
-          @click="goToSlide(activeItem - 1)"
+          :disabled="slider.activeItem.value === 0"
+          @click="slider.previousSlide"
         ></button>
         <button
           class="arrow arrow-right"
-          :disabled="activeItem === scrollPointsCount"
-          @click="goToSlide(activeItem + 1)"
+          :disabled="slider.activeItem.value === slider.scrollPointsCount.value - 1"
+          @click="slider.nextSlide"
         ></button>
       </div>
     </div>
@@ -139,8 +139,8 @@ const { activeItem, scrollPointsCount, goToSlide } = useSlider(container, itemRe
     align-items: center;
     justify-content: center;
 
-    @variant desktop {
-      bottom: var(--pagination-offset, 44px);
+    @variant laptop {
+      bottom: 44px;
     }
   }
 

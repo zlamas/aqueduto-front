@@ -25,9 +25,9 @@ const allCategories = computed(() => [
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[120px]">
+  <main class="pt-[24px] laptop:pt-[120px]">
     <div class="container">
-      <h1 class="mb-[16px] desktop:mb-[32px]">{{ title }}</h1>
+      <h1 class="mb-[16px] laptop:mb-[32px]">{{ title }}</h1>
 
       <div class="flex flex-wrap gap-[16px]">
         <button
@@ -60,7 +60,7 @@ const allCategories = computed(() => [
         </button>
 
         <Dropdown
-          class="ml-auto max-desktop:hidden"
+          class="ml-auto max-laptop:hidden"
           label="Скачать"
           icon-left="download"
           button-class="rounded-[10px]! px-[12px]"
@@ -78,7 +78,7 @@ const allCategories = computed(() => [
         </Dropdown>
       </div>
 
-      <div class="grid grid-cols-2 gap-[18px] mt-[24px] desktop:hidden">
+      <div class="grid grid-cols-2 gap-[18px] mt-[24px] laptop:hidden">
         <button class="button button-secondary">
           <img src="/images/file-xls-sm.svg" alt="">
           <span>Скачать Excel</span>

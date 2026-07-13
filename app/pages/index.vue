@@ -61,14 +61,14 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <div class="text-center mb-[24px] desktop:mb-[32px]">
+          <div class="text-center mb-[24px] laptop:mb-[32px]">
             <h2 class="mb-[12px]">Наши преимущества</h2>
             <p class="subtitle">6 причин выбрать Aqueduto</p>
           </div>
 
           <div
             ref="advantages-slider"
-            class="slider desktop:flex-wrap max-desktop:gap-[16px] text-[14px] desktop:text-[16px]/[24px]"
+            class="slider laptop:flex-wrap max-laptop:gap-[16px] text-[14px] laptop:text-[16px]/[24px]"
           >
             <div
               v-for="(item, index) in homeData.advantages"
@@ -86,7 +86,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div class="dot-pagination mt-[12px]">
             <div
-              v-for="index in advantagesSlider.scrollPointsCount.value"
+              v-for="(_, index) in advantagesSlider.scrollPointsCount.value"
               :key="index"
               :class="{
                 'dot-pagination-item': true,
@@ -99,9 +99,9 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
       </div>
     </div>
 
-    <section class="bg-brand-600 py-[48px] desktop:py-[40px]">
+    <section class="bg-brand-600 py-[48px] laptop:py-[40px]">
       <div class="container">
-        <div class="grid gap-[16px] items-center desktop:grid-cols-2 max-desktop:text-center">
+        <div class="grid gap-[16px] items-center laptop:grid-cols-2 max-laptop:text-center">
           <h2 class="text-white m-0">
             Наша философия
           </h2>
@@ -120,28 +120,31 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             Интерьер вашей ванной в едином стиле
           </p>
 
-          <div class="bento slider flex-row mt-[24px] desktop:mt-[32px]">
+          <div class="bento slider flex-row mt-[24px] laptop:mt-[32px]">
             <NuxtLink
               v-for="style in styles"
               :key="style.id"
-              class="image-gradient style-item"
+              class="image-gradient zoom-hover style-item"
               :style="{ '--bg': `url(${style.thumbnail})` }"
               :to="`/gallery/${style.slug}`"
-              :data-name="style.title"
-            />
+            >
+              <span class="style-item-name">
+                {{ style.title }}
+              </span>
+            </NuxtLink>
           </div>
 
           <NuxtLink
             to="/gallery"
-            class="button button-tertiary mt-[16px] desktop:mt-[32px] desktop:mx-auto"
+            class="button button-tertiary mt-[16px] laptop:mt-[32px] laptop:mx-auto"
           >
             Посмотреть все
           </NuxtLink>
         </section>
 
         <section>
-          <div class="flex max-desktop:flex-col justify-between items-center gap-[24px] max-desktop:mb-[16px]">
-            <div class="max-desktop:text-center">
+          <div class="flex max-laptop:flex-col justify-between items-center gap-[24px] max-laptop:mb-[16px]">
+            <div class="max-laptop:text-center">
               <h2>Новинки</h2>
               <p class="subtitle">
                 Свежие решения для вашей ванной
@@ -162,7 +165,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div
             ref="products-slider"
-            class="slider desktop:py-[32px]"
+            class="slider laptop:py-[32px]"
           >
             <ProductCard
               v-for="product in homeData.new_products"
@@ -173,12 +176,12 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </section>
 
         <section>
-          <h2 class="text-center">Полезные материалы</h2>
-          <div class="grid desktop:grid-cols-2 gap-[12px_24px] mt-[24px] desktop:mt-[32px]">
+          <h2 class="text-center">Каталог</h2>
+          <div class="grid laptop:grid-cols-2 gap-[12px_24px] mt-[24px] laptop:mt-[32px]">
             <NuxtLink
               v-for="item in homeData.materials"
               :key="item.id"
-              class="material-item image-gradient image-link"
+              class="material-item image-gradient zoom-hover image-link"
               :to="`/${item.slug}`"
               :style="{ '--bg': `url(${item.cover})` }"
             >
@@ -200,7 +203,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
     text-align: center;
     line-height: 1.2;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 80px;
       margin-bottom: 64px;
       letter-spacing: -0.02em;
@@ -215,13 +218,13 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
     color: white;
     padding: 12px 16px;
 
-    @variant desktop {
+    @variant laptop {
       height: 336px;
       border-radius: 32px;
       padding: 20px 24px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       height: 400px;
     }
   }

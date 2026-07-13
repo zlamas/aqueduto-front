@@ -3,6 +3,7 @@ import Breadcrumb from "@/components/Breadcrumb.vue";
 import HeroSlider from "@/components/HeroSlider.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import Dropdown from "@/components/Dropdown.vue";
+import Search from "@/components/Search.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import {debounce, formatCurrency, filterQuery} from "@/assets/js/funcs.js";
 
@@ -13,6 +14,7 @@ useHead({ title })
 const productsParams = ref({
   page: 1,
   per_page: 24,
+  filters: {}
 })
 
 const { slug } = useRoute().params
@@ -46,15 +48,27 @@ function nextPage() {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', nextPage);
+  window.addEventListener('scroll', nextPage)
 })
 
 onUnmounted(() => {
-  window.removeEventListener('scroll', nextPage);
+  window.removeEventListener('scroll', nextPage)
 })
+
+function formatQuery({ options }) {
+  const filters = Object.fromEntries(
+    Object.entries(options.query.filters)
+      .map(([key, value]) => [`filters[${key}]`, value])
+  )
+
+  Object.assign(options.query, filters)
+  delete options.query.filters
+}
 
 const { data: productsData } = await useAPI('/products', {
   query: productsParams,
+
+  onRequest: formatQuery,
 
   onResponse({ response }) {
     if (response._data.meta.current_page === 1) {
@@ -97,7 +111,7 @@ const { data: filtersData } = await useAPI('/catalog/filters', {
 
   onResponse({ response }) {
     const range = response._data.data.find((filter) => filter.key === 'price').values
-    priceRange.value = range
+    priceRange.value = range.map(Number)
     minPrice.value = range[0]
     maxPrice.value = range[1]
   }
@@ -108,21 +122,20 @@ const collections = collectionData.value.data
 const filters = computed(() => filtersData?.value?.data)
 
 const range = getFilterByName('price').values
-priceRange.value = range
+priceRange.value = range.map(Number)
 minPrice.value = range[0]
 maxPrice.value = range[1]
 
-const collectionQuery = ref('')
 const productQuery = ref('')
-const colorQuery = ref('')
+const queries = ref({})
 
-const filteredCollections = computed(
-  () => filterQuery(collections, 'name', collectionQuery.value)
-)
+function getFilterByName(name) {
+  return filters.value?.find((filter) => filter.key === name)
+}
 
-const filteredColors = computed(
-  () => filterQuery(colors, 'name', colorQuery.value)
-)
+function getFilteredValues(filter) {
+  return filterQuery(queries.value[filter], getFilterByName(filter)?.values)
+}
 
 watch(
   minPrice,
@@ -142,16 +155,12 @@ watch(
   }
 )
 
-const updateProductsDebounce = debounce(
-  () => Object.assign(
-    productsParams.value,
-    { search: productQuery.value }
-  )
-)
-
 watch(
-  [productQuery],
-  () => updateProductsDebounce(500),
+  productQuery,
+  (value) => Object.assign(
+    productsParams.value,
+    { search: value }
+  ),
 )
 
 const priceProductCount = ref(products.value.length)
@@ -162,7 +171,10 @@ const fetchProductsPriceDebounce = debounce(() => {
     productsParams.value,
     { price_min: minPrice.value, price_max: maxPrice.value }
   )
-  useAPI('/products', { query: params }).then(({ data }) => {
+  useAPI('/products', {
+    query: params,
+    onRequest: formatQuery,
+  }).then(({ data }) => {
     priceProductCount.value = data.value.data.length
   })
 })
@@ -171,72 +183,6 @@ watch(
   [minPrice, maxPrice],
   () => fetchProductsPriceDebounce(500),
 )
-
-const colors = [
-  {
-    name: 'Черный матовый',
-    value: 'black-matte',
-    hex: '#2E2E2E'
-  },
-  {
-    name: 'Белый глянцевый',
-    value: 'white-glossy',
-    hex: '#FFFFFF'
-  },
-  {
-    name: 'Белый матовый',
-    value: 'white-matte',
-    hex: '#FFFFFF'
-  },
-  {
-    name: 'Серый матовый',
-    value: 'gray-matte',
-    hex: '#6B6B6B'
-  },
-  {
-    name: 'Хром',
-    value: 'chrome',
-    hex: ['#ECECEC', '#A2A2A2']
-  },
-  {
-    name: 'Оружейная сталь',
-    value: 'gun-steel',
-    hex: ['#82817E', '#4A4947']
-  },
-  {
-    name: 'Шлифованное золото',
-    value: 'polished-gold',
-    hex: ['#E7E3C0', '#C0B47F']
-  },
-]
-
-const activeFilterBadges = [
-  {
-    name: 'collection',
-    array: collections,
-    valueKey: 'slug'
-  },
-  {
-    name: 'color',
-    array: colors,
-    valueKey: 'value'
-  },
-]
-
-const activeFilters = computed(
-  () => Object.fromEntries(
-    activeFilterBadges
-      .map((filter) => [
-        filter.name,
-        filter.array.find((item) => item[filter.valueKey] === productsParams.value[filter.name])]
-      )
-      .filter(([name, item]) => item)
-  )
-)
-
-function getFilterByName(name) {
-  return !filters.value?.length || filters.value.find((filter) => filter.key === name)
-}
 
 const sortingOptions = {
   price_asc: 'Сначала дешевые',
@@ -280,30 +226,31 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
 <template>
   <main class="pt-[24px]">
-    <div class="max-desktop:px-[16px]">
+    <div class="max-laptop:px-[16px]">
       <section
         v-if="banners?.length"
-        class="hero-banner max-desktop:rounded-[20px] max-desktop:h-[256px] [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]"
+        class="hero-banner max-laptop:rounded-[20px] max-laptop:h-[256px] [--direction:left] [--opacity:0.6] mb-[32px] laptop:mb-[64px]"
       >
         <div class="container relative z-9">
           <Breadcrumb :items="[ { name: title } ]" />
         </div>
 
-          <HeroSlider :items="banners" />
+        <HeroSlider :items="banners" />
       </section>
     </div>
 
     <div class="container">
-      <div class="relative flex items-center -mx-[16px] mb-[24px] desktop:mb-[48px]">
+      <div class="relative flex items-center -mx-[16px] mb-[24px] laptop:mb-[48px]">
         <div class="absolute left-0 bg-linear-to-l to-white w-[6%] h-full pointer-events-none"></div>
         <button
-          class="arrow arrow-left absolute left-[16px] max-desktop:hidden"
+          class="arrow arrow-left absolute left-[16px] max-laptop:hidden"
+          :disabled="categorySlider.scrollEdge.value === 'left'"
           @click="categorySlider.scrollLeft"
         ></button>
 
         <div
           ref="category-slider"
-          class="slider gap-[8px] desktop:gap-[12px] pb-[20px] -mb-[20px] m-0 text-neutral-700 text-[18px] text-center font-medium"
+          class="slider gap-[8px] laptop:gap-[12px] pb-[20px] -mb-[20px] m-0 text-neutral-700 text-[18px] text-center font-medium"
         >
           <div
             v-for="(category, index) in categories"
@@ -315,11 +262,11 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             @click="updateCategory(category.slug)"
           >
             <img
-              class="w-full bg-backdrop rounded-[20px] desktop:h-[192px] object-contain"
+              class="w-full bg-backdrop rounded-[20px] laptop:h-[192px] object-contain"
               :src="category.icon"
               alt=""
             >
-            <span class="grid items-center h-[64px] desktop:h-[72px]">
+            <span class="grid items-center h-[64px] laptop:h-[72px]">
               {{ category.name }}
             </span>
           </div>
@@ -327,14 +274,16 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 
         <div class="absolute right-0 bg-linear-to-r to-white w-[6%] h-full pointer-events-none"></div>
         <button
-          class="arrow arrow-right absolute right-[16px] max-desktop:hidden"
+          class="arrow arrow-right absolute right-[16px] max-laptop:hidden"
+          :disabled="categorySlider.scrollEdge.value === 'right'"
           @click="categorySlider.scrollRight"
         ></button>
       </div>
 
-      <div class="flex max-desktop:flex-col justify-between gap-[24px]">
-        <div class="flex gap-[16px] desktop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto overflow-y-hidden">
+      <div class="flex max-laptop:flex-col items-start justify-between gap-[24px]">
+        <div class="flex laptop:flex-wrap max-w-[100vw] gap-[8px] laptop:gap-x-[12px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto overflow-y-hidden">
           <Dropdown
+            class="mr-[8px] laptop:mr-[12px]"
             label="Сортировка"
             icon-left="sort"
             content-class="rounded-[20px] p-[16px]"
@@ -357,230 +306,185 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
             </div>
           </Dropdown>
 
-          <div class="flex gap-[8px] desktop:gap-[12px]">
-            <Dropdown
-              v-show="getFilterByName('price')"
-              label="Цена"
-              content-class="rounded-[20px] p-[16px]"
-            >
-              <div class="grid gap-[35px] w-[274px]">
-                <div>
-                  <div class="flex justify-center gap-[4px] h-[160px] mt-[32px]">
+          <Dropdown
+            v-show="getFilterByName('price')"
+            label="Цена"
+            content-class="rounded-[20px] p-[16px]"
+          >
+            <div class="grid gap-[35px] w-[274px]">
+              <div>
+                <div class="flex justify-center gap-[4px] h-[160px] mt-[32px]">
+                  <div
+                    v-for="(percent, index) in priceGraphPoints"
+                    :key="index"
+                    class="relative flex flex-col justify-end items-center"
+                  >
                     <div
-                      v-for="(percent, index) in priceGraphPoints"
-                      :key="index"
-                      class="relative flex flex-col justify-end items-center"
+                      v-if="percent === 100"
+                      class="absolute bottom-full flex justify-center bg-neutral-950 rounded-[5px] text-[12px]/[16px] text-white p-[4px_7px] mb-[7px] after:absolute after:bottom-0 after:transform-[translateY(20%)_scaleX(1.5)_rotate(45deg)] after:size-[16px] after:rounded-[3px] after:bg-inherit"
                     >
-                      <div
-                        v-if="percent === 100"
-                        class="absolute bottom-full flex justify-center bg-neutral-950 rounded-[5px] text-[12px]/[16px] text-white p-[4px_7px] mb-[7px] after:absolute after:bottom-0 after:transform-[translateY(20%)_scaleX(1.5)_rotate(45deg)] after:size-[16px] after:rounded-[3px] after:bg-inherit"
-                      >
-                        <span class="z-9">{{ formatCurrency(3900) }}</span>
-                      </div>
-                      <div
-                        :class="{
-                          'w-[6px] rounded-full': true,
-                          'bg-brand-600': percent === 100,
-                          'bg-neutral-300': percent < 100
-                        }"
-                        :style="{
-                          height: `${percent}%`
-                        }"
-                      ></div>
+                      <span class="z-9">{{ formatCurrency(3900) }}</span>
                     </div>
-                  </div>
-
-                  <div class="range-slider">
-                    <input
-                      type="range"
-                      v-model.number="minPrice"
-                      :min="priceRange[0]"
-                      :max="priceRange[1]"
-                      class="range-input"
-                    >
-                    <input
-                      type="range"
-                      v-model.number="maxPrice"
-                      :min="priceRange[0]"
-                      :max="priceRange[1]"
-                      class="range-input"
-                    >
-                  </div>
-                </div>
-
-                <div class="flex justify-between text-neutral-500">
-                  <label class="grid gap-[2px]">
-                    <span>Мин. цена</span>
-                    <input
-                      class="price-input"
-                      type="number"
-                      v-model.number="minPrice"
-                    >
-                  </label>
-                  <label class="grid gap-[2px]">
-                    <span>Макс. цена</span>
-                    <input
-                      class="price-input"
-                      type="number"
-                      v-model.number="maxPrice"
-                    >
-                  </label>
-                </div>
-
-                <div class="flex gap-[4px] items-center">
-                  <button
-                    class="button button-secondary p-[12px]"
-                    @click="[minPrice, maxPrice] = priceRange"
-                  >
-                    <img src="~/assets/icons/trash.svg" alt="">
-                  </button>
-                  <button
-                    class="button button-primary py-[14px] flex-1"
-                    @click="applyPriceRange"
-                  >
-                    Показать {{ priceProductCount }} товаров
-                  </button>
-                </div>
-              </div>
-            </Dropdown>
-
-            <Dropdown
-              v-show="getFilterByName('collection')"
-              label="Коллекция"
-              content-class="rounded-[20px] p-[16px]"
-            >
-              <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
-                <label class="search-field p-[8px_12px]">
-                  <input
-                    v-model="collectionQuery"
-                    class="search-input"
-                    type="text"
-                    placeholder="Поиск"
-                  >
-                </label>
-
-                <div class="grid gap-[12px] overflow-y-auto">
-                  <label
-                    v-for="collection in filteredCollections"
-                    :key="collection.id"
-                    class="flex items-center gap-[9px]"
-                  >
-                    <input
-                      type="radio"
-                      name="collections"
-                      v-model="productsParams.collection"
-                      :value="collection.slug"
-                    >
-                    <span>{{ collection.name }}</span>
-                  </label>
-                </div>
-              </div>
-            </Dropdown>
-
-            <Dropdown
-              v-show="getFilterByName('color')"
-              label="Цвет"
-              content-class="rounded-[20px] p-[16px]"
-            >
-              <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
-                <label class="search-field p-[8px_12px]">
-                  <input
-                    v-model="colorQuery"
-                    class="search-input"
-                    type="text"
-                    placeholder="Поиск"
-                  >
-                </label>
-
-                <div class="grid gap-[12px] overflow-y-auto">
-                  <label
-                    v-for="color in filteredColors"
-                    :key="color.value"
-                    class="flex items-center gap-[9px]"
-                  >
-                    <input
-                      type="radio"
-                      name="collections"
-                      v-model="productsParams.color"
-                      :value="color.value"
-                      class="hidden"
-                    >
-                    <span
+                    <div
                       :class="{
-                        'flex size-[24px] rounded-full': true,
-                        'border border-neutral-300': color.hex === '#FFFFFF'
+                        'w-[6px] rounded-full': true,
+                        'bg-brand-600': percent === 100,
+                        'bg-neutral-300': percent < 100
                       }"
                       :style="{
-                        background: Array.isArray(color.hex) ?
-                          `linear-gradient(to right, ${ color.hex.join(',') })` :
-                          color.hex
+                        height: `${percent}%`
                       }"
-                    >
-                      <img
-                        :class="{
-                          'size-[16px] m-auto': true,
-                          'hidden': color.value !== productsParams.color
-                        }"
-                        src="~/assets/icons/checkmark.svg"
-                        alt=""
-                      >
-                    </span>
-                    <span>{{ color.name }}</span>
-                  </label>
+                    ></div>
+                  </div>
+                </div>
+
+                <div class="range-slider">
+                  <input
+                    type="range"
+                    v-model.number="minPrice"
+                    :min="priceRange[0]"
+                    :max="priceRange[1]"
+                    class="range-input"
+                  >
+                  <input
+                    type="range"
+                    v-model.number="maxPrice"
+                    :min="priceRange[0]"
+                    :max="priceRange[1]"
+                    class="range-input"
+                  >
                 </div>
               </div>
-            </Dropdown>
 
-            <Dropdown
-              v-show="getFilterByName('material')"
-              label="Материал"
-              content-class="rounded-[20px] p-[16px]"
-            >
-            </Dropdown>
+              <div class="flex justify-between text-neutral-500">
+                <label class="grid gap-[2px]">
+                  <span>Мин. цена</span>
+                  <input
+                    class="price-input"
+                    type="number"
+                    v-model.number="minPrice"
+                  >
+                </label>
+                <label class="grid gap-[2px]">
+                  <span>Макс. цена</span>
+                  <input
+                    class="price-input"
+                    type="number"
+                    v-model.number="maxPrice"
+                  >
+                </label>
+              </div>
 
-            <Dropdown
-              v-show="getFilterByName('room')"
-              label="Комната"
-              content-class="rounded-[20px] p-[16px]"
-            >
-            </Dropdown>
-          </div>
+              <div class="flex gap-[4px] items-center">
+                <button
+                  class="button button-secondary p-[12px]"
+                  @click="[minPrice, maxPrice] = priceRange"
+                >
+                  <img src="~/assets/icons/trash.svg" alt="">
+                </button>
+                <button
+                  class="button button-primary py-[14px] flex-1"
+                  @click="applyPriceRange"
+                >
+                  Показать {{ priceProductCount }} товаров
+                </button>
+              </div>
+            </div>
+          </Dropdown>
+
+          <Dropdown
+            v-show="getFilterByName('color')"
+            label="Цвет"
+            content-class="w-[300px] rounded-[20px] p-[16px]"
+          >
+            <div class="grid gap-[18px] min-w-[235px] max-h-[330px]">
+              <Search v-model="queries.color" />
+
+              <div class="grid gap-[12px] overflow-y-auto">
+                <label
+                  v-for="color in getFilteredValues('color')"
+                  :key="color.value"
+                  class="flex items-center gap-[9px]"
+                >
+                  <input
+                    type="radio"
+                    name="collections"
+                    v-model="productsParams.color"
+                    :value="color.value"
+                    class="hidden"
+                  >
+                  <span
+                    :class="{
+                      'flex size-[24px] rounded-full': true,
+                      'border border-neutral-300': color.hex === '#FFFFFF'
+                    }"
+                    :style="{
+                      background: Array.isArray(color.hex) ?
+                        `linear-gradient(to right, ${ color.hex.join(',') })` :
+                        color.hex
+                    }"
+                  >
+                    <img
+                      :class="{
+                        'size-[16px] m-auto': true,
+                        'hidden': color.value !== productsParams.color
+                      }"
+                      src="~/assets/icons/checkmark.svg"
+                      alt=""
+                    >
+                  </span>
+                  <span>{{ color.name }}</span>
+                </label>
+              </div>
+            </div>
+          </Dropdown>
+
+          <Dropdown
+            v-for="filter in filters.filter((item) => item.key !== 'price')"
+            :label="filter.name"
+            content-class="w-[300px] rounded-[20px] p-[16px]"
+          >
+            <div class="flex flex-col max-h-[332px] gap-[18px]">
+              <Search v-model="queries[filter.key]" />
+
+              <div class="grid gap-[12px] flex-1 overflow-y-auto">
+                <label
+                  v-for="(option, index) in getFilteredValues(filter.key)"
+                  :key="index"
+                  class="flex items-center gap-[9px]"
+                >
+                  <input
+                    type="radio"
+                    name="collections"
+                    v-model="productsParams.filters[filter.key]"
+                    :value="option"
+                  >
+                  <span>{{ option }}</span>
+                </label>
+              </div>
+            </div>
+          </Dropdown>
         </div>
 
-        <label class="search-field w-full desktop:w-[320px] p-[10px_12px]">
-          <input
-            v-model="productQuery"
-            class="search-input"
-            type="text"
-            placeholder="Поиск"
-          >
-        </label>
+        <Search
+          class="laptop:w-[320px]"
+          v-model="productQuery"
+          :debounce="500"
+        />
       </div>
 
       <div
-        v-show="Object.keys(activeFilters).length"
-        class="flex gap-[12px] mt-[16px] -mx-[16px] px-[16px] whitespace-nowrap scrollbar-none overflow-x-auto"
+        v-show="Object.keys(productsParams.filters).length"
+        class="flex laptop:flex-wrap gap-[12px] mt-[16px] -mx-[16px] px-[16px] whitespace-nowrap scrollbar-none overflow-x-auto"
       >
         <div
-          v-for="(item, filter) in activeFilters"
+          v-for="(value, filter) in productsParams.filters"
           :key="filter"
           class="filter-badge"
-          @click="delete productsParams[filter]"
+          @click="delete productsParams.filters[filter]"
         >
-          <div
-            v-if="filter === 'color'"
-            :class="{
-              'flex size-[20px] rounded-full': true,
-              'border border-neutral-300': item.hex === '#FFFFFF'
-            }"
-            :style="{
-              background: Array.isArray(item.hex) ?
-                `linear-gradient(to right, ${ item.hex.join(',') })` :
-                item.hex
-            }"
-          ></div>
-          <div>{{ item.name }}</div>
-          <button class="size-[24px]">
+          <span>{{ value }}</span>
+          <button class="filter-delete">
             <img class="m-auto" src="~/assets/icons/filter-delete.svg" alt="">
           </button>
         </div>
@@ -610,7 +514,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
   color: var(--color-neutral-600);
   cursor: pointer;
 
-  @variant desktop {
+  @variant laptop {
     width: 220px;
     scroll-margin-inline: 60px;
   }
@@ -640,6 +544,27 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
   font-weight: 500;
   flex-shrink: 0;
   cursor: pointer;
+}
+
+.filter-badge:hover {
+  color: var(--color-info-700);
+  outline: 1px solid var(--color-info-500);
+  outline-offset: -1px;
+}
+
+.filter-badge:active {
+  background: var(--color-info-100);
+  outline: none;
+}
+
+.filter-delete {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.filter-badge:hover .filter-delete {
+  background: var(--color-info-25);
 }
 
 .price-input {

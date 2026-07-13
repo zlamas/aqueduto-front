@@ -14,17 +14,17 @@ useHead({ title })
 <template>
   <main class="layout">
     <section
-      class="hero-banner image-gradient"
+      class="hero-banner image-gradient grid"
       :style="{ '--bg': `url(${hero.image})` }"
     >
       <div class="container grid">
         <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
+        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] laptop:rounded-[30px] mx-[16px] p-[24px_12px] laptop:p-[32px_64px] text-center laptop:w-[836px]">
           <h1 class="text-text-inverse">
             {{ hero.title }}
           </h1>
-          <p class="text-white max-desktop:text-[14px]/[20px]">
+          <p class="text-white max-laptop:text-[14px]/[20px]">
             {{ hero.subtitle }}
           </p>
         </div>
@@ -48,12 +48,12 @@ useHead({ title })
         </section>
 
         <section>
-          <h2 class="text-center desktop:mb-[32px]">Отзывы наших клиентов</h2>
-          <div class="grid items-center desktop:grid-cols-3 gap-[12px] desktop:gap-[24px]">
+          <h2 class="text-center laptop:mb-[32px]">Отзывы наших клиентов</h2>
+          <div class="grid items-center laptop:grid-cols-3 gap-[12px] laptop:gap-[24px]">
             <div
               v-for="(testimonial, index) in testimonials"
               :key="index"
-              class="grid gap-[48px] p-[32px] rounded-[12px] desktop:rounded-[20px] shadow-md"
+              class="grid gap-[48px] p-[32px] rounded-[12px] laptop:rounded-[20px] shadow-md"
             >
               <div class="whitespace-pre-line text-neutral-600">
                 {{ testimonial.review_text }}

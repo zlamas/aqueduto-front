@@ -49,8 +49,9 @@
 }
 
 @theme {
-  --breakpoint-desktop-xl: 1440px;
-  --breakpoint-desktop: 1024px;
+  --breakpoint-desktop: 1440px;
+  --breakpoint-laptop: 1200px;
+  --breakpoint-tablet-landscape: 1024px;
   --breakpoint-tablet: 768px;
 
   --color-brand-25: #F5FAFF;
@@ -59,6 +60,7 @@
   --color-brand-500: #8CB0C8;
   --color-brand-600: #7195B5;
   --color-brand-700: #63829F;
+  --color-brand-800: #516B82;
   --color-brand-950: #29333D;
 
   --color-neutral-25: #FCFCFD;
@@ -74,9 +76,12 @@
   --color-neutral-900: #0F172A;
   --color-neutral-950: #020617;
 
+  --color-info-25: #F5FAFF;
   --color-info-50: #E8F1FF;
+  --color-info-100: #D2E3FE;
   --color-info-500: #3B82F6;
   --color-info-600: #2669D6;
+  --color-info-700: #1452B2;
 
   --color-warning-50: #FFF7ED;
   --color-warning-100: #FFEDD5;
@@ -114,7 +119,7 @@ body {
     line-height: 36px;
     margin-bottom: 16px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 48px;
       line-height: 60px;
       letter-spacing: -0.01em;
@@ -126,7 +131,7 @@ body {
     line-height: 32px;
     margin-bottom: 8px;
 
-    @variant desktop {
+    @variant laptop {
       font-family: 'Kamerik', sans-serif;
       font-size: 40px;
       line-height: 48px;
@@ -140,7 +145,7 @@ body {
     line-height: 32px;
     margin-bottom: 8px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 32px;
       line-height: 40px;
       margin-bottom: 20px;
@@ -151,7 +156,7 @@ body {
     font-size: 20px;
     line-height: 32px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 28px;
       line-height: 36px;
     }
@@ -162,7 +167,7 @@ body {
     line-height: 32px;
     font-weight: 600;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 24px;
     }
   }
@@ -172,7 +177,7 @@ body {
     line-height: 28px;
     margin-bottom: 4px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 20px;
       line-height: 32px;
       margin-bottom: 12px;
@@ -183,7 +188,7 @@ body {
     font-size: 16px;
     line-height: 24px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 18px;
       line-height: 28px;
     }
@@ -212,10 +217,6 @@ input[type="number"] {
   display: none;
 }
 
-::placeholder {
-  color: var(--color-neutral-500);
-}
-
 select {
   appearance: none;
   background: var(--color-neutral-100) url(/images/arrow-down.svg) center right 12px no-repeat;
@@ -227,29 +228,28 @@ select {
 .container {
   margin: 0 auto;
   padding-inline: 16px;
-  height: 100%;
 
-  @variant desktop {
+  @variant laptop {
     max-width: 1232px;
   }
 
-  @variant desktop-xl {
+  @variant desktop {
     max-width: 1472px;
   }
 }
 
 @layer components {
   main {
-    @variant max-desktop {
+    @variant max-laptop {
       padding-bottom: 64px;
     }
 
-    @variant desktop {
+    @variant laptop {
       padding-top: 24px;
       padding-bottom: 96px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       padding-bottom: 128px;
     }
   }
@@ -259,11 +259,11 @@ select {
     flex-direction: column;
     gap: 64px;
 
-    @variant desktop {
+    @variant laptop {
       gap: 96px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       gap: 128px;
     }
   }
@@ -273,7 +273,7 @@ select {
     font-size: 16px;
     line-height: 20px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 24px;
       line-height: 32px;
     }
@@ -290,7 +290,7 @@ select {
     margin-inline: -16px;
     padding-inline: 16px;
 
-    @variant desktop {
+    @variant laptop {
       gap: 24px;
     }
   }
@@ -303,12 +303,12 @@ select {
     scroll-snap-stop: always;
     flex-shrink: 0;
 
-    @variant desktop {
+    @variant laptop {
       gap: 24px;
       width: calc(100% / 3 - 16px);
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       gap: 32px;
       width: calc(25% - 18px);
     }
@@ -319,7 +319,7 @@ select {
     flex-wrap: wrap;
     gap: 16px 12px;
 
-    @variant desktop {
+    @variant laptop {
       gap: 48px 24px;
     }
   }
@@ -343,9 +343,27 @@ select {
     color: white;
   }
 
+  .button-primary:hover {
+    background: var(--color-brand-700);
+  }
+
+  .button-primary:active {
+    background: var(--color-brand-800);
+  }
+
   .button-secondary {
     background: var(--color-neutral-100);
     color: var(--color-neutral-600);
+  }
+
+  .button-secondary:hover {
+    background: var(--color-neutral-200);
+    color: var(--color-neutral-700);
+  }
+
+  .button-secondary:active {
+    background: var(--color-neutral-300);
+    color: var(--color-neutral-800);
   }
 
   .button-tertiary {
@@ -355,25 +373,16 @@ select {
     line-height: 24px;
   }
 
-  .search-field {
-    display: flex;
-    gap: 8px;
-    width: 100%;
-    align-items: center;
+  .button-tertiary:hover {
+    background: var(--color-neutral-50);
+    color: var(--color-neutral-700);
+    border-color: var(--color-neutral-400);
+  }
+
+  .button-tertiary:active {
     background: var(--color-neutral-100);
-    border-radius: 9999px;
-    line-height: 20px;
-    padding: 10px 12px;
-  }
-
-  .search-field::before {
-    content: url(~/assets/icons/search.svg);
-    line-height: 0;
-  }
-
-  .search-input {
-    width: 0;
-    flex: 1;
+    color: var(--color-neutral-800);
+    border-color: var(--color-neutral-500);
   }
 
   .hero-banner {
@@ -382,18 +391,18 @@ select {
     background-size: cover;
     overflow: hidden;
 
-    @variant max-desktop {
+    @variant max-laptop {
       height: 314px;
     }
 
-    @variant desktop {
+    @variant laptop {
       height: 440px;
       border-radius: 30px;
       margin-inline: 24px;
       padding-block: 24px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       border-radius: 40px;
     }
   }
@@ -401,27 +410,27 @@ select {
   .hero-banner-large {
     --pagination-offset: 56px;
 
-    @variant max-desktop {
+    @variant max-laptop {
       height: 628px;
     }
 
-    @variant desktop {
+    @variant laptop {
       height: 566px;
       border-radius: 40px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       height: 816px;
     }
   }
 
   .hero-banner-small {
-    @variant desktop {
+    @variant laptop {
       height: 194px;
       border-radius: 40px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       height: 280px;
     }
   }
@@ -438,7 +447,7 @@ select {
     gap: 16px;
     padding: 20px;
 
-    @variant desktop {
+    @variant laptop {
       width: calc(100% / 3 - 16px);
       gap: 24px;
       padding: 32px;
@@ -482,7 +491,7 @@ select {
     height: 20px;
     opacity: 0.6;
 
-    @variant desktop {
+    @variant laptop {
       width: 24px;
       height: 24px;
     }
@@ -513,22 +522,22 @@ select {
     display: flex;
     gap: 24px;
 
-    @variant max-desktop {
+    @variant max-laptop {
       flex-direction: column;
     }
 
-    @variant desktop {
+    @variant laptop {
       align-items: center;
       column-gap: 126px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       column-gap: 146px;
     }
   }
 
   .image-aside:nth-child(2n) {
-    @variant desktop {
+    @variant laptop {
       flex-direction: row-reverse;
     }
   }
@@ -539,13 +548,13 @@ select {
     object-fit: cover;
     flex-shrink: 0;
 
-    @variant desktop {
+    @variant laptop {
       width: 588px;
       height: 392px;
       border-radius: 32px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       width: 708px;
       height: 472px;
     }
@@ -553,13 +562,29 @@ select {
 
   .image-gradient {
     position: relative;
+    overflow: hidden;
+  }
+
+  .image-gradient:before {
+    content: '';
+    position: absolute;
+    inset: 0;
     background:
-      linear-gradient(
-        to var(--direction, bottom),
-        transparent,
-        rgba(0, 0, 0, var(--opacity, 0.5))
-      ),
-      var(--bg) center / cover;
+    linear-gradient(
+      to var(--direction, bottom),
+      transparent,
+      rgba(0, 0, 0, var(--opacity, 0.5))
+    ),
+    var(--bg) center / cover;
+    z-index: -1;
+  }
+
+  .zoom-hover::before {
+    transition: 0.3s ease-in-out;
+  }
+
+  .zoom-hover:hover::before {
+    scale: 1.05;
   }
 
   .bento {
@@ -567,13 +592,13 @@ select {
     flex-flow: column;
     gap: 12px;
 
-    @variant desktop {
+    @variant laptop {
       flex-flow: wrap;
       gap: 24px;
     }
   }
 
-  @variant desktop {
+  @variant laptop {
     .bento > :nth-child(5n+1),
     .bento > :nth-child(5n+2),
     .bento > :nth-child(5n+3) {
@@ -597,23 +622,22 @@ select {
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
-    @variant max-desktop {
+    @variant max-laptop {
       min-width: 288px;
     }
 
-    @variant desktop {
+    @variant laptop {
       height: 336px;
       border-radius: 32px;
       padding: 24px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       height: 400px;
     }
   }
 
-  .style-item::after {
-    content: attr(data-name);
+  .style-item-name {
     border-radius: 9999px;
     background: white;
     font-size: 16px;
@@ -621,7 +645,7 @@ select {
     font-weight: 600;
     padding: 8px 16px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 18px;
       line-height: 28px;
       padding: 6px 16px;
@@ -640,17 +664,17 @@ select {
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
-    @variant max-desktop {
+    @variant max-laptop {
       min-width: 288px;
     }
 
-    @variant desktop {
+    @variant laptop {
       height: 336px;
       border-radius: 32px;
       padding: 20px 24px;
     }
 
-    @variant desktop-xl {
+    @variant desktop {
       height: 400px;
     }
   }
@@ -658,13 +682,13 @@ select {
   .promotion-item p {
     color: var(--color-neutral-200);
 
-    @variant max-desktop {
+    @variant max-laptop {
       font-size: 14px;
       line-height: 20px;
     }
   }
 
-  .image-link::before {
+  .image-link::after {
     content: url(~/assets/icons/link.svg);
     position: absolute;
     top: 12px;
@@ -674,7 +698,7 @@ select {
     line-height: 0;
     padding: 6px;
 
-    @variant desktop {
+    @variant laptop {
       top: 24px;
       right: 24px;
     }
@@ -686,7 +710,7 @@ select {
     gap: 8px;
     padding: 8px;
 
-    @variant desktop {
+    @variant laptop {
       display: none;
     }
   }
@@ -724,16 +748,32 @@ select {
     background: white;
   }
 
-  @variant desktop {
+  @variant laptop {
     .stripe-pagination {
       background: none;
       gap: 16px;
     }
 
     .stripe-pagination-item {
+      --opacity: 45%;
       min-width: 142px;
       height: 8px;
+      background: color-mix(in oklab, white var(--opacity), transparent);
     }
+
+    .stripe-pagination-item:hover {
+      --opacity: 70%;
+    }
+
+    .stripe-pagination-item.active {
+      --opacity: 100%;
+    }
+  }
+
+  .label {
+    display: flex;
+    align-items: center;
+    color: var(--color-neutral-600);
   }
 
   .switch {
@@ -744,6 +784,7 @@ select {
     padding: 2px;
   }
 
+  .label:hover .switch,
   .switch:hover {
     background: var(--color-neutral-400);
   }
@@ -757,11 +798,15 @@ select {
     box-shadow: var(--shadow-sm);
   }
 
-  :checked + .switch {
+  :checked + .label {
+    color: var(--color-neutral-800);
+  }
+
+  :checked + .label .switch {
     background: var(--color-neutral-500);
   }
 
-  :checked + .switch > .switch-knob {
+  :checked + .label .switch-knob {
     margin-left: auto;
   }
 

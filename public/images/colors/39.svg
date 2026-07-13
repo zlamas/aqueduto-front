@@ -1,0 +1,23 @@
+<svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_924_41252)">
+<g clip-path="url(#clip1_924_41252)">
+<path d="M0 14C0 6.26801 6.26801 0 14 0C21.732 0 28 6.26801 28 14C28 21.732 21.732 28 14 28C6.26801 28 0 21.732 0 14Z" fill="#888887"/>
+<g opacity="0.75" filter="url(#filter0_f_924_41252)">
+<path d="M1 15C0.833333 12.3333 6.20009 2.6 13.0001 1" stroke="white" stroke-width="4"/>
+</g>
+</g>
+</g>
+<defs>
+<filter id="filter0_f_924_41252" x="-7.00366" y="-6.94727" width="26.4618" height="28.0723" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+<feFlood flood-opacity="0" result="BackgroundImageFix"/>
+<feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape"/>
+<feGaussianBlur stdDeviation="3" result="effect1_foregroundBlur_924_41252"/>
+</filter>
+<clipPath id="clip0_924_41252">
+<path d="M0 14C0 6.26801 6.26801 0 14 0C21.732 0 28 6.26801 28 14C28 21.732 21.732 28 14 28C6.26801 28 0 21.732 0 14Z" fill="white"/>
+</clipPath>
+<clipPath id="clip1_924_41252">
+<path d="M0 14C0 6.26801 6.26801 0 14 0C21.732 0 28 6.26801 28 14C28 21.732 21.732 28 14 28C6.26801 28 0 21.732 0 14Z" fill="white"/>
+</clipPath>
+</defs>
+</svg>

@@ -16,6 +16,7 @@ const icon = {
   pdf: 'pdf',
   catalog: 'xls',
   model3d: 'zip',
+  model: 'zip',
 }
 </script>
 
@@ -32,7 +33,7 @@ const icon = {
       </span>
     </div>
     <div class="flex items-center gap-[8px] shrink-0">
-      <span class="text-[14px]/[20px] text-neutral-500 group-hover:text-neutral-600 max-desktop:hidden">
+      <span class="text-[14px]/[20px] text-neutral-500 group-hover:text-neutral-600 max-laptop:hidden">
         размер файла
       </span>
       <button class="bg-brand-600 group-hover:bg-brand-700 rounded-[8px] p-[8px]">

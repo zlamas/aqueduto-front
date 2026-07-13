@@ -30,18 +30,18 @@ useHead({ title })
 
 <template>
   <main>
-    <section class="hero-banner image-gradient [--bg:url(/images/catalog.jpg)] [--direction:bottom] desktop:[--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[64px]">
-      <div class="container grid desktop:content-between max-desktop:p-[16px] max-desktop:backdrop-blur-[2px] max-desktop:bg-black/20">
+    <section class="hero-banner image-gradient grid [--bg:url(/images/catalog.jpg)] [--direction:bottom] laptop:[--direction:left] [--opacity:0.6] mb-[32px] laptop:mb-[64px]">
+      <div class="container grid laptop:content-between max-laptop:p-[16px] max-laptop:backdrop-blur-[2px] max-laptop:bg-black/20">
         <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="relative grid content-center desktop:p-[0_160px_64px]">
-          <h1 class="text-text-inverse max-desktop:m-0 max-desktop:text-center">
+        <div class="relative grid content-center laptop:p-[0_160px_64px]">
+          <h1 class="text-text-inverse max-laptop:m-0 max-laptop:text-center">
             Каталог Aqueduto 2026
           </h1>
-          <p class="text-white text-[20px]/[32px] mb-[24px] max-desktop:hidden">
+          <p class="text-white text-[20px]/[32px] mb-[24px] max-laptop:hidden">
             Загрузите наш полный каталог и откройте для себя мир <br> элегантной и надежной сантехники Aqueduto!
           </p>
-          <NuxtLink to="/" class="button button-primary p-[14px_28px] justify-self-start max-desktop:absolute bottom-0 max-desktop:w-full">
+          <NuxtLink to="/" class="button button-primary p-[14px_28px] justify-self-start max-laptop:absolute bottom-0 max-laptop:w-full">
             <img src="~/assets/icons/download.svg" alt="">
             <span>Скачать каталог</span>
           </NuxtLink>
@@ -50,15 +50,15 @@ useHead({ title })
     </section>
 
     <div class="container">
-      <div class="flex max-desktop:flex-col gap-[24px]">
-        <div class="flex desktop:flex-col gap-[4px_12px] desktop:w-[342px] whitespace-nowrap overflow-x-auto scrollbar-none max-desktop:-mx-[16px] max-desktop:px-[16px]">
+      <div class="flex max-laptop:flex-col gap-[24px]">
+        <div class="flex laptop:flex-col gap-[4px_12px] laptop:w-[342px] whitespace-nowrap overflow-x-auto scrollbar-none max-laptop:-mx-[16px] max-laptop:px-[16px]">
           <button
             v-for="category in categories"
             :key="category.id"
             :class="{
-              'rounded-full desktop:rounded-[16px] p-[10px_16px] desktop:p-[12px_16px] desktop:text-[24px]/[32px] text-left font-medium desktop:font-semibold': true,
-              'text-neutral-600 max-desktop:bg-neutral-100 hover:bg-neutral-100': category.slug !== selectedCategory,
-              'bg-brand-950 text-white desktop:bg-neutral-950': category.slug === selectedCategory,
+              'rounded-full laptop:rounded-[16px] p-[10px_16px] laptop:p-[12px_16px] laptop:text-[24px]/[32px] text-left font-medium laptop:font-semibold': true,
+              'text-neutral-600 max-laptop:bg-neutral-100 hover:bg-neutral-100': category.slug !== selectedCategory,
+              'bg-brand-950 text-white laptop:bg-neutral-950': category.slug === selectedCategory,
             }"
             @click="selectedCategory = category.slug"
           >

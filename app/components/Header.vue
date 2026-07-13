@@ -1,5 +1,6 @@
 <script setup>
 import Dropdown from "@/components/Dropdown.vue";
+import Search from "./Search.vue";
 
 defineProps({
   settings: Object,
@@ -10,8 +11,8 @@ const mobileMenuOpen = ref(false)
 </script>
 
 <template>
-  <header class="font-medium desktop:shadow-md">
-    <div class="bg-neutral-900 text-white text-[14px] max-desktop:hidden">
+  <header class="font-medium laptop:shadow-md">
+    <div class="bg-neutral-900 text-white text-[14px] max-laptop:hidden">
       <div class="container flex justify-between items-center py-[8px]">
         <div class="flex items-center gap-[4px]">
           <img src="~/assets/icons/clock.svg" alt="">
@@ -34,31 +35,31 @@ const mobileMenuOpen = ref(false)
 
     <nav class="text-neutral-700 py-[16px]">
       <div class="container">
-        <div class="flex justify-between max-desktop:flex-col gap-[16px_64px]">
+        <div class="flex justify-between max-laptop:flex-col gap-[16px_64px]">
           <div class="flex items-center gap-[60px]">
             <NuxtLink to="/" class="shrink-0">
               <img src="~/assets/icons/logo.svg" alt="">
             </NuxtLink>
             <ul
               :class="{
-                'flex gap-[24px_36px] desktop-xl:gap-x-[40px] list-none max-desktop:fixed max-desktop:inset-0  max-desktop:flex-col max-desktop:bg-white max-desktop:z-999 max-desktop:p-[16px]': true,
-                'max-desktop:hidden': !mobileMenuOpen,
+                'flex gap-[24px_36px] desktop:gap-x-[40px] list-none max-laptop:fixed max-laptop:inset-0  max-laptop:flex-col max-laptop:bg-white max-laptop:z-999 max-laptop:p-[16px]': true,
+                'max-laptop:hidden': !mobileMenuOpen,
               }"
             >
               <button
-                class="absolute top-0 right-0 p-[16px] desktop:hidden"
+                class="absolute top-0 right-0 p-[16px] laptop:hidden"
                 @click="mobileMenuOpen = false"
               >
                 <img src="~/assets/icons/delete.svg" alt="">
               </button>
               <li>
-                <NuxtLink to="/about">
+                <NuxtLink to="/about" data-title="О нас">
                   О нас
                 </NuxtLink>
               </li>
               <li>
                 <Dropdown
-                  content-class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] rounded-[20px] p-[64px_96px] max-desktop:hidden"
+                  content-class="grid grid-cols-5 gap-[24px] rounded-[20px] p-[64px_96px] text-neutral-600 max-laptop:hidden"
                   :hover="true"
                 >
                   <template #button>
@@ -66,7 +67,7 @@ const mobileMenuOpen = ref(false)
                       to="/gallery"
                       class="header-dropdown"
                     >
-                      Галерея
+                      <span data-title="Галерея">Галерея</span>
                     </NuxtLink>
                   </template>
 
@@ -74,20 +75,20 @@ const mobileMenuOpen = ref(false)
                     v-for="style in navigation.gallery"
                     :key="style.id"
                     :to="`/gallery/${style.slug}`"
-                    class="flex items-center gap-[12px] rounded-[12px] p-[4px]"
+                    class="grid justify-items-center text-center gap-[8px]"
                   >
                     <img
                       :src="style.thumbnail"
-                      class="size-[56px] rounded-[8px]"
+                      class="size-[186px] object-cover rounded-[15px]"
                       alt=""
                     >
-                    <div class="font-semibold">{{ style.title }}</div>
+                    <span>{{ style.title }}</span>
                   </NuxtLink>
                 </Dropdown>
               </li>
               <li>
                 <Dropdown
-                  content-class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] rounded-[20px] p-[64px_96px] max-desktop:hidden"
+                  content-class="grid grid-rows-4 grid-flow-col auto-cols-[276px] gap-[24px] rounded-[20px] p-[64px_96px] max-laptop:hidden"
                   :hover="true"
                 >
                   <template #button>
@@ -95,7 +96,7 @@ const mobileMenuOpen = ref(false)
                       to="/catalog"
                       class="header-dropdown"
                     >
-                      Каталог
+                      <span data-title="Каталог">Каталог</span>
                     </NuxtLink>
                   </template>
 
@@ -118,38 +119,36 @@ const mobileMenuOpen = ref(false)
                 </Dropdown>
               </li>
               <li>
-                <NuxtLink to="/promotions">
+                <NuxtLink to="/promotions" data-title="Акции">
                   Акции
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/where-to-buy">
+                <NuxtLink to="/where-to-buy" data-title="Где купить">
                   Где купить
                 </NuxtLink>
               </li>
               <li>
-                <NuxtLink to="/contact">
+                <NuxtLink to="/contact" data-title="Контакты">
                   Контакты
                 </NuxtLink>
               </li>
             </ul>
           </div>
 
-          <div class="flex gap-[8px] desktop:gap-[24px] desktop-xl:gap-[32px] justify-end flex-1">
+          <div class="flex gap-[8px] laptop:gap-[24px] desktop:gap-[32px] justify-end flex-1">
             <button
-              class="header-button desktop:hidden"
+              class="header-button laptop:hidden"
               @click="mobileMenuOpen = !mobileMenuOpen"
             >
               <img src="~/assets/icons/menu.svg" alt="">
             </button>
 
             <form action="/search" class="header-search">
-              <label class="search-field h-full">
-                <input name="q" class="search-input" type="text" placeholder="Поиск">
-              </label>
+              <Search name="q" placeholder="Поиск" />
             </form>
 
-            <div class="flex gap-[4px] desktop:gap-[12px]">
+            <div class="flex gap-[4px] laptop:gap-[12px]">
               <NuxtLink class="header-button"  to="/favorites">
                 <img src="~/assets/icons/favorite.svg" alt="">
               </NuxtLink>
@@ -168,11 +167,29 @@ const mobileMenuOpen = ref(false)
 @reference "~/assets/css/main.css";
 
 @layer components {
+  li:hover {
+    color: var(--color-neutral-800);
+    font-weight: 700;
+  }
+
+  li:active {
+    color: var(--color-brand-950);
+    font-weight: 700;
+  }
+
+  [data-title]::before {
+    content: attr(data-title);
+    display: block;
+    color: transparent;
+    font-weight: 700;
+    height: 0;
+  }
+
   .header-search {
     flex: 1;
     max-width: 280px;
 
-    @variant desktop {
+    @variant laptop {
       font-size: 14px;
     }
   }
@@ -185,7 +202,7 @@ const mobileMenuOpen = ref(false)
     border-radius: 8px;
     flex-shrink: 0;
 
-    @variant desktop {
+    @variant laptop {
       background: none;
     }
   }
@@ -195,7 +212,7 @@ const mobileMenuOpen = ref(false)
     width: 20px;
     height: 20px;
 
-    @variant desktop {
+    @variant laptop {
       width: 24px;
       height: 24px;
     }
@@ -210,6 +227,10 @@ const mobileMenuOpen = ref(false)
   .header-dropdown::after {
     content: url("/images/arrow-down.svg");
     line-height: 0;
+  }
+
+  .header-dropdown:hover::after {
+    rotate: 180deg;
   }
 }
 </style>

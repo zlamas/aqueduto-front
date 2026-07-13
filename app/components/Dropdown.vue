@@ -31,28 +31,30 @@ const open = ref(false)
 const popupPosition = ref(null)
 
 let hoverTimeout = null
-const hoverTimeoutDuration = 200
+const hoverTimeoutDuration = 100
+
+function positionDropdown() {
+  const buttonRect = button.value.getBoundingClientRect()
+
+  const top = window.scrollY + buttonRect.bottom
+  const left = Math.max(
+    Math.min(
+      window.scrollX + buttonRect.left,
+      window.innerWidth - dropdown.value.offsetWidth,
+    ),
+    0
+  )
+
+  popupPosition.value = {
+    top: `${top}px`,
+    left: `${left}px`,
+  }
+}
 
 watch(
   open,
   (value) => {
-    if (value) {
-      const buttonRect = button.value.getBoundingClientRect()
-
-      const top = window.scrollY + buttonRect.bottom
-      const left = Math.max(
-        Math.min(
-          window.scrollX + buttonRect.left,
-          window.innerWidth - dropdown.value.offsetWidth,
-        ),
-        0
-      )
-
-      popupPosition.value = {
-        top: `${top}px`,
-        left: `${left}px`,
-      }
-    }
+    if (value) positionDropdown()
   }
 )
 
@@ -92,15 +94,26 @@ function onPointerLeave() {
 
     <button
       v-else
-      :class="`button button-secondary rounded-full ${buttonClass}`"
+      :class="{
+        [`button button-secondary rounded-full ${buttonClass}`]: true,
+        'bg-neutral-200 outline -outline-offset-1 outline-neutral-400': open
+      }"
     >
-      <img v-if="iconLeft" :src="`/images/${iconLeft}.svg`" alt="">
-      <span :class="{ 'max-desktop:hidden': iconLeft }">
+      <img
+        v-if="iconLeft"
+        class="min-w-[20px]"
+        :src="`/images/${iconLeft}.svg`"
+        alt=""
+      >
+      <span :class="{
+        'whitespace-nowrap': true,
+         'max-laptop:hidden': iconLeft
+      }">
         {{ label }}
       </span>
       <img
         v-if="iconRight"
-        :class="{ 'rotate-180': open }"
+        :class="{ 'min-w-[20px]': true, 'rotate-180': open }"
         :src="`/images/${iconRight}.svg`"
         alt=""
       >

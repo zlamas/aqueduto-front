@@ -9,7 +9,7 @@ useHead({ title })
 </script>
 
 <template>
-  <main class="pt-[32px] desktop:pt-[48px]">
+  <main class="pt-[32px] laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
@@ -17,13 +17,13 @@ useHead({ title })
         :light="true"
       />
 
-      <h1 class="desktop:mb-[32px]">{{ title }}</h1>
+      <h1 class="laptop:mb-[32px]">{{ title }}</h1>
       <div class="bento">
         <NuxtLink
           v-for="promotion in promotionsData.data"
           :key="promotion.id"
           :to="`/promotions/${promotion.slug}`"
-          class="promotion-item image-gradient image-link"
+          class="promotion-item image-gradient zoom-hover image-link"
           :style="{ '--bg': `url(${promotion.image})` }"
         >
           <h4>{{ promotion.title }}</h4>

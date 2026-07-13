@@ -54,7 +54,7 @@ const manuals = ref([
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[48px]">
+  <main class="pt-[24px] laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
@@ -62,9 +62,9 @@ const manuals = ref([
         :light="true"
       />
 
-      <h1 class="mb-[24px] desktop:mb-[32px]">{{ title }}</h1>
+      <h1 class="mb-[24px] laptop:mb-[32px]">{{ title }}</h1>
 
-      <div class="flex gap-[16px] mb-[24px] desktop:mb-[32px] px-[16px] -mx-[16px] overflow-auto scrollbar-none">
+      <div class="flex gap-[16px] mb-[24px] laptop:mb-[32px] px-[16px] -mx-[16px] overflow-auto scrollbar-none">
         <button
           v-for="category in allCategories"
           :key="category.slug"
@@ -95,12 +95,12 @@ const manuals = ref([
         </button>
       </div>
 
-      <div class="layout desktop:gap-[64px]">
+      <div class="layout laptop:gap-[64px]">
         <section
           v-show="(selectedCategory === null || selectedCategory === 'products') && products.length"
           class="search-section"
         >
-          <h5>Товары</h5>
+          <h3 class="m-0">Товары</h3>
 
           <div class="product-grid">
             <ProductCard
@@ -112,7 +112,7 @@ const manuals = ref([
 
           <button
               v-show="page * perPage < products.length"
-              class="button button-tertiary desktop:mx-auto"
+              class="button button-tertiary laptop:mx-auto"
               @click="page += 1"
             >
             Показать еще
@@ -123,18 +123,38 @@ const manuals = ref([
           v-show="selectedCategory === null || selectedCategory === 'collections'"
           class="search-section"
         >
-          <h5>Коллекции</h5>
+          <h3 class="m-0">Коллекции</h3>
           <div class="bento">
-            <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-4.jpg)]" data-name="OVO
-(6 товаров)"/>
-            <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-11.jpg)]" data-name="MACIO
-(6 товаров)"/>
-            <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-3.jpg)]" data-name="FORMA
-(6 товаров)"/>
-            <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-4.jpg)]" data-name="CANO
-(6 товаров)"/>
-            <NuxtLink to="/gallery" class="image-gradient style-item [--bg:url(/images/style-3.jpg)]" data-name="CHUVA
-(6 товаров)"/>
+            <NuxtLink to="/gallery" class="image-gradient zoom-hover style-item [--bg:url(/images/style-4.jpg)]">
+              <span class="style-item-name">
+                <span>OVO </span>
+                <span class="text-neutral-500">(6 товаров)</span>
+              </span>
+            </NuxtLink>
+            <NuxtLink to="/gallery" class="image-gradient zoom-hover style-item [--bg:url(/images/style-11.jpg)]">
+              <span class="style-item-name">
+                <span>MACIO </span>
+                <span class="text-neutral-500">(6 товаров)</span>
+              </span>
+            </NuxtLink>
+            <NuxtLink to="/gallery" class="image-gradient zoom-hover style-item [--bg:url(/images/style-3.jpg)]">
+              <span class="style-item-name">
+                <span>FORMA </span>
+                <span class="text-neutral-500">(6 товаров)</span>
+              </span>
+            </NuxtLink>
+            <NuxtLink to="/gallery" class="image-gradient zoom-hover style-item [--bg:url(/images/style-4.jpg)]">
+              <span class="style-item-name">
+                <span>CANO </span>
+                <span class="text-neutral-500">(6 товаров)</span>
+              </span>
+            </NuxtLink>
+            <NuxtLink to="/gallery" class="image-gradient zoom-hover style-item [--bg:url(/images/style-3.jpg)]">
+              <span class="style-item-name">
+                <span>CHUVA </span>
+                <span class="text-neutral-500">(6 товаров)</span>
+              </span>
+            </NuxtLink>
           </div>
         </section>
 
@@ -142,7 +162,7 @@ const manuals = ref([
           v-show="selectedCategory === null || selectedCategory === 'manuals'"
           class="search-section"
         >
-          <h5>Материалы</h5>
+          <h3 class="m-0">Материалы</h3>
           <div class="grid gap-[24px] content-start flex-1">
             <div
               v-for="group in manuals"

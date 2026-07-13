@@ -79,7 +79,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 </script>
 
 <template>
-  <main class="desktop:pt-[48px]">
+  <main class="laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: 'Каталог', path: '/catalog' }, { name: title } ]"
@@ -87,17 +87,17 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         :light="true"
       />
 
-      <div class="flex flex-col desktop:grid desktop:grid-cols-2 items-start gap-[24px] mb-[48px] desktop:mb-[64px]">
-        <div class="flex items-center justify-center relative rounded-[24px] desktop:rounded-[40px] overflow-hidden">
+      <div class="flex flex-col laptop:grid laptop:grid-cols-2 items-start gap-[24px] mb-[48px] laptop:mb-[64px]">
+        <div class="flex items-center justify-center relative rounded-[24px] laptop:rounded-[40px] overflow-hidden">
           <button
-            class="arrow arrow-left absolute left-[12px] max-desktop:hidden"
-            :disabled="imagesSlider.activeItem.value === 1"
-            @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
+            class="arrow arrow-left absolute left-[12px] max-laptop:hidden"
+            :disabled="imagesSlider.activeItem.value === 0"
+            @click="imagesSlider.previousSlide"
           ></button>
           <button
-            class="arrow arrow-right absolute right-[12px] max-desktop:hidden"
-            :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
-            @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
+            class="arrow arrow-right absolute right-[12px] max-laptop:hidden"
+            :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value - 1"
+            @click="imagesSlider.nextSlide"
           ></button>
 
           <div
@@ -123,7 +123,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div class="pill-pagination absolute bottom-[16px]">
             <div
-              v-for="index in imagesSlider.scrollPointsCount.value"
+              v-for="(_, index) in imagesSlider.scrollPointsCount.value"
               :class="{
                 'pill-pagination-item': true,
                 'active': imagesSlider.activeItem.value === index
@@ -133,14 +133,14 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
           </div>
         </div>
 
-        <div class="grid gap-[24px] desktop:gap-[44px]">
-          <div class="grid gap-[24px] desktop:gap-[32px]">
+        <div class="grid gap-[24px] laptop:gap-[44px]">
+          <div class="grid gap-[24px] laptop:gap-[32px]">
             <div>
               <h3 class="mb-[8px]">
                 {{ productData.name }}
               </h3>
 
-              <div class="flex desktop:flex-col-reverse items-center desktop:items-start justify-between gap-[16px] text-[14px]">
+              <div class="flex laptop:flex-col-reverse items-center laptop:items-start justify-between gap-[16px] text-[14px]">
                 <div class="bg-neutral-100 rounded-full p-[4px_12px] font-medium">
                   {{ productData.collection.name }}
                 </div>
@@ -158,7 +158,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                 <span>{{ currentColorData?.name }}</span>
               </div>
 
-              <div class="flex gap-[8px] overflow-x-auto scrollbar-none mt-[12px] max-desktop:-mx-[16px] max-desktop:px-[16px]">
+              <div class="flex gap-[8px] overflow-x-auto scrollbar-none mt-[12px] max-laptop:-mx-[16px] max-laptop:px-[16px]">
                 <img
                   v-for="color in productData.colors"
                   :key="color.id"
@@ -213,10 +213,10 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                 @click="toggleComparison"
               >
                 <img class="size-[20px]" src="~/assets/icons/compare.svg" alt="">
-                <span class="max-desktop:hidden">
+                <span class="max-laptop:hidden">
                   {{ isInComparison ? 'В сравнении' : 'Добавить к сравнению' }}
                 </span>
-                <span class="desktop:hidden">
+                <span class="laptop:hidden">
                   {{ isInComparison ? 'В сравнении' : 'К сравнению' }}
                 </span>
               </button>
@@ -225,8 +225,11 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
         </div>
       </div>
 
-      <section class="grid gap-[16px] desktop:gap-[32px] mb-[64px] desktop:mb-[128px]">
-        <div class="flex desktop:justify-center gap-[8px] desktop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto">
+      <section :class="{
+        'grid gap-[16px] laptop:gap-[32px] mx-auto mb-[64px] laptop:mb-[128px]': true,
+        'w-max max-w-full': currentTab === 'documents'
+      }">
+        <div class="flex laptop:justify-center gap-[8px] laptop:gap-[24px] -mx-[16px] px-[16px] scrollbar-none overflow-x-auto">
           <button
             v-for="(name, id) in tabs"
             :key="id"
@@ -256,7 +259,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
         <div
           v-show="currentTab === 'documents'"
-          class="grid gap-[8px] max-w-[941px]"
+          class="grid gap-[8px]"
         >
           <DownloadItem
             v-for="document in productData.documents"
@@ -278,7 +281,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
       </section>
 
       <section>
-        <div class="flex max-desktop:flex-col items-center justify-between gap-[24px] max-desktop:mb-[16px]">
+        <div class="flex max-laptop:flex-col items-center justify-between gap-[24px] max-laptop:mb-[16px]">
           <h3 class="m-0">Похожие товары</h3>
 
           <div class="arrows self-end">
@@ -295,7 +298,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
         <div
           ref="products-slider"
-          class="slider desktop:py-[32px]"
+          class="slider laptop:py-[32px]"
         >
           <ProductCard
             v-for="product in similarData"
@@ -327,14 +330,14 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 }
 
 .tab {
-  @variant max-desktop {
+  @variant max-laptop {
     background: var(--color-neutral-100);
     border-radius: 9999px;
     color: var(--color-neutral-600);
     padding: 10px 16px;
   }
 
-  @variant desktop {
+  @variant laptop {
     font-size: 24px;
     line-height: 32px;
     font-weight: 700;
@@ -344,18 +347,18 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 }
 
 .tab.selected {
-  @variant max-desktop {
+  @variant max-laptop {
     background: var(--color-neutral-300);
     color: var(--color-neutral-800);
   }
 
-  @variant desktop {
+  @variant laptop {
     position: relative;
     color: var(--color-brand-950);
   }
 }
 
-@variant desktop {
+@variant laptop {
   .tab.selected::after {
     content: "";
     display: block;
@@ -369,7 +372,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 }
 
 .spec-list {
-  @variant desktop {
+  @variant laptop {
     columns: 2;
     gap: 80px;
   }
@@ -378,6 +381,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 .spec-row {
   display: flex;
   justify-content: space-between;
+  gap: 8px;
   border-bottom: 1px solid var(--color-neutral-300);
   padding-block: 16px;
 }
@@ -390,7 +394,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
   font-weight: 600;
   text-align: right;
 
-  @variant max-desktop {
+  @variant max-laptop {
     color: var(--color-neutral-700);
   }
 }

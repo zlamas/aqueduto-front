@@ -1,6 +1,7 @@
 <script setup>
 import {useAPI} from "@/composables/useAPI.js";
 import {getDayOfWeek} from "@/assets/js/funcs.js";
+import Search from "../components/Search.vue";
 
 const { data: whereToBuyData } = await useAPI('/where-to-buy')
 
@@ -29,6 +30,8 @@ function initMap() {
     zoom: 16,
   })
 
+  map.controls.remove('searchControl')
+
   let LayoutClass = ymaps.templateLayoutFactory.createClass(`
     <div class="store-balloon {% if properties.is_open %} open {% else %} closed {% endif %}">
       {% if properties.image %}
@@ -52,8 +55,7 @@ function initMap() {
 
         <div class="store-schedule py-[8px]">
           <span class="store-status"></span>
-          <span> · </span>
-          <span>{{ properties.status_text }}</span>
+          <span class="store-status-text">{{ properties.status_text }}</span>
         </div>
 
         <div class="grid gap-[8px]">
@@ -84,7 +86,7 @@ function initMap() {
         iconLayout: 'default#imageWithContent',
         iconImageHref: '/images/map-marker.svg',
         iconImageSize: [40, 40],
-        iconImageOffset: [-20, 8],
+        iconImageOffset: [-20, -40],
         hideIconOnBalloonOpen: false,
         balloonLayout: LayoutClass,
       }
@@ -134,7 +136,7 @@ const days = {
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[48px]">
+  <main class="pt-[24px] laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
@@ -142,9 +144,9 @@ const days = {
         :light="true"
       />
 
-      <div class="grid gap-[16px] desktop:gap-[64px]">
+      <div class="grid gap-[16px] laptop:gap-[64px]">
         <section>
-          <h1 class="desktop:mb-[32px]">{{ title }}</h1>
+          <h1 class="laptop:mb-[32px]">{{ title }}</h1>
 
           <div class="flex items-center gap-[12px] bg-warning-50 border-2 border-warning-100 text-neutral-800 rounded-[16px] p-[16px]">
             <img class="size-[24px]" src="~/assets/icons/warning.svg" alt="">
@@ -153,7 +155,7 @@ const days = {
             </span>
           </div>
 
-          <div class="flex gap-[8px] whitespace-nowrap overflow-x-auto scrollbar-none -mx-[16px] px-[16px] mt-[24px] desktop:hidden">
+          <div class="flex gap-[8px] whitespace-nowrap overflow-x-auto scrollbar-none -mx-[16px] px-[16px] mt-[24px] laptop:hidden">
             <button
               v-for="(tab, id) in tabs"
               :key="id"
@@ -173,17 +175,18 @@ const days = {
 
           <div
             v-show="currentTab !== 'online'"
-            class="flex gap-[24px] mt-[16px] desktop:mt-[24px]"
+            class="flex gap-[24px] mt-[16px] laptop:mt-[24px]"
           >
             <div
               :class="{
-                'grid gap-[16px] content-start h-[764px] desktop:w-[464px] bg-neutral-100 rounded-[28px] p-[12px]': true,
-                'max-desktop:hidden': currentTab !== 'offline'
+                'grid gap-[16px] content-start h-[764px] laptop:w-[464px] bg-neutral-100 rounded-[28px] p-[12px]': true,
+                'max-laptop:hidden': currentTab !== 'offline'
               }"
             >
-              <label class="search-field w-full bg-white px-[12px]">
-                <input class="search-input" type="text" placeholder="Введите название/город/адрес">
-              </label>
+              <Search
+                class="bg-white"
+                placeholder="Введите название/город/адрес"
+              />
 
               <div
                 ref="dealers-wrapper"
@@ -219,16 +222,17 @@ const days = {
                   </div>
 
                   <div class="store-schedule">
-                    <span class="store-status"></span>
-                    <span> · </span>
-                    <details
-                      v-if="Object.keys(dealer.schedule).length"
-                      class="store-schedule-details"
-                    >
-                      <summary class="store-schedule-open" @click.stop>
-                        {{ dealer.status_text }}
+                    <details class="store-schedule-details">
+                      <summary class="store-schedule-summary" @click.stop>
+                        <span class="store-status"></span>
+                        <span class="store-status-text">
+                          {{ dealer.status_text }}
+                        </span>
                       </summary>
-                      <table class="store-schedule-table">
+                      <table
+                        v-if="Object.keys(dealer.schedule).length"
+                        class="store-schedule-table"
+                      >
                         <colgroup>
                           <col class="w-full">
                           <col>
@@ -252,25 +256,25 @@ const days = {
 
             <div
               :class="{
-                'grid gap-[16px] bg-neutral-100 rounded-[28px] desktop:rounded-[40px] overflow-hidden max-desktop:p-[12px] flex-1': true,
-                'max-desktop:hidden': currentTab !== 'map'
+                'grid gap-[16px] bg-neutral-100 rounded-[28px] laptop:rounded-[40px] overflow-hidden max-laptop:p-[12px] flex-1': true,
+                'max-laptop:hidden': currentTab !== 'map'
               }"
             >
-              <label class="search-field w-full bg-white px-[12px] desktop:hidden">
+              <label class="search-field w-full bg-white px-[12px] laptop:hidden">
                 <input class="search-input" type="text" placeholder="Введите название/город/адрес">
               </label>
 
               <div
-                class="rounded-[16px] desktop:rounded-[40px] overflow-hidden max-desktop:h-[487px]"
+                class="rounded-[16px] laptop:rounded-[40px] overflow-hidden max-laptop:h-[487px]"
                 id="map"
               ></div>
             </div>
           </div>
         </section>
 
-        <section :class="{ 'max-desktop:hidden': currentTab !== 'online' }">
-          <h2 class="mb-[32px] max-desktop:hidden">Онлайн-дистрибьюторы</h2>
-          <div class="grid desktop:grid-cols-3 items-center gap-[12px] desktop:gap-[24px]">
+        <section :class="{ 'max-laptop:hidden': currentTab !== 'online' }">
+          <h2 class="mb-[32px] max-laptop:hidden">Онлайн-дистрибьюторы</h2>
+          <div class="grid laptop:grid-cols-3 items-center gap-[12px] laptop:gap-[24px]">
             <div
               v-for="distributor in online_distributors"
               :key="distributor.id"
@@ -337,23 +341,33 @@ const days = {
 
 .store-item {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   background: white;
   border-radius: 16px;
   padding: 12px 16px;
   color: var(--color-neutral-600);
   font-size: 14px;
   cursor: pointer;
+  outline: 1px solid transparent;
+  outline-offset: -1px;
 }
 
-.store-item:hover {
-  background: var(--color-neutral-50);
+.store-item:hover,
+.store-item:active {
+  background: var(--color-neutral-25);
 }
 
 .store-item.selected {
   background: var(--color-neutral-50);
-  outline: 1px solid var(--color-info-500);
-  outline-offset: -1px;
+}
+
+.store-item:hover {
+  outline-color: var(--color-neutral-300);
+}
+
+.store-item:active,
+.store-item.selected {
+  outline-color: var(--color-info-500);
 }
 
 .open {
@@ -391,8 +405,9 @@ const days = {
 .store-status {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: 6px;
   color: var(--color-neutral-700);
+  font-weight: 500;
 }
 
 .store-schedule {
@@ -414,38 +429,56 @@ const days = {
   content: var(--status-content);
 }
 
-.store-schedule-details {
-  flex: 1;
+.store-schedule:hover .store-status {
+  color: var(--color-neutral-800);
 }
 
-.store-schedule-open {
-  display: inline-flex;
-  gap: 2px;
+.store-schedule-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
 }
 
-.store-schedule-open::after {
+summary.store-schedule-summary::after {
   content: url(~/assets/icons/arrow-collapse.svg);
+  align-self: center;
   line-height: 0;
 }
 
-[open] > .store-schedule-open::after {
+[open] > summary.store-schedule-summary::after {
   rotate: 180deg;
 }
 
+.store-schedule:hover .store-schedule-summary {
+  color: var(--color-neutral-700);
+}
+
+.store-status-text::before {
+  content: ' · ';
+}
+
+[open] .store-status-text,
+.store-status-text:empty {
+  display: none;
+}
+
 .store-schedule-table {
-  width: 100%;
   margin-top: 8px;
+  margin-left: 14px;
   white-space: nowrap;
-  font-size: 12px;
+}
+
+.store-schedule-table td {
+  padding-block: 4px;
 }
 
 .store-schedule-table td:last-child {
+  padding-left: 34px;
   text-align: center;
 }
 
 .today {
   color: var(--color-neutral-700);
-  font-weight: 600;
 }
 
 .store-balloon {
@@ -456,10 +489,10 @@ const days = {
   box-shadow: var(--shadow-md);
   font-family: 'Lato', sans-serif;
   font-size: 14px;
-  translate: -50% -100%;
+  translate: -50% calc(-100% - 48px);
   overflow: hidden;
 
-  @variant desktop {
+  @variant laptop {
     width: 320px;
   }
 }

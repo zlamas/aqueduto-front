@@ -45,7 +45,7 @@ function onLocationClick(location, index) {
 </script>
 
 <template>
-  <main class="desktop:pt-[48px]">
+  <main class="laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
@@ -59,7 +59,7 @@ function onLocationClick(location, index) {
           Готовы помочь вам в любой точке России!
         </p>
 
-        <div class="relative max-w-[1200px] mx-auto mt-[64px] max-desktop:hidden">
+        <div class="relative max-w-[1200px] mx-auto mt-[64px] max-laptop:hidden">
           <img
             class="w-full"
             src="/images/map.svg"
@@ -97,7 +97,7 @@ function onLocationClick(location, index) {
         </div>
       </section>
 
-      <section class="flex max-desktop:grid items-start gap-[16px_24px] mt-[24px] desktop:mt-[64px]">
+      <section class="flex max-laptop:grid items-start gap-[16px_24px] mt-[24px] laptop:mt-[64px]">
         <div class="contact-block">
           <div class="flex justify-between items-start">
             <img src="~/assets/icons/contact-phone.svg" alt="" class="contact-icon">
@@ -242,7 +242,7 @@ function onLocationClick(location, index) {
   padding: 16px;
   flex: 1;
 
-  @variant desktop {
+  @variant laptop {
     padding: 24px;
   }
 }

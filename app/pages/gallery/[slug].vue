@@ -28,7 +28,7 @@ let hoverTimeout = null
 const cardHotspotOffset = 8
 const cardEdgeOffset = 16
 
-function positionCard(button, slideIndex) {
+function positionProductCard(button, slideIndex) {
   nextTick().then(() => {
     const slideRect = imagesSliderItems.value[slideIndex].getBoundingClientRect()
     const buttonRect = button.getBoundingClientRect()
@@ -67,7 +67,7 @@ function onHotspotHover(button, hotspot, index) {
       () => {
         selectedHotspot.value = hotspot
         slideIndex.value = index
-        positionCard(button, index)
+        positionProductCard(button, index)
       },
       1000
     )
@@ -87,7 +87,7 @@ function onHotspotClick(button, hotspot, i, j) {
     selectedHotspot.value = hotspot
     slideIndex.value = i
     activeHotspot.value = `${i}.${j}`
-    positionCard(button, i)
+    positionProductCard(button, i)
   } else {
     closeHotspot()
   }
@@ -99,22 +99,41 @@ const imagesSlider = useSlider(imagesSliderContainer, imagesSliderItems)
 
 const relatedSliderContainer = useTemplateRef('related-slider')
 const relatedSlider = useSimpleSlider(relatedSliderContainer)
+
+function createImageSliderRef(el, i, url) {
+  imagesSliderItems.value[i] = el
+
+  let img = new Image()
+
+  img.onload = () => {
+    let { width, height } = img
+    el.style.setProperty('--width', width)
+    el.style.setProperty('--height', height)
+  }
+
+  img.src = url
+}
+
+let autoScrollInterval
+
+onMounted(() => autoScrollInterval = setInterval(imagesSlider.nextSlide, 5000))
+onUnmounted(() => clearInterval(autoScrollInterval))
 </script>
 
 <template>
   <main class="layout">
     <section
-      class="hero-banner desktop:hero-banner-large image-gradient"
+      class="hero-banner hero-banner-large grid max-laptop:h-[314px] image-gradient"
       :style="{ '--bg': `url(${styleData.hero_image})` }"
     >
       <div class="container grid">
         <Breadcrumb :items="[ { name: 'Галерея', path: '/gallery' }, { name: title } ]" />
 
-        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] desktop:rounded-[30px] mx-[16px] p-[24px_12px] desktop:p-[32px_64px] text-center desktop:w-[836px]">
+        <div class="absolute place-self-center bg-black/20 backdrop-blur-[10px] rounded-[12px] laptop:rounded-[30px] mx-[16px] p-[24px_12px] laptop:p-[32px_64px] text-center laptop:w-[836px]">
           <h1 class="text-text-inverse">
             {{ styleData.title }}
           </h1>
-          <p class="text-text-inverse max-desktop:text-[14px]/[20px]">
+          <p class="text-text-inverse max-laptop:text-[14px]/[20px]">
             {{ styleData.description }}
           </p>
         </div>
@@ -124,7 +143,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
     <div class="container">
       <div class="layout">
         <section>
-          <div class="grid desktop:grid-cols-[auto_830px] gap-[8px]">
+          <div class="grid laptop:grid-cols-[auto_830px] gap-[8px]">
             <h2 class="m-0">Используемые коллекции</h2>
             <p>
               {{ styleData.intro_text }}
@@ -132,16 +151,14 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
           </div>
 
           <div class="grid mt-[32px]">
-            <div class="justify-self-end flex gap-[8px] mb-[16px] desktop:hidden">
+            <div class="justify-self-end flex gap-[8px] mb-[16px] laptop:hidden">
               <button
                 class="arrow arrow-left"
-                :disabled="imagesSlider.activeItem.value === 1"
-                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
+                @click="imagesSlider.previousSlide"
               ></button>
               <button
                 class="arrow arrow-right"
-                :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
-                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
+                @click="imagesSlider.nextSlide"
               ></button>
             </div>
 
@@ -153,22 +170,26 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
                 <div
                   v-for="(slide, i) in styleData.images"
                   :key="slide.id"
-                  :ref="(el) => imagesSliderItems[i] = el"
+                  :ref="(el) => createImageSliderRef(el, i, slide.url)"
                   class="slider-item style-page-item"
-                  :style="{ '--bg': `url(${slide.url})` }"
                   @click="closeHotspot"
                 >
-                  <button
-                    v-for="(hotspot, j) in slide.hotspots"
-                    :class="{
-                      'hotspot': true,
-                      'active': activeHotspot === `${i}.${j}`,
-                    }"
-                    :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
-                    @pointerover="onHotspotHover($event.target, hotspot, i)"
-                    @pointerleave="onHotspotLeave()"
-                    @click.stop="onHotspotClick($event.target, hotspot, i, j)"
-                  ></button>
+                  <div
+                    class="hotspot-wrapper"
+                    :style="{ '--bg': `url(${slide.url})` }"
+                  >
+                    <button
+                      v-for="(hotspot, j) in slide.hotspots"
+                      :class="{
+                        'hotspot': true,
+                        'active': activeHotspot === `${i}.${j}`,
+                      }"
+                      :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
+                      @pointerover="onHotspotHover($event.target, hotspot, i)"
+                      @pointerleave="onHotspotLeave()"
+                      @click.stop="onHotspotClick($event.target, hotspot, i, j)"
+                    ></button>
+                  </div>
                 </div>
 
                 <Teleport
@@ -177,17 +198,17 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
                 >
                   <NuxtLink
                     ref="hotspot-card"
-                    :to="`/catalog/${selectedHotspot?.product.slug}`"
+                    :to="`/product/${selectedHotspot?.product.slug}`"
                     :class="{
                       'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
                       'invisible': !selectedHotspot,
                     }"
                     :style="{
-                      maxWidth: `calc(100% - ${cardEdgeOffset * 2}px)`
+                      maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
                     }"
                   >
                     <img
-                      class="size-[96px] desktop:size-[116px] bg-backdrop rounded-[8px]"
+                      class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
                       :src="selectedHotspot?.product.image"
                       alt=""
                     >
@@ -212,20 +233,18 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
               </div>
 
               <button
-                class="arrow arrow-left absolute left-0 -translate-x-1/2 max-desktop:hidden"
-                :disabled="imagesSlider.activeItem.value === 1"
-                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value - 1)"
+                class="arrow arrow-left absolute left-0 -translate-x-1/2 max-laptop:hidden"
+                @click="imagesSlider.previousSlide"
               ></button>
               <button
-                class="arrow arrow-right absolute right-0 translate-x-1/2 max-desktop:hidden"
-                :disabled="imagesSlider.activeItem.value === imagesSlider.scrollPointsCount.value"
-                @click="imagesSlider.goToSlide(imagesSlider.activeItem.value + 1)"
+                class="arrow arrow-right absolute right-0 translate-x-1/2 max-laptop:hidden"
+                @click="imagesSlider.nextSlide"
               ></button>
             </div>
 
             <div class="dot-pagination mt-[12px]">
               <div
-                v-for="index in imagesSlider.scrollPointsCount.value"
+                v-for="(_, index) in imagesSlider.scrollPointsCount.value"
                 :class="{
                   'dot-pagination-item': true,
                   'active': imagesSlider.activeItem.value === index
@@ -236,16 +255,16 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
           </div>
         </section>
 
-        <section class="grid gap-[24px] desktop:gap-[32px]">
+        <section class="grid gap-[24px] laptop:gap-[32px]">
           <h2 class="m-0">Используемые товары</h2>
 
-          <div class="grid grid-cols-2 grid-rows-[auto_auto] grid-flow-col gap-[4px] bg-neutral-100 p-[12px_16px] desktop:p-[16px_32px] rounded-[16px]">
+          <div class="grid grid-cols-2 grid-rows-[auto_auto] grid-flow-col gap-[4px] bg-neutral-100 p-[12px_16px] laptop:p-[16px_32px] rounded-[16px]">
             <div class="text-neutral-500">Позиций</div>
-            <div class="text-[20px]/[32px] desktop:text-[24px] font-bold">
+            <div class="text-[20px]/[32px] laptop:text-[24px] font-bold">
               {{ styleData.products_summary.count }}
             </div>
             <div class="text-neutral-500">Общая стоимость</div>
-            <div class="text-[20px]/[32px] desktop:text-[24px] font-bold">
+            <div class="text-[20px]/[32px] laptop:text-[24px] font-bold">
               {{ formatCurrency(styleData.products_summary.total_price) }}
             </div>
           </div>
@@ -261,7 +280,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 
             <button
               v-show="page * perPage < styleData.products_summary.count"
-              class="button button-tertiary desktop:mx-auto"
+              class="button button-tertiary laptop:mx-auto"
               @click="page += 1"
             >
               Показать еще
@@ -270,9 +289,9 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
         </section>
 
         <section>
-          <div class="flex justify-center desktop:justify-between">
+          <div class="flex justify-center laptop:justify-between">
             <h2 class="m-0">Смотрите также</h2>
-            <div class="arrows max-desktop:hidden">
+            <div class="arrows max-laptop:hidden">
               <button
                 class="arrow arrow-left"
                 @click="relatedSlider.scrollLeft"
@@ -286,20 +305,23 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 
           <div
             ref="related-slider"
-            class="slider mt-[24px] desktop:mt-[32px]"
+            class="slider mt-[24px] laptop:mt-[32px]"
           >
             <NuxtLink
               v-for="style in styleData.related_styles"
               :key="style.id"
-              class="slider-item image-gradient style-item image-link"
+              class="slider-item image-gradient zoom-hover style-item image-link"
               :style="{ '--bg': `url(${style.thumbnail})` }"
               :to="`/gallery/${style.slug}`"
-              :data-name="style.title"
-            />
+            >
+              <span class="style-item-name">
+                {{ style.title }}
+              </span>
+            </NuxtLink>
           </div>
           <NuxtLink
             to="/gallery"
-            class="button button-tertiary mt-[16px] w-full desktop:hidden"
+            class="button button-tertiary mt-[16px] w-full laptop:hidden"
           >
             Посмотреть все
           </NuxtLink>
@@ -313,7 +335,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 @reference "~/assets/css/main.css";
 
 @layer components {
-  @variant desktop {
+  @variant laptop {
     .style-item {
       width: calc(50% - 12px);
     }
@@ -323,15 +345,24 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
     position: relative;
     height: 380px;
     width: 100%;
-    background: var(--bg) center / cover;
     border-radius: 32px;
+    overflow: hidden;
     scroll-snap-align: start;
     scroll-snap-stop: always;
 
-    @variant desktop {
+    @variant laptop {
       height: 472px;
       width: calc(50% - 12px);
     }
+  }
+
+  .hotspot-wrapper {
+    position: relative;
+    aspect-ratio: var(--width) / var(--height);
+    background: var(--bg) center / cover;
+    min-width: 100%;
+    min-height: 100%;
+    place-self: center;
   }
 
   .hotspot {
@@ -346,7 +377,8 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
     border: var(--border) solid rgba(255, 255, 255, var(--opacity-outer));
     border-radius: 50%;
     cursor: pointer;
-    transition: 0.2s;
+    transition: background 0.2s;
+    translate: -50% -50%;
   }
 
   .hotspot::after {

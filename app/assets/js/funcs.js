@@ -6,8 +6,11 @@ export function formatCurrency(sum) {
   return formatNumber(sum) + '₽'
 }
 
-export function filterQuery(items, field, query) {
-  return items.filter((item) => item[field].toLowerCase().includes(query.toLowerCase()))
+export function filterQuery(query = '', items = [], field = null) {
+  return items.filter((item) => {
+    item = field ? item[field] : item
+    return item.toLowerCase().includes(query.toLowerCase())
+  })
 }
 
 export function debounce(func) {

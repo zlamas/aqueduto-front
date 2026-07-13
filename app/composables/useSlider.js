@@ -1,15 +1,14 @@
 export default function useSlider(container, items) {
-  const activeItem = ref(1)
+  const activeItem = ref(0)
   const targetSet = ref(false)
 
   const containerWidth = ref(null)
   const containerScrollWidth = ref(null)
-  const itemOffsets = ref(null)
 
   const scrollPointsCount = computed(() =>
-    (itemOffsets.value?.findIndex(
-      (offset) => offset >= containerScrollWidth.value - containerWidth.value
-    ) + 1) || 0
+    items.value.findIndex(
+      (item) => item.offsetLeft >= containerScrollWidth.value - containerWidth.value
+    ) + 1
   )
 
   let scrollPos = 0
@@ -21,7 +20,7 @@ export default function useSlider(container, items) {
     scrollPos = container.value.scrollLeft
     if (isDragging || targetSet.value) return
 
-    const index = scrollPos / containerWidth.value + 1
+    const index = scrollPos / containerWidth.value
     activeItem.value = scrollAmount > 0 ? Math.ceil(index) : Math.floor(index + 0.01)
   }
 
@@ -36,13 +35,22 @@ export default function useSlider(container, items) {
 
   function goToSlide(index) {
     targetSet.value = true
-    activeItem.value = index
+    activeItem.value = (index + scrollPointsCount.value) % scrollPointsCount.value
+  }
+
+  function previousSlide() {
+    goToSlide(activeItem.value - 1)
+  }
+
+  function nextSlide() {
+    goToSlide(activeItem.value + 1)
   }
 
   function updateParameters() {
+    const computedStyle = window.getComputedStyle(container.value)
+
     containerWidth.value = container.value.offsetWidth
     containerScrollWidth.value = container.value.scrollWidth
-    itemOffsets.value = items.value.map((item) => item.offsetLeft)
   }
 
   onMounted(() => {
@@ -64,10 +72,10 @@ export default function useSlider(container, items) {
     activeItem,
     (item) => {
       if (targetSet.value) {
-        container.value.scrollTo({ left: itemOffsets.value[item - 1], behavior: 'smooth' })
+        container.value.scrollTo({ left: items.value[item].offsetLeft, behavior: 'smooth' })
       }
     }
   )
 
-  return { activeItem, scrollPointsCount, goToSlide }
+  return { activeItem, scrollPointsCount, goToSlide, previousSlide, nextSlide }
 }

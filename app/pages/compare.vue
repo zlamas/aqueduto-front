@@ -113,7 +113,7 @@ const onDrop = (targetIndex) => {
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[48px]">
+  <main class="pt-[24px] laptop:pt-[48px]">
     <div class="container">
       <Breadcrumb
         :items="[ { name: title } ]"
@@ -123,10 +123,10 @@ const onDrop = (targetIndex) => {
 
       <div class="layout">
         <section>
-          <div class="flex justify-between items-end mb-[16px] desktop:mb-[32px]">
+          <div class="flex justify-between items-end mb-[16px] laptop:mb-[32px]">
             <h1 class="m-0">{{ title }}</h1>
 
-            <div class="arrows max-desktop:hidden">
+            <div class="arrows max-laptop:hidden">
               <button
                 class="arrow arrow-left"
                 @click="compareSlider.scrollLeft"
@@ -138,7 +138,7 @@ const onDrop = (targetIndex) => {
             </div>
           </div>
 
-          <div class="flex flex-wrap gap-[16px] mb-[24px] desktop:mb-[32px]">
+          <div class="flex flex-wrap gap-[16px] mb-[24px] laptop:mb-[32px]">
             <button
               v-for="category in allCategories"
               :key="category.slug"
@@ -173,11 +173,11 @@ const onDrop = (targetIndex) => {
             ref="compare-slider"
             class="slider compare-slider"
           >
-            <div class="compare-col slider-item max-desktop:order-1">
+            <div class="compare-col slider-item max-laptop:order-1">
               <div class="compare-item gap-[32px] content-start mt-[44px]">
                 <NuxtLink
                   to="/catalog"
-                  class="grid place-content-center justify-items-center desktop:h-[328px] max-desktop:min-h-[360px] gap-[20px] rounded-[16px] desktop:rounded-[28px] border-2 border-dashed border-neutral-300 text-center text-neutral-400 font-semibold cursor-pointer hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-500 active:bg-neutral-100 active:border-neutral-500 active:text-neutral-600"
+                  class="grid place-content-center justify-items-center laptop:h-[328px] max-laptop:min-h-[360px] gap-[20px] rounded-[16px] laptop:rounded-[28px] border-2 border-dashed border-neutral-300 text-center text-neutral-400 font-semibold cursor-pointer hover:bg-neutral-50 hover:border-neutral-400 hover:text-neutral-500 active:bg-neutral-100 active:border-neutral-500 active:text-neutral-600"
                 >
                   <div>Добавить товар <br> к сравнению</div>
                   <svg width="48" height="48" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
@@ -187,9 +187,9 @@ const onDrop = (targetIndex) => {
                 </NuxtLink>
 
                 <div class="show-differences">
-                  <label class="show-differences-label">
+                  <input v-model="onlyDifferences" id="show-differences" type="checkbox" class="hidden">
+                  <label for="show-differences" class="label show-differences-label">
                     <span>Показать только различия</span>
-                    <input v-model="onlyDifferences" type="checkbox" class="hidden">
                     <span class="switch">
                       <span class="switch-knob"></span>
                     </span>
@@ -199,7 +199,7 @@ const onDrop = (targetIndex) => {
 
               <div
                 v-for="name in attributeMeta"
-                class="max-desktop:hidden"
+                class="max-laptop:hidden"
               >
                 {{ name }}
               </div>
@@ -243,7 +243,7 @@ const onDrop = (targetIndex) => {
                 v-for="(name, key, attrIndex) in attributeMeta"
                 class="flex flex-col gap-[8px]"
               >
-                <div class="desktop:hidden text-neutral-500 font-normal">
+                <div class="laptop:hidden text-neutral-500 font-normal">
                   {{ name }}
                 </div>
                 <div>
@@ -255,7 +255,7 @@ const onDrop = (targetIndex) => {
         </section>
 
         <section v-if="similarData?.length">
-          <div class="flex max-desktop:flex-col items-center justify-between gap-[24px] max-desktop:mb-[16px]">
+          <div class="flex max-laptop:flex-col items-center justify-between gap-[24px] max-laptop:mb-[16px]">
             <h3 class="m-0">Похожие товары</h3>
 
             <div class="arrows self-end">
@@ -272,7 +272,7 @@ const onDrop = (targetIndex) => {
 
           <div
             ref="products-slider"
-            class="slider desktop:py-[32px]"
+            class="slider laptop:py-[32px]"
           >
             <ProductCard
               v-for="product in similarData"
@@ -296,7 +296,7 @@ const onDrop = (targetIndex) => {
   grid-auto-columns: calc(50% - 6px);
   overflow-wrap: anywhere;
 
-  @variant desktop {
+  @variant laptop {
     grid-auto-columns: calc(25% - 18px);
   }
 }
@@ -340,7 +340,7 @@ const onDrop = (targetIndex) => {
 }
 
 .show-differences {
-  @variant max-desktop {
+  @variant max-laptop {
     position: absolute;
     left: 0;
     width: calc(var(--container-width, 0) * 1px);
@@ -352,13 +352,9 @@ const onDrop = (targetIndex) => {
 }
 
 .show-differences-label {
-
-  display: flex;
-  align-items: center;
   justify-content: space-between;
-  color: var(--color-neutral-600);
 
-  @variant max-desktop {
+  @variant max-laptop {
     position: sticky;
     left: 0;
     width: calc(100vw - 32px);

@@ -35,21 +35,21 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 </script>
 
 <template>
-  <main class="pt-[24px] desktop:pt-[64px] desktop:pb-[100px]">
+  <main class="pt-[24px] laptop:pt-[64px] laptop:pb-[100px]">
     <section
-      class="hero-banner image-gradient [--direction:left] [--opacity:0.6] mb-[32px] desktop:mb-[48px]"
+      class="hero-banner image-gradient [--direction:left] [--opacity:0.6] mb-[32px] laptop:mb-[48px]"
       :style="{ '--bg': `url(${promotion.banner_image})` }"
     >
-      <div class="container grid desktop:content-between">
+      <div class="container grid laptop:content-between">
         <Breadcrumb
           :items="[ { name: 'Акции', path: '/promotions' }, { name: title } ]"
         />
 
-        <div class="max-desktop:place-self-center max-desktop:text-center max-desktop:bg-black/20 max-desktop:backdrop-blur-[10px] max-desktop:rounded-[12px] p-[24px_12px] desktop:p-[0_160px_96px]">
+        <div class="max-laptop:place-self-center max-laptop:text-center max-laptop:bg-black/20 max-laptop:backdrop-blur-[10px] max-laptop:rounded-[12px] p-[24px_12px] laptop:p-[96px_0]">
           <h1 class="text-text-inverse">
             {{ promotion.title }}
           </h1>
-          <p class="text-neutral-50 text-[14px]/[20px] desktop:text-[20px]/[32px]">
+          <p class="text-neutral-50 text-[14px]/[20px] laptop:text-[20px]/[32px]">
             {{ promotion.description }}
           </p>
         </div>
@@ -59,7 +59,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
     <div class="container">
       <div class="layout">
         <section>
-          <div class="grid desktop:grid-cols-[auto_830px] gap-[8px]">
+          <div class="grid laptop:grid-cols-[auto_830px] gap-[8px]">
             <h2 class="m-0">Об акции</h2>
             <p>
               {{ promotion.description }}
@@ -76,7 +76,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 
           <button
             v-show="productsMeta.current_page < productsMeta.last_page"
-            class="button button-tertiary flex mt-[32px] desktop:mx-auto"
+            class="button button-tertiary flex mt-[32px] laptop:mx-auto"
             @click="productsParams.page += 1"
           >
             Показать еще
@@ -84,9 +84,9 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
         </section>
 
         <section>
-          <div class="flex justify-center desktop:justify-between">
+          <div class="flex justify-center laptop:justify-between">
             <h2 class="m-0">Смотрите также</h2>
-            <div class="arrows max-desktop:hidden">
+            <div class="arrows max-laptop:hidden">
               <button
                 class="arrow arrow-left"
                 @click="relatedSlider.scrollLeft"
@@ -100,13 +100,13 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 
           <div
             ref="related-slider"
-            class="slider mt-[24px] desktop:mt-[32px]"
+            class="slider mt-[24px] laptop:mt-[32px]"
           >
             <NuxtLink
               v-for="promotion in promotion.related"
               :key="promotion.id"
               :to="`/promotions/${promotion.slug}`"
-              class="slider-item promotion-item image-gradient image-link"
+              class="slider-item promotion-item image-gradient zoom-hover image-link"
               :style="{ '--bg': `url(${promotion.image})` }"
             >
               <h4>{{ promotion.title }}</h4>
@@ -116,7 +116,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 
           <NuxtLink
             to="/promotions"
-            class="button button-tertiary mt-[16px] w-full desktop:hidden"
+            class="button button-tertiary mt-[16px] w-full laptop:hidden"
           >
             Посмотреть все
           </NuxtLink>
@@ -130,7 +130,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
 @reference "~/assets/css/main.css";
 
 .promotion-item {
-  @variant desktop {
+  @variant laptop {
     width: calc(50% - 12px);
   }
 }
