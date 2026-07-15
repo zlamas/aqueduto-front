@@ -100,6 +100,32 @@
   --color-text-inverse: #FCFCFD;
 }
 
+@keyframes like-bounce {
+  80% {
+    scale: 1;
+    color: var(--color-brand-950);
+  }
+}
+
+@keyframes like-color {
+  80% {
+    color: var(--color-brand-950);
+  }
+}
+
+@keyframes dislike-bounce {
+  20%, 80% {
+    scale: 1;
+  }
+}
+
+@keyframes dislike-color {
+  20%, 80% {
+    color: var(--color-neutral-400);
+    fill: transparent;
+  }
+}
+
 body {
   color: var(--color-brand-950);
   font-family: 'Lato', sans-serif;

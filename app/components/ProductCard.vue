@@ -76,23 +76,24 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
         {{ badge_label }}
       </div>
       <button
-        :class="{
-          'group absolute size-[44px] max-laptop:bottom-[8px] max-laptop:right-[8px] laptop:top-[16px] laptop:right-[16px] laptop:invisible group-hover/card:visible bg-neutral-50 rounded-full z-99': true,
-          'text-neutral-400': !isFavorite,
-          'text-brand-950': isFavorite,
-        }"
+        class="group absolute size-[44px] max-laptop:bottom-[8px] max-laptop:right-[8px] laptop:top-[16px] laptop:right-[16px] laptop:invisible group-hover/card:visible bg-neutral-50 rounded-full z-99"
         @click.prevent="toggleFavorite"
       >
         <svg
           width="24"
           height="24"
           viewBox="0 0 24 24"
-          class="m-auto group-hover:fill-current group-hover:size-[28px]"
-          :fill="isFavorite ? 'currentColor' : 'none'"
+          :class="{
+            'favorite-icon m-auto group-hover:fill-current group-hover:scale-[calc(28/24)] ': true,
+            'text-neutral-400': !isFavorite,
+            'active text-brand-950 group-hover:text-neutral-400': isFavorite,
+          }"
+          :fill="isFavorite ? 'currentColor' : 'transparent'"
           xmlns="http://www.w3.org/2000/svg"
         >
           <path
             d="M12.6289 6.14648C14.4826 4.28491 17.4862 4.28491 19.3398 6.14648C21.553 8.36915 21.5531 11.9736 19.3398 14.1963L18.8613 14.6777L18.8281 14.7109L18.7988 14.748C18.7798 14.7727 18.7593 14.7973 18.7363 14.8203C16.9863 16.5778 15.2323 18.3306 13.4785 20.0869C12.5972 20.9695 11.1664 20.9689 10.2871 20.0859L5.04297 14.8203C5.02016 14.7974 4.9994 14.7735 4.98047 14.749L4.95215 14.7109L4.91895 14.6777L4.66016 14.418C2.44694 12.1953 2.44693 8.59082 4.66016 6.36816C6.44974 4.57095 9.3117 4.50905 11.1748 6.18164C11.5736 6.53952 12.2149 6.56218 12.6289 6.14648Z"
+            class="transition-[inherit]"
             stroke="currentColor"
             stroke-width="1.5"
           />
@@ -147,6 +148,21 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
 </template>
 
 <style scoped>
+.favorite-icon {
+  transition: scale cubic-bezier(0.5, 3, 0.5, 0), color linear;
+  transition-duration: 0.1s;
+}
+
+.favorite-icon.active {
+  animation: like-bounce cubic-bezier(0.5, 3, 0.5, 0), like-color ease-out;
+  animation-duration: 0.4s;
+}
+
+.favorite-icon:not(.active) {
+  animation: dislike-bounce cubic-bezier(0.5, 3, 0.5, 0), dislike-color linear;
+  animation-duration: 0.5s;
+}
+
 .product-new {
   --bg: var(--color-tag-new-bg);
   --icon: url(~/assets/icons/product-new.svg);

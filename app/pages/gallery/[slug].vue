@@ -4,6 +4,9 @@ import ProductCard from "@/components/ProductCard.vue";
 import {formatCurrency} from "@/assets/js/funcs.js";
 import {useAPI} from "@/composables/useAPI.js";
 import useSimpleSlider from "@/composables/useSimpleSlider.js";
+import Swiper from "swiper";
+import {Autoplay, Navigation, Pagination} from "swiper/modules";
+import 'swiper/css';
 
 const { slug } = useRoute().params
 
@@ -93,9 +96,7 @@ function onHotspotClick(button, hotspot, i, j) {
   }
 }
 
-const imagesSliderContainer = useTemplateRef('images-slider')
 const imagesSliderItems = ref([])
-const imagesSlider = useSlider(imagesSliderContainer, imagesSliderItems)
 
 const relatedSliderContainer = useTemplateRef('related-slider')
 const relatedSlider = useSimpleSlider(relatedSliderContainer)
@@ -114,10 +115,45 @@ function createImageSliderRef(el, i, url) {
   img.src = url
 }
 
-let autoScrollInterval
+onMounted(() => {
+  const fewSlides = imagesSliderItems.value.length < 2
 
-onMounted(() => autoScrollInterval = setInterval(imagesSlider.nextSlide, 5000))
-onUnmounted(() => clearInterval(autoScrollInterval))
+  Swiper.use([ Autoplay, Navigation, Pagination ])
+
+  new Swiper(
+    '.swiper',
+    {
+      loop: !fewSlides,
+      slidesPerView: 2,
+      spaceBetween: 24,
+      autoplay: {
+        delay: 5000,
+        pauseOnMouseEnter: true,
+      },
+      pagination: {
+        el: '.swiper-pagination',
+        bulletClass: 'dot-pagination-item',
+        bulletActiveClass: 'active',
+        clickable: true,
+      },
+      navigation: {
+        nextEl: '.swiper-button-next',
+        prevEl: '.swiper-button-prev',
+        addIcons: false,
+      },
+      observer: true,
+      observeParents: true,
+      breakpoints: {
+        0: {
+          slidesPerView: 1,
+        },
+        1200: {
+          slidesPerView: 2,
+        }
+      },
+    }
+  )
+})
 </script>
 
 <template>
@@ -150,108 +186,83 @@ onUnmounted(() => clearInterval(autoScrollInterval))
             </p>
           </div>
 
-          <div class="grid mt-[32px]">
-            <div class="justify-self-end flex gap-[8px] mb-[16px] laptop:hidden">
+          <div class="swiper flex! max-laptop:flex-col items-center h-[380px] laptop:h-[472px] gap-[12px] mt-[92px] laptop:mt-[32px] -mx-[16px]! px-[16px]! overflow-visible! overflow-x-clip!">
+            <div class="flex items-center justify-between max-laptop:self-end gap-[8px] absolute max-laptop:bottom-full max-laptop:mb-[16px] laptop:w-full -mx-[16px] px-[16px]">
               <button
-                class="arrow arrow-left"
-                @click="imagesSlider.previousSlide"
+                class="swiper-button-prev arrow arrow-left laptop:-translate-x-1/2 z-9"
               ></button>
               <button
-                class="arrow arrow-right"
-                @click="imagesSlider.nextSlide"
+                class="swiper-button-next arrow arrow-right laptop:translate-x-1/2 z-9"
               ></button>
             </div>
 
-            <div class="relative flex items-center">
+            <div class="swiper-wrapper">
               <div
-                ref="images-slider"
-                class="slider flex-1"
+                v-for="(slide, i) in styleData.images"
+                :key="slide.id"
+                :ref="(el) => createImageSliderRef(el, i, slide.url)"
+                class="swiper-slide style-page-item"
+                @click="closeHotspot"
               >
                 <div
-                  v-for="(slide, i) in styleData.images"
-                  :key="slide.id"
-                  :ref="(el) => createImageSliderRef(el, i, slide.url)"
-                  class="slider-item style-page-item"
-                  @click="closeHotspot"
+                  class="hotspot-wrapper"
+                  :style="{ '--bg': `url(${slide.url})` }"
                 >
-                  <div
-                    class="hotspot-wrapper"
-                    :style="{ '--bg': `url(${slide.url})` }"
-                  >
-                    <button
-                      v-for="(hotspot, j) in slide.hotspots"
-                      :class="{
-                        'hotspot': true,
-                        'active': activeHotspot === `${i}.${j}`,
-                      }"
-                      :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
-                      @pointerover="onHotspotHover($event.target, hotspot, i)"
-                      @pointerleave="onHotspotLeave()"
-                      @click.stop="onHotspotClick($event.target, hotspot, i, j)"
-                    ></button>
-                  </div>
-                </div>
-
-                <Teleport
-                  :to="imagesSliderItems[slideIndex]"
-                  :disabled="!imagesSliderItems[slideIndex]"
-                >
-                  <NuxtLink
-                    ref="hotspot-card"
-                    :to="`/product/${selectedHotspot?.product.slug}`"
+                  <button
+                    v-for="(hotspot, j) in slide.hotspots"
                     :class="{
-                      'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
-                      'invisible': !selectedHotspot,
-                    }"
-                    :style="{
-                      maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
-                    }"
-                  >
-                    <img
-                      class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
-                      :src="selectedHotspot?.product.image"
-                      alt=""
-                    >
-
-                    <div>
-                      <div class="font-semibold mb-[8px]">
-                        {{ selectedHotspot?.product.name }}
-                      </div>
-                      <div class="w-max bg-neutral-100 rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
-                        {{ selectedHotspot?.product.collection.name }}
-                      </div>
-                      <h6 class="m-0">
-                        {{ formatCurrency(selectedHotspot?.product.price) }}
-                      </h6>
-                    </div>
-
-                    <button class="button button-secondary p-[8px] rounded-[8px] ml-[12px]">
-                      <img src="~/assets/icons/arrow-right.svg" alt="">
-                    </button>
-                  </NuxtLink>
-                </Teleport>
+                    'hotspot': true,
+                    'active': activeHotspot === `${i}.${j}`,
+                  }"
+                    :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
+                    @pointerover="onHotspotHover($event.target, hotspot, i)"
+                    @pointerleave="onHotspotLeave()"
+                    @click.stop="onHotspotClick($event.target, hotspot, i, j)"
+                  ></button>
+                </div>
               </div>
 
-              <button
-                class="arrow arrow-left absolute left-0 -translate-x-1/2 max-laptop:hidden"
-                @click="imagesSlider.previousSlide"
-              ></button>
-              <button
-                class="arrow arrow-right absolute right-0 translate-x-1/2 max-laptop:hidden"
-                @click="imagesSlider.nextSlide"
-              ></button>
+              <Teleport
+                :to="imagesSliderItems[slideIndex]"
+                :disabled="!imagesSliderItems[slideIndex]"
+              >
+                <NuxtLink
+                  ref="hotspot-card"
+                  :to="`/product/${selectedHotspot?.product.slug}`"
+                  :class="{
+                  'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
+                  'invisible': !selectedHotspot,
+                }"
+                  :style="{
+                  maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
+                }"
+                >
+                  <img
+                    class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
+                    :src="selectedHotspot?.product.image"
+                    alt=""
+                  >
+
+                  <div class="grid content-start justify-items-start">
+                    <div class="font-semibold mb-[8px]">
+                      {{ selectedHotspot?.product.name }}
+                    </div>
+                    <div class="bg-neutral-100 rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
+                      {{ selectedHotspot?.product.collection.name }}
+                    </div>
+                    <h6 class="m-0">
+                      {{ formatCurrency(selectedHotspot?.product.price) }}
+                    </h6>
+                  </div>
+
+                  <button class="button button-secondary p-[8px] rounded-[8px] ml-[12px]">
+                    <img src="~/assets/icons/arrow-right.svg" alt="">
+                  </button>
+                </NuxtLink>
+              </Teleport>
             </div>
 
-            <div class="dot-pagination mt-[12px]">
-              <div
-                v-for="(_, index) in imagesSlider.scrollPointsCount.value"
-                :class="{
-                  'dot-pagination-item': true,
-                  'active': imagesSlider.activeItem.value === index
-                }"
-                @click="imagesSlider.goToSlide(index)"
-              ></div>
-            </div>
+            <div class="swiper-pagination dot-pagination"></div>
           </div>
         </section>
 
@@ -342,18 +353,10 @@ onUnmounted(() => clearInterval(autoScrollInterval))
   }
 
   .style-page-item {
+    display: grid !important;
     position: relative;
-    height: 380px;
-    width: 100%;
     border-radius: 32px;
     overflow: hidden;
-    scroll-snap-align: start;
-    scroll-snap-stop: always;
-
-    @variant laptop {
-      height: 472px;
-      width: calc(50% - 12px);
-    }
   }
 
   .hotspot-wrapper {

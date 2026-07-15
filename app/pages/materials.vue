@@ -34,7 +34,7 @@ useHead({ title })
       <div class="container grid laptop:content-between max-laptop:p-[16px] max-laptop:backdrop-blur-[2px] max-laptop:bg-black/20">
         <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="relative grid content-center laptop:p-[0_160px_64px]">
+        <div class="relative grid content-center laptop:pb-[64px]">
           <h1 class="text-text-inverse max-laptop:m-0 max-laptop:text-center">
             Каталог Aqueduto 2026
           </h1>

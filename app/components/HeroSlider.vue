@@ -23,7 +23,7 @@ const slider = useSlider(container, itemRefs)
         :ref="(el) => itemRefs[index] = el"
         :data-slide="index + 1"
         :class="{
-          'hero-slider-item image-gradient flex items-center max-laptop:justify-center px-[32px] laptop:px-[160px]': true,
+          'hero-slider-item image-gradient flex items-center max-laptop:justify-center': true,
           'hero-slider-video': item.media_type === 'video'
         }"
         :style="item.media_type === 'image' && { '--bg': `url(${item.media_url})` }"
@@ -40,27 +40,29 @@ const slider = useSlider(container, itemRefs)
 
         <div
           v-if="item.title || item.subtitle || item.cta"
-          class="grid laptop:justify-items-start gap-[16px] max-w-[904px] z-9 max-laptop:text-center max-laptop:bg-black/20 max-laptop:backdrop-blur-[10px] max-laptop:rounded-[12px] max-laptop:p-[24px_12px]"
+          class="container z-9"
         >
-          <h1
-            v-if="item.title"
-            class="text-text-inverse m-0"
-          >
-            {{ item.title }}
-          </h1>
-          <p
-            v-if="item.subtitle"
-            class="text-white laptop:text-[20px]/[32px] max-laptop:text-[14px]/[20px]"
-          >
-            {{ item.subtitle }}
-          </p>
-          <NuxtLink
-            v-if="item.cta?.text"
-            :to="item.cta.url"
-            class="button button-secondary"
-          >
-            {{ item.cta.text }}
-           </NuxtLink>
+          <div class="grid laptop:justify-items-start gap-[16px] max-laptop:text-center max-laptop:bg-black/20 max-laptop:backdrop-blur-[10px] max-laptop:rounded-[12px] max-laptop:p-[24px_12px]">
+            <h1
+              v-if="item.title"
+              class="text-text-inverse m-0"
+            >
+              {{ item.title }}
+            </h1>
+            <p
+              v-if="item.subtitle"
+              class="text-white laptop:text-[20px]/[32px] max-laptop:text-[14px]/[20px]"
+            >
+              {{ item.subtitle }}
+            </p>
+            <NuxtLink
+              v-if="item.cta?.text"
+              :to="item.cta.url"
+              class="button button-secondary"
+            >
+              {{ item.cta.text }}
+            </NuxtLink>
+          </div>
         </div>
       </div>
     </div>
