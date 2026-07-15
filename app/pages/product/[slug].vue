@@ -8,7 +8,7 @@ const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
 
-const currentColor = ref(variant_id)
+const currentColor = ref(Number(variant_id))
 
 const productData = ref(null)
 
@@ -163,9 +163,9 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                   v-for="color in productData.colors"
                   :key="color.id"
                   :class="{
-                  'color-preview': true,
-                  'selected': currentColor === color.variant_id
-                }"
+                    'color-preview': true,
+                    'selected': currentColor === color.variant_id
+                  }"
                   :src="color.image"
                   :alt="color.name"
                   :title="color.name"

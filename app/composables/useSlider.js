@@ -47,10 +47,9 @@ export default function useSlider(container, items) {
   }
 
   function updateParameters() {
-    const computedStyle = window.getComputedStyle(container.value)
-
-    containerWidth.value = container.value.offsetWidth
-    containerScrollWidth.value = container.value.scrollWidth
+    containerWidth.value = container.value?.offsetWidth
+    containerScrollWidth.value = container.value?.scrollWidth
+    activeItem.value = 0
   }
 
   onMounted(() => {
@@ -75,6 +74,12 @@ export default function useSlider(container, items) {
         container.value.scrollTo({ left: items.value[item].offsetLeft, behavior: 'smooth' })
       }
     }
+  )
+
+  watch(
+    items,
+    updateParameters,
+    { deep: true },
   )
 
   return { activeItem, scrollPointsCount, goToSlide, previousSlide, nextSlide }

@@ -211,9 +211,9 @@ onMounted(() => {
                   <button
                     v-for="(hotspot, j) in slide.hotspots"
                     :class="{
-                    'hotspot': true,
-                    'active': activeHotspot === `${i}.${j}`,
-                  }"
+                      'hotspot': true,
+                      'active': activeHotspot === `${i}.${j}`,
+                    }"
                     :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
                     @pointerover="onHotspotHover($event.target, hotspot, i)"
                     @pointerleave="onHotspotLeave()"
@@ -230,12 +230,12 @@ onMounted(() => {
                   ref="hotspot-card"
                   :to="`/product/${selectedHotspot?.product.slug}`"
                   :class="{
-                  'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
-                  'invisible': !selectedHotspot,
-                }"
+                    'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
+                    'invisible': !selectedHotspot,
+                  }"
                   :style="{
-                  maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
-                }"
+                    maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
+                  }"
                 >
                   <img
                     class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
