@@ -148,9 +148,9 @@ const days = {
         <section>
           <h1 class="laptop:mb-[32px]">{{ title }}</h1>
 
-          <div class="flex items-center gap-[12px] bg-warning-50 outline-2 -outline-offset-2 outline-warning-100 text-neutral-800 rounded-[16px] p-[16px]">
+          <div class="flex items-center gap-[12px] bg-warning-50 outline-2 -outline-offset-2 outline-warning-100 text-neutral-800 rounded-[16px] p-[16px] max-laptop:text-[14px]">
             <img class="size-[24px]" src="~/assets/icons/warning.svg" alt="">
-            <span class="text-[14px]">
+            <span>
               {{ warning }}
             </span>
           </div>
@@ -348,8 +348,8 @@ const days = {
   color: var(--color-neutral-600);
   font-size: 14px;
   cursor: pointer;
-  outline: 1px solid transparent;
-  outline-offset: -1px;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
 }
 
 .store-item:hover {
@@ -358,10 +358,6 @@ const days = {
 
 .store-item:active {
   background: white;
-}
-
-.store-item.selected {
-  background: var(--color-neutral-50);
 }
 
 .store-item:hover {

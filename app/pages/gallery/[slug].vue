@@ -186,8 +186,8 @@ onMounted(() => {
             </p>
           </div>
 
-          <div class="swiper flex! max-laptop:flex-col items-center h-[380px] laptop:h-[472px] gap-[12px] mt-[92px] laptop:mt-[32px] -mx-[16px]! px-[16px]! overflow-visible! overflow-x-clip!">
-            <div class="flex items-center justify-between max-laptop:self-end gap-[8px] absolute max-laptop:bottom-full max-laptop:mb-[16px] laptop:w-full -mx-[16px] px-[16px]">
+          <div class="relative mt-[32px]">
+            <div class="flex items-center justify-end laptop:justify-between gap-[8px] laptop:absolute laptop:size-full max-laptop:mb-[16px]">
               <button
                 class="swiper-button-prev arrow arrow-left laptop:-translate-x-1/2 z-9"
               ></button>
@@ -196,73 +196,75 @@ onMounted(() => {
               ></button>
             </div>
 
-            <div class="swiper-wrapper">
-              <div
-                v-for="(slide, i) in styleData.images"
-                :key="slide.id"
-                :ref="(el) => createImageSliderRef(el, i, slide.url)"
-                class="swiper-slide style-page-item"
-                @click="closeHotspot"
-              >
+            <div class="swiper h-[380px] laptop:h-[472px] -mx-[16px]! px-[16px]!">
+              <div class="swiper-wrapper">
                 <div
-                  class="hotspot-wrapper"
-                  :style="{ '--bg': `url(${slide.url})` }"
+                  v-for="(slide, i) in styleData.images"
+                  :key="slide.id"
+                  :ref="(el) => createImageSliderRef(el, i, slide.url)"
+                  class="swiper-slide style-page-item"
+                  @click="closeHotspot"
                 >
-                  <button
-                    v-for="(hotspot, j) in slide.hotspots"
-                    :class="{
+                  <div
+                    class="hotspot-wrapper"
+                    :style="{ '--bg': `url(${slide.url})` }"
+                  >
+                    <button
+                      v-for="(hotspot, j) in slide.hotspots"
+                      :class="{
                       'hotspot': true,
                       'active': activeHotspot === `${i}.${j}`,
                     }"
-                    :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
-                    @pointerover="onHotspotHover($event.target, hotspot, i)"
-                    @pointerleave="onHotspotLeave()"
-                    @click.stop="onHotspotClick($event.target, hotspot, i, j)"
-                  ></button>
+                      :style="{ left: `${hotspot.x}%`, top: `${hotspot.y}%` }"
+                      @pointerover="onHotspotHover($event.target, hotspot, i)"
+                      @pointerleave="onHotspotLeave()"
+                      @click.stop="onHotspotClick($event.target, hotspot, i, j)"
+                    ></button>
+                  </div>
                 </div>
-              </div>
 
-              <Teleport
-                :to="imagesSliderItems[slideIndex]"
-                :disabled="!imagesSliderItems[slideIndex]"
-              >
-                <NuxtLink
-                  ref="hotspot-card"
-                  :to="`/product/${selectedHotspot?.product.slug}`"
-                  :class="{
+                <Teleport
+                  :to="imagesSliderItems[slideIndex]"
+                  :disabled="!imagesSliderItems[slideIndex]"
+                >
+                  <NuxtLink
+                    ref="hotspot-card"
+                    :to="`/product/${selectedHotspot?.product.slug}`"
+                    :class="{
                     'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
                     'invisible': !selectedHotspot,
                   }"
-                  :style="{
+                    :style="{
                     maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
                   }"
-                >
-                  <img
-                    class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
-                    :src="selectedHotspot?.product.image"
-                    alt=""
                   >
+                    <img
+                      class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
+                      :src="selectedHotspot?.product.image"
+                      alt=""
+                    >
 
-                  <div class="grid content-start justify-items-start">
-                    <div class="font-semibold mb-[8px]">
-                      {{ selectedHotspot?.product.name }}
+                    <div class="grid content-start justify-items-start">
+                      <div class="font-semibold mb-[8px]">
+                        {{ selectedHotspot?.product.name }}
+                      </div>
+                      <div class="bg-neutral-100 rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
+                        {{ selectedHotspot?.product.collection.name }}
+                      </div>
+                      <h6 class="m-0">
+                        {{ formatCurrency(selectedHotspot?.product.price) }}
+                      </h6>
                     </div>
-                    <div class="bg-neutral-100 rounded-full p-[4px_12px] text-[12px]/[16px] font-medium mb-[12px]">
-                      {{ selectedHotspot?.product.collection.name }}
-                    </div>
-                    <h6 class="m-0">
-                      {{ formatCurrency(selectedHotspot?.product.price) }}
-                    </h6>
-                  </div>
 
-                  <button class="button button-secondary p-[8px] rounded-[8px] ml-[12px]">
-                    <img src="~/assets/icons/arrow-right.svg" alt="">
-                  </button>
-                </NuxtLink>
-              </Teleport>
+                    <button class="button button-secondary p-[8px] rounded-[8px] ml-[12px]">
+                      <img src="~/assets/icons/arrow-right.svg" alt="">
+                    </button>
+                  </NuxtLink>
+                </Teleport>
+              </div>
             </div>
 
-            <div class="swiper-pagination dot-pagination"></div>
+            <div class="swiper-pagination dot-pagination mt-[12px]"></div>
           </div>
         </section>
 
