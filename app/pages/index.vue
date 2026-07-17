@@ -182,10 +182,11 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
               v-for="item in homeData.materials"
               :key="item.id"
               class="material-item image-gradient zoom-hover image-link"
-              :to="`/${item.slug}`"
-              :style="{ '--bg': `url(${item.cover})` }"
+              :to="item.url"
+              :style="{ '--bg': `url(${item.image})` }"
             >
               <h4>{{ item.title }}</h4>
+              <p>{{ item.text }}</p>
             </NuxtLink>
           </div>
         </section>

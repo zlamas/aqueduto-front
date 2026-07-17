@@ -29,7 +29,7 @@ const colorData = {
     }"
     :style="{
       '--size': `${size}px`,
-      background: `url(/images/colors/${color.code}.svg)`,
+      background: `${color.hex} url(/images/colors/${color.code}.svg)`,
     }"
     :title="color.name"
   >

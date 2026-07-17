@@ -51,7 +51,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
 <template>
   <main>
-    <section class="hero-banner hero-banner-large image-gradient [--bg:url(/images/style-6.jpg)] mb-[32px] laptop:mb-[128px]">
+    <section class="hero-banner hero-banner-large image-gradient grid [--bg:url(/images/style-6.jpg)] mb-[32px] laptop:mb-[128px]">
       <div class="container grid">
         <Breadcrumb :items="[ { name: title } ]" />
 
