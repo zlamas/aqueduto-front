@@ -45,9 +45,7 @@ function toggleComparison() {
     })
 }
 
-const currentColor = ref(props.colors?.find((color) => color.is_default)?.variant_id)
-
-const currentColorData = computed(() => props.colors?.find((color) => currentColor.value === color.variant_id))
+const currentColor = ref(props.colors?.find((color) => color.is_default))
 </script>
 
 <template>
@@ -62,7 +60,7 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
       }"
     >
       <img
-        :src="currentColorData?.image || image"
+        :src="currentColor?.image || image"
         class="relative size-full object-contain z-9"
         alt=""
       >
@@ -124,13 +122,13 @@ const currentColorData = computed(() => props.colors?.find((color) => currentCol
         </div>
 
         <div class="text-neutral-500">
-          Арт. {{ currentColorData?.article || article }}
+          Арт. {{ currentColor?.article || article }}
         </div>
       </div>
 
       <div class="flex items-center">
         <h4>
-          {{ formatCurrency(currentColorData?.price || price) }}
+          {{ formatCurrency(currentColor?.price || price) }}
         </h4>
 
         <button

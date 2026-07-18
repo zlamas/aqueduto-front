@@ -8,12 +8,17 @@ const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
 
-const currentColor = ref(Number(variant_id))
-
+const currentColor = ref(null)
 const productData = ref(null)
 
 const { data: product } = await useAPI(`/products/${slug}`, {
-  query: { variant_id: currentColor },
+  query: currentColor,
+
+  onRequest({ options }) {
+    if (options.query) {
+      options.query = { variant_id: options.query.variant_id }
+    }
+  },
 
   onResponse({ response }) {
     productData.value = response._data.data
@@ -28,18 +33,20 @@ const title = productData.value.name
 
 useHead({ title })
 
-if (!currentColor.value) {
-  currentColor.value = productData.value.colors?.find((color) => color.is_default)?.variant_id
+if (productData.value.colors && !currentColor.value) {
+  if (variant_id != null) {
+    currentColor.value = productData.value.colors.find((color) => color.variant_id === Number(variant_id))
+  } else {
+    currentColor.value = productData.value.colors.find((color) => color.is_default)
+  }
 }
-
-const currentColorData = computed(
-  () => productData.value.colors?.find((color) => currentColor.value === color.variant_id)
-)
 
 watch(
   currentColor,
-  (id) => {
-    window.history.pushState({}, '', `${window.location.pathname}?variant_id=${id}`)
+  (color) => {
+    if (color.variant_id) {
+      window.history.pushState({}, '', `${window.location.pathname}?variant_id=${color.variant_id}`)
+    }
   }
 )
 
@@ -145,7 +152,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                   {{ productData.collection.name }}
                 </div>
                 <div class="text-neutral-500">
-                  Артикул {{ currentColorData?.article || productData.article }}
+                  Артикул {{ currentColor?.article || productData.article }}
                 </div>
               </div>
             </div>
@@ -164,12 +171,12 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
                   :key="color.id"
                   :class="{
                     'color-preview': true,
-                    'selected': currentColor === color.variant_id
+                    'selected': currentColor.id === color.id
                   }"
                   :src="color.image"
                   :alt="color.name"
                   :title="color.name"
-                  @click="currentColor = color.variant_id"
+                  @click="currentColor = color"
                 >
               </div>
             </div>
@@ -184,7 +191,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
           <div>
             <h3 class="m-0">
-              {{ formatCurrency(currentColorData?.price || productData.price) }}
+              {{ formatCurrency(currentColor?.price || productData.price) }}
             </h3>
             <div class="text-[14px]/[20px] text-neutral-500">
               Рекоменд. розничная цена

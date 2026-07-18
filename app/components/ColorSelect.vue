@@ -27,11 +27,11 @@ const currentColor = defineModel()
       :key="color.id"
       :color="color"
       :size="size"
-      :selected="currentColor === color.variant_id"
+      :selected="currentColor.id === color.id"
       :class="{
-        'mx-[4px]': currentColor === color.variant_id
+        'mx-[4px]': currentColor.id === color.id
       }"
-      @click="currentColor = color.variant_id"
+      @click="currentColor = color"
     />
 
     <Dropdown
@@ -55,11 +55,11 @@ const currentColor = defineModel()
         :key="color.id"
         :color="color"
         :size="size"
-        :selected="currentColor === color.variant_id"
+        :selected="currentColor.id === color.id"
         :class="{
-          'mx-[4px]': currentColor === color.variant_id
+          'mx-[4px]': currentColor.id === color.id
         }"
-        @click="currentColor = color.variant_id"
+        @click="currentColor = color"
       />
     </Dropdown>
   </div>
