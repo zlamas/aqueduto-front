@@ -18,12 +18,17 @@ const props = defineProps({
 })
 
 const currentColor = defineModel()
+
+const groupedColors = Object.groupBy(
+  props.colors,
+  (color) => color.on_order ? 'onOrder' : 'normal'
+)
 </script>
 
 <template>
   <div class="flex flex-wrap items-center" :style="{ gap: `${gap}px` }">
     <ColorSwatch
-      v-for="color in colors.slice(0, 4)"
+      v-for="color in groupedColors.normal"
       :key="color.id"
       :color="color"
       :size="size"
@@ -35,8 +40,8 @@ const currentColor = defineModel()
     />
 
     <Dropdown
-      v-if="colors.length > 4"
-      content-class="w-max max-w-[300px] flex flex-wrap gap-[4px] p-[8px] rounded-[16px] border border-neutral-100"
+      v-if="groupedColors.onOrder"
+      content-class="w-max max-w-[300px] grid gap-[8px] p-[8px] rounded-[16px] outline outline-neutral-100"
     >
       <template #button>
         <button
@@ -46,21 +51,26 @@ const currentColor = defineModel()
             background: '#BFBFBF',
           }"
         >
-          +{{ colors.length - 4 }}
+          +{{ groupedColors.onOrder.length }}
         </button>
       </template>
 
-      <ColorSwatch
-        v-for="color in colors.slice(4)"
-        :key="color.id"
-        :color="color"
-        :size="size"
-        :selected="currentColor.id === color.id"
-        :class="{
-          'mx-[4px]': currentColor.id === color.id
-        }"
-        @click="currentColor = color"
-      />
+      <div class="text-[14px] text-neutral-500">Цвета под заказ</div>
+
+      <div class="flex flex-wrap gap-[4px]">
+        <ColorSwatch
+          v-for="color in groupedColors.onOrder"
+          :key="color.id"
+          :color="color"
+          :size="size"
+          :disabled="!color.image"
+          :selected="currentColor.id === color.id"
+          :class="{
+            'mx-[4px]': currentColor.id === color.id
+          }"
+          @click="currentColor = color"
+        />
+      </div>
     </Dropdown>
   </div>
 </template>

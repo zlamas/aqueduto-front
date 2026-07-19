@@ -61,7 +61,7 @@ const currentImageIndex = ref(0)
         />
         <div class="absolute bottom-0 rounded-t-[36px] laptop:bg-white p-[12px] laptop:pb-0">
           <button
-            class="button button-secondary p-[12px_16px] rounded-full before:content-[url(~/assets/icons/rotate.svg)] before:leading-0"
+            class="button button-secondary p-[12px_16px] rounded-full leading-[24px] before:content-[url(~/assets/icons/rotate.svg)] before:leading-0"
             @click="currentImageIndex = (currentImageIndex + 1) % sliderImages.length"
           >
             Сменить стили

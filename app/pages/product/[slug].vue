@@ -83,6 +83,11 @@ const imagesSlider = useSlider(imagesSliderContainer, imagesSliderItems)
 
 const productsSliderContainer = useTemplateRef('products-slider')
 const productsSlider = useSimpleSlider(productsSliderContainer)
+
+const groupedColors = productData.value.colors && Object.groupBy(
+  productData.value.colors,
+  (color) => color.on_order ? 'onOrder' : 'normal'
+)
 </script>
 
 <template>
@@ -159,25 +164,53 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
 
             <div
               v-if="productData.colors?.length"
+              class="grid gap-[16px]"
             >
-              <div>
-                <span class="text-neutral-500">Цвет: </span>
-                <span>{{ currentColorData?.name }}</span>
+              <div
+                v-if="groupedColors.normal"
+                class="grid gap-[12px]"
+              >
+                <div>
+                  <span class="text-neutral-500">Цвет: </span>
+                  <span>{{ currentColor?.name }}</span>
+                </div>
+
+                <div class="flex gap-[8px] overflow-x-auto scrollbar-none max-laptop:-mx-[16px] max-laptop:px-[16px]">
+                  <img
+                    v-for="color in groupedColors.normal"
+                    :key="color.id"
+                    :class="{
+                      'color-preview': true,
+                      'selected': currentColor.id === color.id
+                    }"
+                    :src="color.image"
+                    :alt="color.name"
+                    :title="color.name"
+                    @click="currentColor = color"
+                  >
+                </div>
               </div>
 
-              <div class="flex gap-[8px] overflow-x-auto scrollbar-none mt-[12px] max-laptop:-mx-[16px] max-laptop:px-[16px]">
-                <img
-                  v-for="color in productData.colors"
-                  :key="color.id"
-                  :class="{
-                    'color-preview': true,
-                    'selected': currentColor.id === color.id
-                  }"
-                  :src="color.image"
-                  :alt="color.name"
-                  :title="color.name"
-                  @click="currentColor = color"
-                >
+              <div
+                v-if="groupedColors.onOrder"
+                class="grid gap-[8px]"
+              >
+                <div class="text-[14px]">Цвета под заказ</div>
+
+                <div class="flex flex-wrap gap-[4px]">
+                  <ColorSwatch
+                    v-for="color in groupedColors.onOrder"
+                    :key="color.id"
+                    :color="color"
+                    :size="28"
+                    :disabled="!color.image"
+                    :selected="currentColor.id === color.id"
+                    :class="{
+                      'mx-[4px]': currentColor.id === color.id
+                    }"
+                    @click="currentColor = color"
+                  />
+                </div>
               </div>
             </div>
 
