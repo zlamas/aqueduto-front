@@ -1,7 +1,7 @@
 <script setup>
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
-import Dropdown from "../components/Dropdown.vue";
+import Dropdown from "@/components/Dropdown.vue";
 
 const selectedCategory = ref(null)
 

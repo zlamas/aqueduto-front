@@ -1,6 +1,6 @@
 <script setup>
 import Dropdown from "@/components/Dropdown.vue";
-import Search from "./Search.vue";
+import Search from "@/components/Search.vue";
 
 defineProps({
   settings: Object,
