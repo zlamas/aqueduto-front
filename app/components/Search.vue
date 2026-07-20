@@ -20,6 +20,11 @@ watch(
   query,
   () => queryDebounce(props.debounce)
 )
+
+watch(
+  model,
+  () => query.value = model.value
+)
 </script>
 
 <template>
