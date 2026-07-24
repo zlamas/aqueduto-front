@@ -196,7 +196,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             <ProductCard
               v-for="product in homeData.new_products"
               :key="product.id"
-              v-bind="product"
+              :product="product"
             />
           </div>
         </section>

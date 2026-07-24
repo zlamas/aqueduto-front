@@ -94,7 +94,7 @@ const allCategories = computed(() => [
         <ProductCard
           v-for="product in favorites"
           :key="product.id"
-          v-bind="product"
+          :product="product"
         />
       </div>
     </div>

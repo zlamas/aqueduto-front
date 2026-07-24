@@ -8,6 +8,8 @@ const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
 
+const { $api } = useNuxtApp()
+
 const currentColor = ref(null)
 const productData = ref(null)
 
@@ -60,21 +62,46 @@ const currentTab = ref(Object.keys(tabs)[0])
 
 const attributes = productData.value.attributes.flatMap((group) => group.items)
 
-const isFavorite = ref(productData.value.is_favorite)
-const isInComparison = ref(productData.value.is_in_comparison)
+const isFavorite = computed({
+  get() {
+    return currentColor.value?.is_favorite ?? productData.value.is_favorite
+  },
+  set(newValue) {
+    if (currentColor.value) {
+      currentColor.value.is_favorite = newValue
+    } else {
+      productData.value.is_favorite = newValue
+    }
+  }
+})
+
+const isInComparison = computed({
+  get() {
+    return currentColor.value?.is_in_comparison ?? productData.value.is_in_comparison
+  },
+  set(newValue) {
+    if (currentColor.value) {
+      currentColor.value.is_in_comparison = newValue
+    } else {
+      productData.value.is_in_comparison = newValue
+    }
+  }
+})
 
 function toggleFavorite() {
-  useAPI(`/favorites/${productData.value.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
-    .then(({data}) => {
-      isFavorite.value = !isFavorite.value
-    })
+  $api(`/favorites/${productData.value.id}`, {
+    method: isFavorite.value ? 'DELETE' : 'POST',
+    query: currentColor.value && { variant_id: currentColor.value.variant_id },
+  })
+    .then(() => isFavorite.value = !isFavorite.value)
 }
 
 function toggleComparison() {
-  useAPI(`/comparison/${productData.value.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
-    .then(({data}) => {
-      isInComparison.value = !isInComparison.value
-    })
+  $api(`/comparison/${productData.value.id}`, {
+    method: isInComparison.value ? 'DELETE' : 'POST',
+    query: currentColor.value && { variant_id: currentColor.value.variant_id },
+  })
+    .then(() => isInComparison.value = !isInComparison.value)
 }
 
 const imagesSliderContainer = useTemplateRef('images-slider')
@@ -343,7 +370,7 @@ const groupedColors = productData.value.colors && Object.groupBy(
           <ProductCard
             v-for="product in similarData"
             :key="product.id"
-            v-bind="product"
+            :product="product"
           />
         </div>
       </section>

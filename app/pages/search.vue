@@ -1,6 +1,5 @@
 <script setup>
 import ProductCard from "@/components/ProductCard.vue";
-import Dropdown from "@/components/Dropdown.vue";
 import DownloadItem from "@/components/DownloadItem.vue";
 import {useAPI} from "@/composables/useAPI.js";
 
@@ -106,7 +105,7 @@ const manuals = ref([
             <ProductCard
               v-for="product in products.slice(0, page * perPage)"
               :key="product.id"
-              v-bind="product"
+              :product="product"
             />
           </div>
 

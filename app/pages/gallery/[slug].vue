@@ -4,6 +4,7 @@ import ProductCard from "@/components/ProductCard.vue";
 import {formatCurrency} from "@/assets/js/funcs.js";
 import {useAPI} from "@/composables/useAPI.js";
 import useSimpleSlider from "@/composables/useSimpleSlider.js";
+
 import Swiper from "swiper";
 import {Autoplay, Navigation, Pagination} from "swiper/modules";
 import 'swiper/css';
@@ -287,7 +288,7 @@ onMounted(() => {
               <ProductCard
                 v-for="product in styleData.products.slice(0, page * perPage)"
                 :key="product.id"
-                v-bind="product"
+                :product="product"
               />
             </div>
 

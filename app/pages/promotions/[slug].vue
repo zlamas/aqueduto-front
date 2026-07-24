@@ -70,7 +70,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
             <ProductCard
               v-for="product in products"
               :key="product.id"
-              v-bind="product"
+              :product="product"
             />
           </div>
 

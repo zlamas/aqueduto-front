@@ -3,6 +3,8 @@ import Breadcrumb from "@/components/Breadcrumb.vue";
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
 
+const { $api } = useNuxtApp()
+
 const onlyDifferences = ref(false)
 const refreshListToggle = ref(false)
 const selectedCategory = ref(null)
@@ -58,8 +60,8 @@ const attributeValues = computed(() =>
 )
 
 function deleteFromComparison(id) {
-  useAPI(`/comparison/${id}`, { method: 'DELETE' })
-    .then(({data}) => {
+  $api(`/comparison/${id}`, { method: 'DELETE' })
+    .then(() => {
       const index = comparisonData.value.data.findIndex((item) => item.product.id === id)
       comparisonData.value.data.splice(index, 1)
       refreshListToggle.value = !refreshListToggle.value
@@ -233,7 +235,7 @@ const onDrop = (targetIndex) => {
                 </div>
 
                 <ProductCard
-                  v-bind="item.product"
+                  :product="item.product"
                   class="w-full"
                   :compare-button="false"
                 />
@@ -277,7 +279,7 @@ const onDrop = (targetIndex) => {
             <ProductCard
               v-for="product in similarData"
               :key="product.id"
-              v-bind="product"
+              :product="product"
             />
           </div>
         </section>

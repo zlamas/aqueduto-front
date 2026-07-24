@@ -11,6 +11,8 @@ const title = 'Каталог'
 
 useHead({ title })
 
+const { $api } = useNuxtApp()
+
 const productsParams = ref({
   page: 1,
   per_page: 24,
@@ -171,11 +173,12 @@ const fetchProductsPriceDebounce = debounce(() => {
     productsParams.value,
     { price_min: minPrice.value, price_max: maxPrice.value }
   )
-  useAPI('/products', {
+
+  $api('/products', {
     query: params,
-    onRequest: formatQuery,
+    onRequestOverride: formatQuery,
   }).then(({ data }) => {
-    priceProductCount.value = data.value.data.length
+    priceProductCount.value = data.length
   })
 })
 
@@ -497,7 +500,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
         <ProductCard
           v-for="product in products"
           :key="product.id"
-          v-bind="product"
+          :product="product"
         />
       </div>
     </div>

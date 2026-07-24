@@ -1,76 +1,92 @@
 <script setup>
 import ColorSelect from "@/components/ColorSelect.vue";
 import {formatCurrency} from '@/assets/js/funcs';
-import {useAPI} from "@/composables/useAPI.js";
 
 const props = defineProps({
-  id: Number,
-  name: String,
-  slug: String,
-  article: String,
-  price: [Number, String],
-  old_price: [Number, String],
-  badge: String,
-  badge_label: String,
-  collection: Object,
-  image: String,
-  image_hover: String,
-  colors: Array,
-  is_favorite: Boolean,
-  is_in_comparison: Boolean,
+  product: {
+    type: Object,
+    required: true,
+  },
   compareButton: {
     type: Boolean,
     default: true
   },
 })
 
+const { $api } = useNuxtApp()
+
 const productCard = useTemplateRef('product-card')
 
 defineExpose({productCard})
 
-const isFavorite = ref(props.is_favorite)
-const isInComparison = ref(props.is_in_comparison)
+const currentColor = ref(props.product.colors?.find((color) => color.is_default))
+
+const isFavorite = computed({
+  get() {
+    return currentColor.value?.is_favorite ?? props.product.is_favorite
+  },
+  set(newValue) {
+    if (currentColor.value) {
+      currentColor.value.is_favorite = newValue
+    } else {
+      props.product.is_favorite = newValue
+    }
+  }
+})
+
+const isInComparison = computed({
+  get() {
+    return currentColor.value?.is_in_comparison ?? props.product.is_in_comparison
+  },
+  set(newValue) {
+    if (currentColor.value) {
+      currentColor.value.is_in_comparison = newValue
+    } else {
+      props.product.is_in_comparison = newValue
+    }
+  }
+})
 
 function toggleFavorite() {
-  useAPI(`/favorites/${props.id}`, { method: isFavorite.value ? 'DELETE' : 'POST' })
-    .then(({data}) => {
-      isFavorite.value = !isFavorite.value
-    })
+  $api(`/favorites/${props.product.id}`, {
+    method: isFavorite.value ? 'DELETE' : 'POST',
+    query: currentColor.value && { variant_id: currentColor.value.variant_id },
+  })
+    .then(() => isFavorite.value = !isFavorite.value)
 }
 
 function toggleComparison() {
-  useAPI(`/comparison/${props.id}`, { method: isInComparison.value ? 'DELETE' : 'POST' })
-    .then(({data}) => {
-      isInComparison.value = !isInComparison.value
-    })
+  $api(`/comparison/${props.product.id}`, {
+    method: isInComparison.value ? 'DELETE' : 'POST',
+    query: currentColor.value && { variant_id: currentColor.value.variant_id },
+  })
+    .then(() => isInComparison.value = !isInComparison.value)
 }
-
-const currentColor = ref(props.colors?.find((color) => color.is_default))
 </script>
 
 <template>
   <NuxtLink
-    :to="`/product/${slug}`"
+    :to="`/product/${product.slug}`"
     ref="product-card"
     class="slider-item group/card gap-0 grid-rows-[auto_1fr] grid-cols-[100%] rounded-[20px] laptop:rounded-[28px] hover:shadow-md active:shadow-md">
     <div
       :class="{
         'group/image relative rounded-[16px] laptop:rounded-[28px] bg-backdrop overflow-hidden': true,
-        [`product-${badge}`]: badge,
+        [`product-${product.badge}`]: product.badge,
       }"
     >
       <img
-        :src="currentColor?.image || image"
+        :src="currentColor?.image || product.image"
         class="relative size-full object-contain z-9"
         alt=""
       >
       <img
-        v-if="image_hover"
-        :src="image_hover"
+        v-if="product.image_hover"
+        :src="product.image_hover"
         class="absolute inset-0 size-full object-contain group-hover/image:z-19"
         alt=""
       >
-      <div v-if="badge" class="absolute top-[8px] left-[8px] laptop:top-[16px] laptop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[12px]/[16px] laptop:text-[14px]/[20px] text-white font-semibold p-[4px_10px] laptop:p-[6px_12px] before:content-(--icon) before:leading-0 z-99">
+      <div v-if="product.badge" class="absolute top-[8px] left-[8px] laptop:top-[16px] laptop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[12px]/[16px] laptop:text-[14px]/[20px] text-white font-semibold p-[4px_10px] laptop:p-[6px_12px] before:content-(--icon) before:leading-0 z-99">
         {{ badge_label }}
       </div>
       <button
@@ -102,33 +118,33 @@ const currentColor = ref(props.colors?.find((color) => color.is_default))
     <div class="grid gap-[16px] grid-rows-[1fr] grid-cols-[100%] p-[8px] laptop:p-[16px]">
       <div class="grid gap-[8px] content-start">
         <div class="font-semibold laptop:text-[20px]/[32px]">
-          {{ name }}
+          {{ product.name }}
         </div>
 
         <div class="justify-self-start bg-neutral-100 rounded-full p-[4px_12px] font-medium laptop:hidden">
-          {{ collection.name }}
+          {{ product.collection.name }}
         </div>
       </div>
 
       <ColorSelect
-        :colors="colors"
+        :colors="product.colors"
         v-model="currentColor"
         @click.prevent
       />
 
       <div class="flex items-center justify-between max-laptop:flex-col gap-[12px] text-[14px] max-laptop:hidden">
         <div class="bg-neutral-100 rounded-full p-[4px_12px] font-medium">
-          {{ collection.name }}
+          {{ product.collection.name }}
         </div>
 
         <div class="text-neutral-500">
-          Арт. {{ currentColor?.article || article }}
+          Арт. {{ currentColor?.article || product.article }}
         </div>
       </div>
 
       <div class="flex items-center">
         <h4>
-          {{ formatCurrency(currentColor?.price || price) }}
+          {{ formatCurrency(currentColor?.price || product.price) }}
         </h4>
 
         <button

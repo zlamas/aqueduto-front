@@ -170,7 +170,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
             <ProductCard
               v-for="product in homeData.new_products"
               :key="product.id"
-              v-bind="product"
+              :product="product"
             />
           </div>
         </section>
@@ -184,6 +184,7 @@ const productsSlider = useSimpleSlider(productsSliderContainer)
               class="material-item image-gradient zoom-hover image-link"
               :to="item.url"
               :style="{ '--bg': `url(${item.image})` }"
+              :target="item.download ? '_blank' : ''"
             >
               <h4>{{ item.title }}</h4>
               <p>{{ item.text }}</p>
