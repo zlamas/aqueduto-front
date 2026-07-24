@@ -111,6 +111,11 @@ defineProps({
                 Акции
                </NuxtLink>
             </li>
+            <li>
+              <NuxtLink to="https://new.aqueduto.ru/api/v1/useful-materials/2/download">
+                Скачать каталог
+              </NuxtLink>
+            </li>
           </ul>
         </div>
       </nav>

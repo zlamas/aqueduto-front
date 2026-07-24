@@ -57,7 +57,18 @@ const currentImageIndex = ref(0)
           max="100"
           step="any"
           v-model="sliderPosition"
-          class="slider"
+          class="slider-range"
+          @pointermove="(event) => {
+            if (event.buttons & 1) {
+              sliderPosition = Math.max(
+                0,
+                Math.min(
+                  1,
+                  (event.layerX / event.target.offsetWidth)
+                )
+              ) * 100
+            }
+          }"
         />
         <div class="absolute bottom-0 rounded-t-[36px] laptop:bg-white p-[12px] laptop:pb-0">
           <button
@@ -108,11 +119,10 @@ const currentImageIndex = ref(0)
 @reference "~/assets/css/main.css";
 
 @layer components {
-  .slider {
+  .slider-range {
     position: absolute;
     inset: 0;
     opacity: 0;
-    cursor: pointer;
   }
 
   .style-item {

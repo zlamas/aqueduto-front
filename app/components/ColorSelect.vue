@@ -34,7 +34,7 @@ const groupedColors = Object.groupBy(
       :size="size"
       :selected="currentColor.id === color.id"
       :class="{
-        'mx-[4px]': currentColor.id === color.id
+        'laptop:mx-[4px]': currentColor.id === color.id
       }"
       @click="currentColor = color"
     />
@@ -66,7 +66,7 @@ const groupedColors = Object.groupBy(
           :disabled="!color.image"
           :selected="currentColor.id === color.id"
           :class="{
-            'mx-[4px]': currentColor.id === color.id
+            'laptop:mx-[4px]': currentColor.id === color.id
           }"
           @click="currentColor = color"
         />

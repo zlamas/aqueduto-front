@@ -8,6 +8,8 @@ defineProps({
 })
 
 const mobileMenuOpen = ref(false)
+
+useNuxtApp().hook('page:finish', () => mobileMenuOpen.value = false)
 </script>
 
 <template>

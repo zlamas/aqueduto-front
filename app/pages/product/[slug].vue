@@ -232,7 +232,7 @@ const groupedColors = productData.value.colors && Object.groupBy(
 
             <div class="flex flex-wrap gap-[8px] mt-[16px]">
               <NuxtLink
-                :to="productData.buy_url"
+                to="/where-to-buy"
                 class="button button-primary py-[12px] leading-[24px] w-full"
               >
                 Купить у партнеров

@@ -31,20 +31,17 @@ useHead({ title })
 <template>
   <main>
     <section class="hero-banner image-gradient grid [--bg:url(/images/catalog.jpg)] [--direction:bottom] laptop:[--direction:left] [--opacity:0.6] mb-[32px] laptop:mb-[64px]">
-      <div class="container grid laptop:content-between max-laptop:p-[16px] max-laptop:backdrop-blur-[2px] max-laptop:bg-black/20">
+      <div class="container grid laptop:grid-rows-[auto_1fr] max-laptop:p-[16px] max-laptop:backdrop-blur-[2px] max-laptop:bg-black/20">
         <Breadcrumb :items="[ { name: title } ]" />
 
-        <div class="relative grid content-center laptop:pb-[64px]">
+        <div class="relative grid content-center">
           <h1 class="text-text-inverse max-laptop:m-0 max-laptop:text-center">
             Каталог Aqueduto 2026
           </h1>
-          <p class="text-white text-[20px]/[32px] mb-[24px] max-laptop:hidden">
+
+          <p class="text-white text-[20px]/[32px] max-laptop:hidden">
             Загрузите наш полный каталог и откройте для себя мир <br> элегантной и надежной сантехники Aqueduto!
           </p>
-          <NuxtLink to="/" class="button button-primary p-[14px_28px] justify-self-start max-laptop:absolute bottom-0 max-laptop:w-full">
-            <img src="~/assets/icons/download.svg" alt="">
-            <span>Скачать каталог</span>
-          </NuxtLink>
         </div>
       </div>
     </section>
