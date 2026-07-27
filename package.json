@@ -17,7 +17,8 @@
     "vue-router": "^5.0.4"
   },
   "devDependencies": {
-    "swiper": "^14.0.5"
+    "swiper": "^14.0.5",
+    "xlsx-js-style": "^1.2.0"
   },
   "allowScripts": {
     "esbuild@0.27.7": true,

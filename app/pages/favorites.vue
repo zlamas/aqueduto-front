@@ -2,6 +2,7 @@
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import Dropdown from "@/components/Dropdown.vue";
+import {utils, writeFile} from "xlsx-js-style";
 
 const selectedCategory = ref(null)
 
@@ -22,6 +23,48 @@ const allCategories = computed(() => [
   },
   ...categories.value
 ])
+
+async function exportXLSX() {
+  const ws = utils.aoa_to_sheet([
+    [
+      { v: 'Артикул', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
+      { v: 'Товар', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
+      { v: 'Цена без скидки', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
+      { v: 'Цена со скидкой', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
+    ],
+    ...favorites.value.map(
+      (product) => [
+        { v: product.article, s: { alignment: { horizontal: 'right' } } },
+        { v: product.name, s: { alignment: { wrapText: true } } },
+        { v: product.old_price, s: { alignment: { horizontal: 'right' } } },
+        { v: product.price, s: { alignment: { horizontal: 'right' } } },
+      ]
+    ),
+    [
+      { v: 'Итого (руб.)', s: { alignment: { horizontal: 'right' } } },
+      { },
+      { },
+      { v: favorites.value.reduce((a, b) => a + parseFloat(b.price), 0).toFixed(2), s: { alignment: { horizontal: 'right' } } },
+    ]
+  ])
+
+  ws['!cols'] = [
+    { wch: 15 },
+    { wch: 45 },
+    { wch: 15 },
+    { wch: 15 },
+  ]
+
+  ws['!rows'] = [
+    { },
+    ...favorites.value.map(() => ({ hpt: 40 })),
+    { hpt: 20 }
+  ]
+
+  const wb = utils.book_new()
+  utils.book_append_sheet(wb, ws, 'Корзина')
+  writeFile(wb, 'Корзина.xlsx')
+}
 </script>
 
 <template>
@@ -71,7 +114,8 @@ const allCategories = computed(() => [
             <img src="/images/file-pdf-sm.svg" alt="">
             <span>PDF</span>
           </div>
-          <div class="dropdown-item">
+
+          <div class="dropdown-item" @click="exportXLSX">
             <img src="/images/file-xls-sm.svg" alt="">
             <span>XLSX</span>
           </div>
