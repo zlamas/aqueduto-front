@@ -60,7 +60,7 @@ const tabs = {
 
 const currentTab = ref(Object.keys(tabs)[0])
 
-const attributes = productData.value.attributes.flatMap((group) => group.items)
+const attributes = computed(() => productData.value.attributes.flatMap((group) => group.items))
 
 const isFavorite = computed({
   get() {
