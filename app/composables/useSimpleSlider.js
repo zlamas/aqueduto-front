@@ -19,7 +19,7 @@ export default function useSimpleSlider(container) {
     }
   }
 
-  onMounted(() => container.value.addEventListener('scroll', updateScrollEdge))
+  onMounted(() => container.value?.addEventListener('scroll', updateScrollEdge))
 
   return { scrollLeft, scrollRight, scrollEdge }
 }

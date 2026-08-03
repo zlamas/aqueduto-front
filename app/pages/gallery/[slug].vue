@@ -109,8 +109,8 @@ function createImageSliderRef(el, i, url) {
 
   img.onload = () => {
     let { width, height } = img
-    el.style.setProperty('--width', width)
-    el.style.setProperty('--height', height)
+    el?.style.setProperty('--width', width)
+    el?.style.setProperty('--height', height)
   }
 
   img.src = url

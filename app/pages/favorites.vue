@@ -2,7 +2,7 @@
 import ProductCard from "@/components/ProductCard.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import Dropdown from "@/components/Dropdown.vue";
-import {utils, writeFile} from "xlsx-js-style";
+import xlsx from "xlsx-js-style";
 
 const selectedCategory = ref(null)
 
@@ -25,7 +25,7 @@ const allCategories = computed(() => [
 ])
 
 async function exportXLSX() {
-  const ws = utils.aoa_to_sheet([
+  const ws = xlsx.utils.aoa_to_sheet([
     [
       { v: 'Артикул', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
       { v: 'Товар', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
@@ -61,9 +61,9 @@ async function exportXLSX() {
     { hpt: 20 }
   ]
 
-  const wb = utils.book_new()
-  utils.book_append_sheet(wb, ws, 'Корзина')
-  writeFile(wb, 'Корзина.xlsx')
+  const wb = xlsx.utils.book_new()
+  xlsx.utils.book_append_sheet(wb, ws, 'Корзина')
+  xlsx.writeFile(wb, 'Корзина.xlsx')
 }
 </script>
 
