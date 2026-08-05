@@ -17,14 +17,10 @@ const props = defineProps({
   }
 })
 
-useHead({
-  script: [
-    {
-      src: 'https://api-maps.yandex.ru/2.1/?apikey=86cb0147-d5b1-4892-ac30-f7ce196228c8&load=package.standard&lang=ru_RU',
-      defer: true,
-    }
-  ]
-})
+const { onLoaded } = useScript(
+  'https://api-maps.yandex.ru/2.1/?apikey=86cb0147-d5b1-4892-ac30-f7ce196228c8&load=package.standard&lang=ru_RU',
+  { defer: true }
+)
 
 const search = ref(null)
 
@@ -122,7 +118,7 @@ function initMap() {
   })
 }
 
-onMounted(() => ymaps.ready(initMap))
+onLoaded(() => ymaps.ready(initMap))
 
 const selectedLocation = ref(null)
 
