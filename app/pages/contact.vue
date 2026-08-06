@@ -197,7 +197,7 @@ function onLocationClick(location, index) {
         </div>
       </section>
 
-      <section>
+      <section id="services">
         <div class="text-center mb-[32px]">
           <h1 class="mb-[12px]">
             {{ services.title }}

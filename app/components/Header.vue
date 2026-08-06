@@ -135,6 +135,11 @@ useNuxtApp().hook('page:finish', () => mobileMenuOpen.value = false)
                   Контакты
                 </NuxtLink>
               </li>
+              <li>
+                <NuxtLink to="/contact#services" data-title="Сервисы">
+                  Сервисы
+                </NuxtLink>
+              </li>
             </ul>
           </div>
 

@@ -25,6 +25,10 @@ const allCategories = computed(() => [
 ])
 
 async function exportXLSX() {
+  const total = favorites.value
+    .reduce((a, b) => a + parseFloat(b.price), 0)
+    .toFixed(2)
+
   const ws = xlsx.utils.aoa_to_sheet([
     [
       { v: 'Артикул', s: { font: { bold: true }, alignment: { horizontal: 'center' } } },
@@ -41,10 +45,10 @@ async function exportXLSX() {
       ]
     ),
     [
-      { v: 'Итого (руб.)', s: { alignment: { horizontal: 'right' } } },
+      { v: 'Итого (руб.)', s: { font: { bold: true }, alignment: { horizontal: 'right' } } },
       { },
       { },
-      { v: favorites.value.reduce((a, b) => a + parseFloat(b.price), 0).toFixed(2), s: { alignment: { horizontal: 'right' } } },
+      { v: total, s: { font: { bold: true }, alignment: { horizontal: 'right' } } },
     ]
   ])
 
@@ -64,6 +68,57 @@ async function exportXLSX() {
   const wb = xlsx.utils.book_new()
   xlsx.utils.book_append_sheet(wb, ws, 'Корзина')
   xlsx.writeFile(wb, 'Корзина.xlsx')
+}
+
+async function exportPDF() {
+  const pdfMake = (await import('pdfmake/build/pdfmake')).default
+  const pdfFonts = await import('pdfmake/build/vfs_fonts')
+  pdfMake.addVirtualFileSystem(pdfFonts.default ?? pdfFonts)
+
+  const total = favorites.value
+    .reduce((a, b) => a + parseFloat(b.price), 0)
+    .toFixed(2)
+
+  const body = [
+    [
+      { text: 'Артикул', bold: true, alignment: 'center' },
+      { text: 'Товар', bold: true, alignment: 'center' },
+      { text: 'Цена без скидки', bold: true, alignment: 'center' },
+      { text: 'Цена со скидкой', bold: true, alignment: 'center' },
+    ],
+    ...favorites.value.map((product) => [
+      { text: String(product.article ?? ''), alignment: 'right' },
+      { text: String(product.name ?? '') },
+      { text: product.old_price != null ? String(product.old_price) : '', alignment: 'right' },
+      { text: String(product.price ?? ''), alignment: 'right' },
+    ]),
+    [
+      { text: 'Итого (руб.)', bold: true, alignment: 'right', colSpan: 3 },
+      {},
+      {},
+      { text: total, bold: true, alignment: 'right' },
+    ],
+  ]
+
+  const docDefinition = {
+    pageMargins: [24, 24, 24, 24],
+    content: [
+      { text: 'Корзина', style: 'header', margin: [0, 0, 0, 12] },
+      {
+        table: {
+          headerRows: 1,
+          widths: ['auto', '*', 'auto', 'auto'],
+          body,
+        },
+      },
+    ],
+    styles: {
+      header: { fontSize: 16, bold: true },
+    },
+    defaultStyle: { fontSize: 10 },
+  }
+
+  pdfMake.createPdf(docDefinition).download('Корзина.pdf')
 }
 </script>
 
@@ -110,7 +165,7 @@ async function exportXLSX() {
           content-class="dropdown-content"
           :close-on-click="true"
         >
-          <div class="dropdown-item">
+          <div class="dropdown-item" @click="exportPDF">
             <img src="/images/file-pdf-sm.svg" alt="">
             <span>PDF</span>
           </div>
