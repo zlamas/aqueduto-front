@@ -21,6 +21,9 @@ defineExpose({productCard})
 
 const currentColor = ref(props.product.colors?.find((color) => color.is_default))
 
+const badge = computed(() => currentColor.value ? currentColor.value.badge : props.product.badge)
+const badgeLabel = computed(() => currentColor.value ? currentColor.value.badge_label : props.product.badge_label)
+
 const isFavorite = computed({
   get() {
     return currentColor.value?.is_favorite ?? props.product.is_favorite
@@ -72,7 +75,7 @@ function toggleComparison() {
     <div
       :class="{
         'group/image relative rounded-[16px] laptop:rounded-[28px] bg-backdrop overflow-hidden': true,
-        [`product-${product.badge}`]: product.badge,
+        [`product-${badge}`]: badge
       }"
     >
       <img
@@ -81,13 +84,16 @@ function toggleComparison() {
         alt=""
       >
       <img
-        v-if="product.image_hover"
-        :src="product.image_hover"
+        v-if="currentColor?.image_hover || product.image_hover"
+        :src="currentColor?.image_hover || product.image_hover"
         class="absolute inset-0 size-full object-contain group-hover/image:z-19"
         alt=""
       >
-      <div v-if="product.badge" class="absolute top-[8px] left-[8px] laptop:top-[16px] laptop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[14px]/[20px] text-white font-semibold p-[4px_12px_4px_8px] before:content-(--icon) before:leading-0 z-99">
-        {{ product.badge_label }}
+      <div
+        v-if="badge"
+        class="absolute top-[8px] left-[8px] laptop:top-[16px] laptop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[14px]/[20px] text-white font-semibold p-[4px_12px_4px_8px] before:content-(--icon) before:leading-0 z-99"
+      >
+        {{ badgeLabel }}
       </div>
       <button
         class="group absolute size-[44px] max-laptop:bottom-[8px] max-laptop:right-[8px] laptop:top-[16px] laptop:right-[16px] laptop:invisible group-hover/card:visible bg-neutral-50 rounded-full z-99"
