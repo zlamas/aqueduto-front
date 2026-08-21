@@ -230,14 +230,14 @@ onMounted(() => {
                 >
                   <NuxtLink
                     ref="hotspot-card"
-                    :to="`/product/${selectedHotspot?.product.slug}`"
+                    :to="selectedHotspot && `/product/${selectedHotspot.product.slug}`"
                     :class="{
-                    'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
-                    'invisible': !selectedHotspot,
-                  }"
+                      'absolute w-max flex gap-[12px] bg-white rounded-[16px] p-[8px]': true,
+                      'invisible': !selectedHotspot,
+                    }"
                     :style="{
-                    maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
-                  }"
+                      maxWidth: `min(calc(100% - ${cardEdgeOffset * 2}px), 320px)`
+                    }"
                   >
                     <img
                       class="size-[96px] laptop:size-[116px] bg-backdrop rounded-[8px]"
