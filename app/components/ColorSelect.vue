@@ -55,7 +55,9 @@ const groupedColors = Object.groupBy(
         </button>
       </template>
 
-      <div class="text-[14px] text-neutral-500">Цвета под заказ</div>
+      <div class="text-[14px] text-neutral-500">
+        Цвета под заказ
+      </div>
 
       <div class="flex flex-wrap gap-[4px]">
         <ColorSwatch
@@ -63,7 +65,7 @@ const groupedColors = Object.groupBy(
           :key="color.id"
           :color="color"
           :size="size"
-          :disabled="!color.image"
+          :disabled="true"
           :selected="currentColor.id === color.id"
           :class="{
             'laptop:mx-[4px]': currentColor.id === color.id

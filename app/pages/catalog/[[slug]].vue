@@ -59,13 +59,20 @@ onUnmounted(() => {
 
 function formatQuery({ options }) {
   const filters = Object.fromEntries(
-    Object.entries(options.query.filters)
-      .map(([key, value]) => [`filters[${key}]`, value])
+    Object.entries(options.query.filters).flatMap(
+      ([key, value]) => value.map(
+        (item, index) => [`filters[${key}][${index}]`, item]
+      )
+    )
   )
 
   Object.assign(options.query, filters)
   delete options.query.filters
 }
+
+const activeFilters = computed(() =>
+  Object.entries(productsParams.value.filters).filter(([key, value]) => value.length)
+)
 
 const { data: productsData } = await useAPI('/products', {
   query: productsParams,
@@ -116,6 +123,12 @@ const { data: filtersData } = await useAPI('/catalog/filters', {
     priceRange.value = range.map(Number)
     minPrice.value = range[0]
     maxPrice.value = range[1]
+
+    productsParams.value.filters = Object.fromEntries(
+      response._data.data
+        .filter((filter) => filter.key !== 'price')
+        .map((filter) => [filter.key, []])
+    )
   }
 })
 
@@ -457,8 +470,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                   class="flex items-center gap-[9px]"
                 >
                   <input
-                    type="radio"
-                    name="collections"
+                    type="checkbox"
                     v-model="productsParams.filters[filter.key]"
                     :value="option"
                   >
@@ -477,16 +489,19 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
       </div>
 
       <div
-        v-show="Object.keys(productsParams.filters).length"
+        v-show="activeFilters.length"
         class="flex laptop:flex-wrap gap-[12px] mt-[16px] -mx-[16px] px-[16px] whitespace-nowrap scrollbar-none overflow-x-auto"
       >
         <div
-          v-for="(value, filter) in productsParams.filters"
+          v-for="[filter, value] in activeFilters"
           :key="filter"
           class="filter-badge"
-          @click="delete productsParams.filters[filter]"
+          :title="value.join(', ')"
+          @click="productsParams.filters[filter].length = 0"
         >
-          <span>{{ value }}</span>
+          <span class="filter-text">
+            {{ value.join(', ') }}
+          </span>
           <button class="filter-delete">
             <img class="m-auto" src="~/assets/icons/filter-delete.svg" alt="">
           </button>
@@ -537,6 +552,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
 }
 
 .filter-badge {
+  max-width: 100%;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -560,10 +576,17 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
   outline: none;
 }
 
+.filter-text {
+  max-width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .filter-delete {
   width: 24px;
   height: 24px;
   border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .filter-badge:hover .filter-delete {
