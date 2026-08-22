@@ -24,6 +24,9 @@ const currentColor = ref(props.product.colors?.find((color) => color.is_default)
 const badge = computed(() => currentColor.value ? currentColor.value.badge : props.product.badge)
 const badgeLabel = computed(() => currentColor.value ? currentColor.value.badge_label : props.product.badge_label)
 
+const image = computed(() => currentColor.value?.image || props.product.image)
+const imageHover = computed(() => currentColor.value?.image_hover || props.product.image_hover)
+
 const isFavorite = computed({
   get() {
     return currentColor.value?.is_favorite ?? props.product.is_favorite
@@ -74,27 +77,43 @@ function toggleComparison() {
     class="slider-item group/card gap-0 grid-rows-[auto_1fr] grid-cols-[100%] rounded-[20px] laptop:rounded-[28px] hover:shadow-md active:shadow-md">
     <div
       :class="{
-        'group/image relative rounded-[16px] laptop:rounded-[28px] bg-backdrop overflow-hidden': true,
+        'group/image relative rounded-[16px] laptop:rounded-[28px] overflow-hidden': true,
         [`product-${badge}`]: badge
       }"
     >
-      <img
-        :src="currentColor?.image || product.image"
-        class="relative size-full object-contain z-9"
+      <component
+        :is="image.endsWith('.mp4') ? 'video' : 'img'"
+        :src="image"
+        class="relative size-full object-contain bg-backdrop z-9"
         alt=""
-      >
-      <img
-        v-if="currentColor?.image_hover || product.image_hover"
-        :src="currentColor?.image_hover || product.image_hover"
-        class="absolute inset-0 size-full object-contain group-hover/image:z-19"
+        autoplay
+        playsinline
+        muted
+        loop
+        @pointerover="$event.target.pause?.()"
+        @pointerleave="$event.target.play?.()"
+      />
+
+      <component
+        v-if="imageHover"
+        :is="imageHover.endsWith('.mp4') ? 'video' : 'img'"
+        :src="imageHover"
+        class="absolute inset-0 size-full object-contain bg-backdrop group-hover/image:z-19"
         alt=""
-      >
+        playsinline
+        muted
+        loop
+        @pointerover="$event.target.play?.()"
+        @pointerleave="$event.target.pause?.()"
+      />
+
       <div
         v-if="badge"
         class="absolute top-[8px] left-[8px] laptop:top-[16px] laptop:left-[16px] flex items-center gap-[4px] rounded-full bg-(--bg) text-[14px]/[20px] text-white font-semibold p-[4px_12px_4px_8px] before:content-(--icon) before:leading-0 z-99"
       >
         {{ badgeLabel }}
       </div>
+
       <button
         class="group absolute size-[44px] max-laptop:bottom-[8px] max-laptop:right-[8px] laptop:top-[16px] laptop:right-[16px] laptop:invisible group-hover/card:visible bg-neutral-50 rounded-full z-99"
         @click.prevent="toggleFavorite"
