@@ -69,7 +69,7 @@ function toggleComparison() {
 
 <template>
   <NuxtLink
-    :to="`/product/${product.slug}`"
+    :to="`/product/${product.slug}${currentColor ? `?variant_id=${currentColor.variant_id}` : ''}`"
     ref="product-card"
     class="slider-item group/card gap-0 grid-rows-[auto_1fr] grid-cols-[100%] rounded-[20px] laptop:rounded-[28px] hover:shadow-md active:shadow-md">
     <div

@@ -60,9 +60,9 @@ onUnmounted(() => {
 function formatQuery({ options }) {
   const filters = Object.fromEntries(
     Object.entries(options.query.filters).flatMap(
-      ([key, value]) => value.map(
-        (item, index) => [`filters[${key}][${index}]`, item]
-      )
+      ([key, value]) => Array.isArray(value) ?
+        value.map((item, index) => [`filters[${key}][${index}]`, item]) :
+        [[`filters[${key}]`, value]]
     )
   )
 
@@ -71,7 +71,7 @@ function formatQuery({ options }) {
 }
 
 const activeFilters = computed(() =>
-  Object.entries(productsParams.value.filters).filter(([key, value]) => value.length)
+  Object.entries(productsParams.value.filters).filter(([key, value]) => value?.length)
 )
 
 const { data: productsData } = await useAPI('/products', {
@@ -82,6 +82,19 @@ const { data: productsData } = await useAPI('/products', {
   onResponse({ response }) {
     if (response._data.meta.current_page === 1) {
       products.value.length = 0
+    }
+
+    if (productsParams.value.filters.cvet?.length) {
+      response._data.data.forEach((item, index, array) => {
+        const newColor = item.colors.find((color) => color.name === productsParams.value.filters.cvet)
+        if (newColor.on_order) {
+          delete array[index]
+          return
+        }
+        const defaultColor = item.colors.find((color) => color.is_default)
+        defaultColor.is_default = false
+        newColor.is_default = true
+      })
     }
 
     products.value.push(...response._data.data)
@@ -125,9 +138,7 @@ const { data: filtersData } = await useAPI('/catalog/filters', {
     maxPrice.value = range[1]
 
     productsParams.value.filters = Object.fromEntries(
-      response._data.data
-        .filter((filter) => filter.key !== 'price')
-        .map((filter) => [filter.key, []])
+      response._data.data.map((filter) => [filter.key, []])
     )
   }
 })
@@ -470,7 +481,7 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
                   class="flex items-center gap-[9px]"
                 >
                   <input
-                    type="checkbox"
+                    :type="filter.key === 'cvet' ? 'radio' : 'checkbox'"
                     v-model="productsParams.filters[filter.key]"
                     :value="option"
                   >
@@ -496,11 +507,10 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
           v-for="[filter, value] in activeFilters"
           :key="filter"
           class="filter-badge"
-          :title="value.join(', ')"
-          @click="productsParams.filters[filter].length = 0"
+          @click="productsParams.filters[filter] = []"
         >
           <span class="filter-text">
-            {{ value.join(', ') }}
+            {{ Array.isArray(value) ? value.join(', ') : value }}
           </span>
           <button class="filter-delete">
             <img class="m-auto" src="~/assets/icons/filter-delete.svg" alt="">
@@ -513,8 +523,8 @@ const categorySlider = useSimpleSlider(categorySliderContainer)
         class="product-grid mt-[32px]"
       >
         <ProductCard
-          v-for="product in products"
-          :key="product.id"
+          v-for="product in products.filter(Boolean)"
+          :key="product.id + product.colors.findIndex((color) => color.is_default)"
           :product="product"
         />
       </div>
