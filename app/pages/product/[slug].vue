@@ -147,15 +147,19 @@ const groupedColors = productData.value.colors && Object.groupBy(
               <img
                 v-if="media.media_type === 'image'"
                 :ref="(el) => imagesSliderItems[i] = el"
-                class="slider-item size-full"
+                class="slider-item w-full"
                 :src="media.url"
                 alt=""
               >
               <video
                 v-else-if="media.media_type === 'video'"
                 :ref="(el) => imagesSliderItems[i] = el"
-                class="slider-item size-full"
+                class="slider-item w-full"
                 :src="media.url"
+                autoplay
+                playsinline
+                muted
+                loop
               ></video>
             </template>
           </div>
