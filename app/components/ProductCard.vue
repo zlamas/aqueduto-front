@@ -82,6 +82,7 @@ function toggleComparison() {
       }"
     >
       <component
+        v-if="image"
         :is="image.endsWith('.mp4') ? 'video' : 'img'"
         :src="image"
         class="relative size-full object-contain bg-backdrop z-9"
