@@ -147,23 +147,30 @@ function toggleComparison() {
           {{ product.name }}
         </div>
 
-        <div class="justify-self-start bg-neutral-100 rounded-full p-[4px_12px] font-medium laptop:hidden">
+        <div
+          v-if="product.collection?.name"
+          class="justify-self-start bg-neutral-100 rounded-full p-[4px_12px] font-medium laptop:hidden"
+        >
           {{ product.collection.name }}
         </div>
       </div>
 
       <ColorSelect
+        v-if="product.colors?.length"
         :colors="product.colors"
         v-model="currentColor"
         @click.prevent
       />
 
-      <div class="flex items-center justify-between max-laptop:flex-col gap-[12px] text-[14px] max-laptop:hidden">
-        <div class="bg-neutral-100 rounded-full p-[4px_12px] font-medium">
+      <div class="flex items-center max-laptop:flex-col gap-[12px] text-[14px] max-laptop:hidden">
+        <div
+          v-if="product.collection?.name"
+          class="bg-neutral-100 rounded-full p-[4px_12px] font-medium"
+        >
           {{ product.collection.name }}
         </div>
 
-        <div class="text-neutral-500">
+        <div class="text-neutral-500 ml-auto">
           Арт. {{ currentColor?.article || product.article }}
         </div>
       </div>

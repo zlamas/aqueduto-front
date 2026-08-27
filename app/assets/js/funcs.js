@@ -1,9 +1,11 @@
 export function formatNumber(number) {
-  return parseFloat(number).toLocaleString('ru')
+  const parsedNumber= parseFloat(number)
+  return Number.isFinite(parsedNumber) ? parsedNumber.toLocaleString('ru') : ''
 }
 
 export function formatCurrency(sum) {
-  return formatNumber(sum) + '₽'
+  const formattedNumber = formatNumber(sum)
+  return formattedNumber ? formattedNumber + '₽' : 'по запросу'
 }
 
 export function filterQuery(query = '', items = [], field = null) {

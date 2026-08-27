@@ -184,9 +184,13 @@ const groupedColors = productData.value.colors && Object.groupBy(
               </h3>
 
               <div class="flex laptop:flex-col-reverse items-center laptop:items-start justify-between gap-[16px] text-[14px]">
-                <div class="bg-neutral-100 rounded-full p-[4px_12px] font-medium">
+                <div
+                  v-if="product.collection?.name"
+                  class="bg-neutral-100 rounded-full p-[4px_12px] font-medium"
+                >
                   {{ productData.collection.name }}
                 </div>
+
                 <div class="text-neutral-500">
                   Артикул {{ currentColor?.article || productData.article }}
                 </div>
