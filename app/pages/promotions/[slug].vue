@@ -49,8 +49,8 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
           <h1 class="text-text-inverse">
             {{ promotion.title }}
           </h1>
-          <p class="text-neutral-50 text-[14px]/[20px] laptop:text-[20px]/[32px]">
-            {{ promotion.description }}
+          <p class="text-neutral-50 text-[14px]/[20px] laptop:text-[20px]/[32px] whitespace-pre-line">
+            {{ promotion.short_description }}
           </p>
         </div>
       </div>
@@ -61,7 +61,7 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
         <section>
           <div class="grid laptop:grid-cols-[auto_830px] gap-[8px]">
             <h2 class="m-0">Об акции</h2>
-            <p>
+            <p class="whitespace-pre-line">
               {{ promotion.description }}
             </p>
           </div>
@@ -109,8 +109,13 @@ const relatedSlider = useSimpleSlider(relatedSliderContainer)
               class="slider-item promotion-item image-gradient zoom-hover image-link"
               :style="{ '--bg': `url(${promotion.image})` }"
             >
-              <h4>{{ promotion.title }}</h4>
-              <p>{{ promotion.short_description }}</p>
+              <h4>
+                {{ promotion.title }}
+              </h4>
+
+              <p class="whitespace-pre-line">
+                {{ promotion.short_description }}
+              </p>
             </NuxtLink>
           </div>
 

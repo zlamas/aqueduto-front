@@ -26,8 +26,13 @@ useHead({ title })
           class="promotion-item image-gradient zoom-hover image-link"
           :style="{ '--bg': `url(${promotion.image})` }"
         >
-          <h4>{{ promotion.title }}</h4>
-          <p>{{ promotion.short_description }}</p>
+          <h4>
+            {{ promotion.title }}
+          </h4>
+
+          <p class="whitespace-pre-line">
+            {{ promotion.short_description }}
+          </p>
          </NuxtLink>
       </div>
     </div>
