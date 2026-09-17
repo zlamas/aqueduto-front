@@ -180,7 +180,7 @@ const groupedColors = productData.value.colors && Object.groupBy(
           <div class="grid gap-[24px] laptop:gap-[32px]">
             <div>
               <h3 class="mb-[8px]">
-                {{ productData.name }}
+                {{ currentColor?.product_name || productData.name }}
               </h3>
 
               <div class="flex laptop:flex-col-reverse items-center laptop:items-start justify-between gap-[16px] text-[14px]">

@@ -144,7 +144,7 @@ function toggleComparison() {
     <div class="grid gap-[16px] grid-rows-[1fr] grid-cols-[100%] p-[8px] laptop:p-[16px]">
       <div class="grid gap-[8px] content-start">
         <div class="font-semibold laptop:text-[20px]/[32px]">
-          {{ product.name }}
+          {{ currentColor?.product_name || product.name }}
         </div>
 
         <div
