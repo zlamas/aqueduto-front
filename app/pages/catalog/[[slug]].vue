@@ -13,13 +13,15 @@ useHead({ title })
 
 const { $api } = useNuxtApp()
 
+const route = useRoute()
+
 const productsParams = ref({
   page: 1,
   per_page: 24,
   filters: {}
 })
 
-const { slug } = useRoute().params
+const { slug } = route.params
 
 if (slug) {
   productsParams.value.category = slug

@@ -7,7 +7,7 @@ const { slug } = useRoute().params
 
 const productsParams = ref({
   page: 1,
-  per_page: 6,
+  per_page: 8,
 })
 const productsMeta = ref(null)
 const products = ref([])
