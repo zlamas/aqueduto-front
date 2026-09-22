@@ -4,6 +4,7 @@ import DownloadItem from "@/components/DownloadItem.vue";
 import {useAPI} from "@/composables/useAPI.js";
 import {formatCurrency} from "@/assets/js/funcs";
 
+const router = useRouter()
 const route = useRoute()
 const { slug } = route.params
 const { variant_id } = route.query
@@ -47,7 +48,7 @@ watch(
   currentColor,
   (color) => {
     if (color.variant_id) {
-      window.history.pushState({}, '', `${window.location.pathname}?variant_id=${color.variant_id}`)
+      router.push(`${route.path}?variant_id=${color.variant_id}`)
     }
   }
 )

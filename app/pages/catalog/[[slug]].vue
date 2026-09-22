@@ -13,6 +13,7 @@ useHead({ title })
 
 const { $api } = useNuxtApp()
 
+const router = useRouter()
 const route = useRoute()
 
 const productsParams = ref({
@@ -117,7 +118,7 @@ function updateCategory(newCategory) {
   delete productsParams.value.price_max
   productsParams.value.category = newCategory
   resetProducts()
-  window.history.pushState({}, '', `/catalog/${newCategory}`)
+  router.push(`/catalog/${newCategory}`)
 }
 
 function applyPriceRange() {
