@@ -118,7 +118,7 @@ function updateCategory(newCategory) {
   delete productsParams.value.price_max
   productsParams.value.category = newCategory
   resetProducts()
-  router.push(`/catalog/${newCategory}`)
+  window.history.pushState({}, '', `/catalog/${newCategory}`)
 }
 
 function applyPriceRange() {
